@@ -1,3 +1,5 @@
+import { Vector3 } from './vector3.js';
+
 /**
  * Represents the position, rotation, and scale of an object in 3D space.
  */
@@ -6,14 +8,14 @@ export class Transform {
      * Creates a new Transform.
      * @param {Vector3} position - The position in 3D space.
      * @param {Vector3} rotation - The rotation angles in radians (x, y, z).
-     * @param {number} scale - The uniform scale factor.
+     * @param {Vector3} scale - The scale factors for each axis.
      */
     constructor(position, rotation, scale) {
         /** @type {Vector3} */
         this.position = position;
         /** @type {Vector3} */
         this.rotation = rotation;
-        /** @type {number} */
+        /** @type {Vector3} */
         this.scale = scale;
     }
 
@@ -50,10 +52,34 @@ export class Transform {
     }
 
     /**
-     * Multiplies the scale by a scalar value.
+     * Multiplies all scale components by a scalar value.
      * @param {number} scalar - The scalar to multiply by.
      */
     scaleBy(scalar) {
-        this.scale *= scalar;
+        this.scale = this.scale.getScaled(scalar);
+    }
+
+    /**
+     * Multiplies the X scale component by a scalar value.
+     * @param {number} scalar - The scalar to multiply by.
+     */
+    scaleX(scalar) {
+        this.scale = new Vector3(this.scale.x * scalar, this.scale.y, this.scale.z);
+    }
+
+    /**
+     * Multiplies the Y scale component by a scalar value.
+     * @param {number} scalar - The scalar to multiply by.
+     */
+    scaleY(scalar) {
+        this.scale = new Vector3(this.scale.x, this.scale.y * scalar, this.scale.z);
+    }
+
+    /**
+     * Multiplies the Z scale component by a scalar value.
+     * @param {number} scalar - The scalar to multiply by.
+     */
+    scaleZ(scalar) {
+        this.scale = new Vector3(this.scale.x, this.scale.y, this.scale.z * scalar);
     }
 }

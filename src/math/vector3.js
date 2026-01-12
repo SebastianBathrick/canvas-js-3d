@@ -118,6 +118,15 @@ export class Vector3 {
     }
 
     /**
+     * Returns a new vector with component-wise scaling.
+     * @param {Vector3} scale - The scale factors for each axis.
+     * @returns {Vector3} A new scaled vector.
+     */
+    getScaledByVector(scale) {
+        return new Vector3(this.x * scale.x, this.y * scale.y, this.z * scale.z);
+    }
+
+    /**
      * Checks if all components are zero.
      * @returns {boolean} True if the vector is zero.
      */
