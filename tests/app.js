@@ -67,7 +67,14 @@ const controls = {
     scaleZ: document.getElementById('scaleZ'),
     autoRotate: document.getElementById('autoRotate'),
     fov: document.getElementById('fov'),
+    camPosX: document.getElementById('camPosX'),
+    camPosY: document.getElementById('camPosY'),
+    camPosZ: document.getElementById('camPosZ'),
+    camRotX: document.getElementById('camRotX'),
+    camRotY: document.getElementById('camRotY'),
+    camRotZ: document.getElementById('camRotZ'),
     meshSelect: document.getElementById('meshSelect'),
+    backFaceCulling: document.getElementById('backFaceCulling'),
 };
 
 const values = {
@@ -82,6 +89,12 @@ const values = {
     scaleZ: document.getElementById('scaleZVal'),
     autoRotate: document.getElementById('autoRotateVal'),
     fov: document.getElementById('fovVal'),
+    camPosX: document.getElementById('camPosXVal'),
+    camPosY: document.getElementById('camPosYVal'),
+    camPosZ: document.getElementById('camPosZVal'),
+    camRotX: document.getElementById('camRotXVal'),
+    camRotY: document.getElementById('camRotYVal'),
+    camRotZ: document.getElementById('camRotZVal'),
 };
 
 function updateTransformFromControls() {
@@ -115,6 +128,25 @@ function updateDisplayValues() {
     values.scaleZ.textContent = parseFloat(controls.scaleZ.value).toFixed(1);
     values.autoRotate.textContent = parseFloat(controls.autoRotate.value).toFixed(1);
     values.fov.textContent = controls.fov.value;
+    values.camPosX.textContent = parseFloat(controls.camPosX.value).toFixed(1);
+    values.camPosY.textContent = parseFloat(controls.camPosY.value).toFixed(1);
+    values.camPosZ.textContent = parseFloat(controls.camPosZ.value).toFixed(1);
+    values.camRotX.textContent = parseFloat(controls.camRotX.value).toFixed(2);
+    values.camRotY.textContent = parseFloat(controls.camRotY.value).toFixed(2);
+    values.camRotZ.textContent = parseFloat(controls.camRotZ.value).toFixed(2);
+}
+
+function updateCameraFromControls() {
+    engine.camera.transform.position = new Vector3(
+        parseFloat(controls.camPosX.value),
+        parseFloat(controls.camPosY.value),
+        parseFloat(controls.camPosZ.value)
+    );
+    engine.camera.transform.rotation = new Vector3(
+        parseFloat(controls.camRotX.value),
+        parseFloat(controls.camRotY.value),
+        parseFloat(controls.camRotZ.value)
+    );
 }
 
 // Bind all range inputs
@@ -123,14 +155,36 @@ for (const key of Object.keys(controls)) {
         controls[key].addEventListener('input', () => {
             updateDisplayValues();
             updateTransformFromControls();
+            updateCameraFromControls();
         });
     }
 }
 
 // FOV control
 controls.fov.addEventListener('input', () => {
-    engine.setFov(parseFloat(controls.fov.value));
+    engine.camera.setFov(parseFloat(controls.fov.value));
     values.fov.textContent = controls.fov.value;
+});
+
+// Back-face culling toggle
+controls.backFaceCulling.addEventListener('change', () => {
+    engine.camera.toggleBackFaceCulling(controls.backFaceCulling.checked);
+});
+
+// Reset camera button
+document.getElementById('resetCamera').addEventListener('click', () => {
+    controls.fov.value = 60;
+    controls.camPosX.value = 0;
+    controls.camPosY.value = 0;
+    controls.camPosZ.value = 0;
+    controls.camRotX.value = 0;
+    controls.camRotY.value = 0;
+    controls.camRotZ.value = 0;
+    controls.backFaceCulling.checked = false;
+    engine.camera.setFov(60);
+    engine.camera.toggleBackFaceCulling(false);
+    updateDisplayValues();
+    updateCameraFromControls();
 });
 
 // Mesh selector
@@ -151,7 +205,7 @@ document.getElementById('resetTransform').addEventListener('click', () => {
     controls.scaleZ.value = 1;
     controls.autoRotate.value = 0;
     controls.fov.value = 60;
-    engine.setFov(60);
+    engine.camera.setFov(60);
     updateDisplayValues();
     updateTransformFromControls();
 });
@@ -320,6 +374,57 @@ function testTransform() {
     return { passed, total };
 }
 
+// Camera Tests
+function testCamera() {
+    log('--- Camera Tests ---', 'info');
+    let passed = 0, total = 0;
+
+    // isBackFaceCulling default
+    total++;
+    if (assert(engine.camera.isBackFaceCulling() === false, 'Back-face culling is off by default')) passed++;
+
+    // toggleBackFaceCulling with parameter (enable)
+    total++;
+    engine.camera.toggleBackFaceCulling(true);
+    if (assert(engine.camera.isBackFaceCulling() === true, 'toggleBackFaceCulling(true) enables culling')) passed++;
+
+    // toggleBackFaceCulling with parameter (disable)
+    total++;
+    engine.camera.toggleBackFaceCulling(false);
+    if (assert(engine.camera.isBackFaceCulling() === false, 'toggleBackFaceCulling(false) disables culling')) passed++;
+
+    // toggleBackFaceCulling without parameter (flip)
+    total++;
+    engine.camera.toggleBackFaceCulling();
+    if (assert(engine.camera.isBackFaceCulling() === true, 'toggleBackFaceCulling() flips state to true')) passed++;
+
+    total++;
+    engine.camera.toggleBackFaceCulling();
+    if (assert(engine.camera.isBackFaceCulling() === false, 'toggleBackFaceCulling() flips state to false')) passed++;
+
+    // isBackFacing test - create a face pointing away
+    total++;
+    const facingCamera = [
+        new Vector3(0, 0, 5),   // v0
+        new Vector3(1, 0, 5),   // v1
+        new Vector3(0, 1, 5),   // v2
+    ];
+    // CCW winding when viewed from camera = front-facing
+    if (assert(engine.camera.isBackFacing(facingCamera) === false, 'Face with CCW winding facing camera is front-facing')) passed++;
+
+    total++;
+    const awayFromCamera = [
+        new Vector3(0, 0, 5),   // v0
+        new Vector3(0, 1, 5),   // v1 (swapped)
+        new Vector3(1, 0, 5),   // v2 (swapped)
+    ];
+    // CW winding when viewed from camera = back-facing
+    if (assert(engine.camera.isBackFacing(awayFromCamera) === true, 'Face with CW winding facing camera is back-facing')) passed++;
+
+    log(`Camera: ${passed}/${total} passed`, passed === total ? 'pass' : 'fail');
+    return { passed, total };
+}
+
 // Run all tests
 function runAllTests() {
     clearLog();
@@ -329,10 +434,12 @@ function runAllTests() {
     const v3 = testVector3();
     log('', 'info');
     const tr = testTransform();
+    log('', 'info');
+    const cam = testCamera();
 
     log('', 'info');
-    const totalPassed = v3.passed + tr.passed;
-    const totalTests = v3.total + tr.total;
+    const totalPassed = v3.passed + tr.passed + cam.passed;
+    const totalTests = v3.total + tr.total + cam.total;
     log(`=== Total: ${totalPassed}/${totalTests} passed ===`, totalPassed === totalTests ? 'pass' : 'fail');
 }
 
@@ -345,6 +452,10 @@ document.getElementById('testVector3').addEventListener('click', () => {
 document.getElementById('testTransform').addEventListener('click', () => {
     clearLog();
     testTransform();
+});
+document.getElementById('testCamera').addEventListener('click', () => {
+    clearLog();
+    testCamera();
 });
 
 // ============================================================================
