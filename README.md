@@ -2,6 +2,8 @@
 
 A lightweight 3D graphics library that uses the Canvas API for wireframe rendering. Zero dependencies, pure vanilla JavaScript.
 
+### Interactive Web Demo: [https://sebastianbathrick.github.io/canvas-js-3d/](https://sebastianbathrick.github.io/canvas-js-3d/)
+
 ## Features
 
 - **Pure JavaScript** - No external dependencies
