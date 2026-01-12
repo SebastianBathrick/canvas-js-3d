@@ -1,9 +1,10 @@
 import { Renderer } from '../rendering/renderer.js';
 import { Camera } from '../rendering/camera.js';
 import { Vector2 } from '../math/vector2.js';
+import { Scene } from './scene.js';
 
 /**
- * The main engine that manages the render loop, camera, and scene objects.
+ * The main engine that manages the render loop, camera, and scene.
  */
 export class Engine {
     /**
@@ -17,8 +18,8 @@ export class Engine {
         this.renderer = new Renderer(canvas, fgColor, bgColor);
         /** @type {Camera} */
         this.camera = new Camera(new Vector2(canvas.width, canvas.height), fov);
-        /** @type {SceneObject[]} */
-        this.sceneObjects = [];
+        /** @type {Scene} */
+        this.scene = new Scene();
         /** @type {boolean} */
         this.running = false;
         /** @type {number|null} */
@@ -65,7 +66,7 @@ export class Engine {
      * @private
      */
     renderAllObjects() {
-        for (const obj of this.sceneObjects) {
+        for (const obj of this.scene.getSceneObjects()) {
             const projectedFaces = this.camera.projectSceneObject(obj);
 
             for (const face of projectedFaces) {
@@ -79,25 +80,6 @@ export class Engine {
                 }
             }
         }
-    }
-
-    /**
-     * Adds a scene object to be rendered.
-     * @param {SceneObject} sceneObject - The object to add.
-     */
-    addSceneObject(sceneObject) {
-        this.sceneObjects.push(sceneObject);
-    }
-
-    /**
-     * Removes a scene object from rendering.
-     * @param {SceneObject} sceneObject - The object to remove.
-     */
-    removeSceneObject(sceneObject) {
-        const idx = this.sceneObjects.indexOf(sceneObject);
-
-        if (idx !== -1)
-            this.sceneObjects.splice(idx, 1);
     }
 
     /**

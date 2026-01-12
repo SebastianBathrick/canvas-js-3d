@@ -10,6 +10,7 @@ export { Transform } from './math/transform.js';
 
 // Scene components
 export { Mesh } from './core/mesh.js';
+export { Scene } from './core/scene.js';
 export { SceneObject } from './core/sceneObject.js';
 
 // Rendering
