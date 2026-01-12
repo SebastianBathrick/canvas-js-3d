@@ -31,14 +31,6 @@ export class Engine {
     }
 
     /**
-     * Sets the camera's field of view.
-     * @param {number} fov - The vertical field of view in degrees.
-     */
-    setFov(fov) {
-        this.camera.setFov(fov);
-    }
-
-    /**
      * Sets the screen size.
      * @param {Vector2} newScreenSize - The new screen size.
      */

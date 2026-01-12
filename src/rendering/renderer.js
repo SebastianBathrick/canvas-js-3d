@@ -17,8 +17,24 @@ export class Renderer {
         this.fgColor = fgColor;
         /** @type {string} */
         this.bgColor = bgColor;
-        /** @type {number} */
-        this.pointSize = 20;
+        /** @type {number} @private */
+        this._pointSize = 20;
+    }
+
+    /**
+     * Gets the point size for renderPoint.
+     * @returns {number} The point size in pixels.
+     */
+    getPointSize() {
+        return this._pointSize;
+    }
+
+    /**
+     * Sets the point size for renderPoint.
+     * @param {number} size - The new point size in pixels.
+     */
+    setPointSize(size) {
+        this._pointSize = size;
     }
 
     /**
@@ -59,10 +75,10 @@ export class Renderer {
     renderPoint(vector2) {
         this.ctx.fillStyle = this.fgColor;
         this.ctx.fillRect(
-            vector2.x - this.pointSize / 2,
-            vector2.y - this.pointSize / 2,
-            this.pointSize,
-            this.pointSize
+            vector2.x - this._pointSize / 2,
+            vector2.y - this._pointSize / 2,
+            this._pointSize,
+            this._pointSize
         );
     }
 }
