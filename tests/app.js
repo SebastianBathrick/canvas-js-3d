@@ -66,6 +66,7 @@ const controls = {
     scaleY: document.getElementById('scaleY'),
     scaleZ: document.getElementById('scaleZ'),
     autoRotate: document.getElementById('autoRotate'),
+    fov: document.getElementById('fov'),
     meshSelect: document.getElementById('meshSelect'),
 };
 
@@ -80,6 +81,7 @@ const values = {
     scaleY: document.getElementById('scaleYVal'),
     scaleZ: document.getElementById('scaleZVal'),
     autoRotate: document.getElementById('autoRotateVal'),
+    fov: document.getElementById('fovVal'),
 };
 
 function updateTransformFromControls() {
@@ -112,6 +114,7 @@ function updateDisplayValues() {
     values.scaleY.textContent = parseFloat(controls.scaleY.value).toFixed(1);
     values.scaleZ.textContent = parseFloat(controls.scaleZ.value).toFixed(1);
     values.autoRotate.textContent = parseFloat(controls.autoRotate.value).toFixed(1);
+    values.fov.textContent = controls.fov.value;
 }
 
 // Bind all range inputs
@@ -123,6 +126,12 @@ for (const key of Object.keys(controls)) {
         });
     }
 }
+
+// FOV control
+controls.fov.addEventListener('input', () => {
+    engine.setFov(parseFloat(controls.fov.value));
+    values.fov.textContent = controls.fov.value;
+});
 
 // Mesh selector
 controls.meshSelect.addEventListener('change', () => {
@@ -141,6 +150,8 @@ document.getElementById('resetTransform').addEventListener('click', () => {
     controls.scaleY.value = 1;
     controls.scaleZ.value = 1;
     controls.autoRotate.value = 0;
+    controls.fov.value = 60;
+    engine.setFov(60);
     updateDisplayValues();
     updateTransformFromControls();
 });
@@ -342,7 +353,21 @@ document.getElementById('testTransform').addEventListener('click', () => {
 
 updateDisplayValues();
 
+// FPS counter
+const fpsCounter = document.getElementById('fpsCounter');
+let frameCount = 0;
+let fpsTime = 0;
+
 engine.onUpdate = (dt) => {
+    // Update FPS counter
+    frameCount++;
+    fpsTime += dt;
+    if (fpsTime >= 1.0) {
+        fpsCounter.textContent = frameCount;
+        frameCount = 0;
+        fpsTime = 0;
+    }
+
     if (!sceneObject) return;
     
     // Auto-rotation
