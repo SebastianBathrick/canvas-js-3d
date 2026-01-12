@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canvas-js-3d Demo</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="canvas-container">
+        <canvas id="canvas"></canvas>
+        <div class="stats-overlay">
+            <div id="fpsCounter">0 FPS</div>
+            <div id="meshStats">Verts: 0 | Edges: 0 | Faces: 0</div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <h2>canvas-js-3d Controls</h2>
+
+        <div class="control-group">
+            <label>Add Model</label>
+            <select id="modelSelect">
+                <option value="./meshes/monkey.obj">Monkey</option>
+                <option value="./meshes/cube.obj">Cube</option>
+                <option value="./meshes/cone.obj">Cone</option>
+                <option value="./meshes/sphere.obj">Sphere</option>
+                <option value="./meshes/ico-sphere.obj">Ico Sphere</option>
+                <option value="./meshes/torus.obj">Torus</option>
+            </select>
+            <button id="addModelBtn">Add Model</button>
+            <p class="model-count">Models: <span id="modelCount">0</span> / 9</p>
+        </div>
+
+        <div class="control-group">
+            <label>Rotation Speed</label>
+            <div class="control-row">
+                <input type="range" id="rotationSpeed" min="0" max="5" step="0.1" value="0.5">
+                <span class="value" id="rotationSpeedValue">0.5</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Scale</label>
+            <div class="control-row">
+                <input type="range" id="scale" min="0.1" max="3" step="0.1" value="1">
+                <span class="value" id="scaleValue">1.0</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Position Offset</label>
+            <div class="xyz-controls">
+                <div class="axis-row">
+                    <span class="axis-label x">X</span>
+                    <input type="range" id="posX" min="-5" max="5" step="0.1" value="0">
+                    <span class="value" id="posXValue">0.0</span>
+                </div>
+                <div class="axis-row">
+                    <span class="axis-label y">Y</span>
+                    <input type="range" id="posY" min="-5" max="5" step="0.1" value="0">
+                    <span class="value" id="posYValue">0.0</span>
+                </div>
+                <div class="axis-row">
+                    <span class="axis-label z">Z</span>
+                    <input type="range" id="posZ" min="2" max="20" step="0.1" value="5">
+                    <span class="value" id="posZValue">5.0</span>
+                </div>
+            </div>
+        </div>
+
+        <button id="clearSceneBtn" class="danger">Clear Scene</button>
+    </div>
+
+    <script type="module" src="./demo.js"></script>
+</body>
+</html>

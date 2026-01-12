@@ -1,0 +1,119 @@
+# AI Tool Files and Directories
+.claude/
+.cursor/
+.aider*
+.continue/
+.windsurf/
+.zed/
+*.aider.chat.history.md
+.anthropic/
+
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.pnp
+.pnp.js
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.npm/
+.eslintcache
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+*.tsbuildinfo
+.parcel-cache/
+.vite/
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+.jest-cache/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# IDE and Editor files
+.vscode/
+.idea/
+.fleet/
+*.swp
+*.swo
+*.swn
+*~
+*.bak
+*.sublime-workspace
+*.sublime-project
+.atom/
+*.code-workspace
+.history/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.stackdump
+
+# Linux
+.directory
+.Trash-*
+.nfs*
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+.tmp/
+*.pid
+*.seed
+*.pid.lock
+
+# Runtime data
+pids/
+lib-cov/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
