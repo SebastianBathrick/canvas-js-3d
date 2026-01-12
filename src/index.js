@@ -15,6 +15,7 @@ export { SceneObject } from './core/sceneObject.js';
 
 // Rendering
 export { Camera } from './rendering/camera.js';
+export { ProjectedFace } from './rendering/projected-face.js';
 export { Renderer } from './rendering/renderer.js';
 
 // Engine

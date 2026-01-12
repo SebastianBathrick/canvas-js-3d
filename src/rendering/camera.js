@@ -1,6 +1,7 @@
 import { Vector2 } from '../math/vector2.js';
 import { Vector3 } from '../math/vector3.js';
 import { Transform } from '../math/transform.js';
+import { ProjectedFace } from './projected-face.js';
 
 /**
  * Projects 3D scene coordinates to 2D screen coordinates.
@@ -64,7 +65,7 @@ export class Camera {
     /**
      * Projects all faces of a scene object to screen coordinates.
      * @param {SceneObject} sceneObject - The scene object to project.
-     * @returns {{screenPositions: Vector2[]}[]} Array of projected faces with screen positions.
+     * @returns {ProjectedFace[]} Array of projected faces with screen positions and depth.
      */
     projectSceneObject(sceneObject) {
         const sceneVerts = sceneObject.getSceneVertices();
@@ -81,8 +82,20 @@ export class Camera {
                 }
             }
             
-            const screenPositions = this.getScreenPositions(faceVerts);
-            projectedFaces.push({ screenPositions });
+            // Project vertices and calculate average depth
+            let depthSum = 0;
+            const screenPositions = [];
+            
+            for (const vert of faceVerts) {
+                const cameraSpacePos = this.worldToCameraSpace(vert);
+                depthSum += cameraSpacePos.z;
+                screenPositions.push(
+                    this.getScaledScreenPosition(this.getNormalizedScreenPosition(cameraSpacePos))
+                );
+            }
+            
+            const averageDepth = depthSum / faceVerts.length;
+            projectedFaces.push(new ProjectedFace(screenPositions, averageDepth));
         }
 
         return projectedFaces;

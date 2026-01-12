@@ -1,5 +1,6 @@
 import { Renderer } from '../rendering/renderer.js';
 import { Camera } from '../rendering/camera.js';
+import { ProjectedFace } from '../rendering/projected-face.js';
 import { Vector2 } from '../math/vector2.js';
 import { Scene } from './scene.js';
 
@@ -20,6 +21,8 @@ export class Engine {
         this.camera = new Camera(new Vector2(canvas.width, canvas.height), fov);
         /** @type {Scene} */
         this.scene = new Scene();
+        /** @type {boolean} @private */
+        this._depthSorting = false;
         /** @type {boolean} */
         this.running = false;
         /** @type {number|null} */
@@ -29,6 +32,24 @@ export class Engine {
          * @type {((deltaTime: number) => void)|null}
          */
         this.onUpdate = null;
+    }
+
+    /**
+     * Gets whether depth sorting is enabled.
+     * @returns {boolean} True if depth sorting is enabled.
+     */
+    isDepthSorting() {
+        return this._depthSorting;
+    }
+
+    /**
+     * Toggles depth sorting on or off.
+     * When enabled, faces are sorted back-to-front and filled with background color
+     * to create the illusion of solid objects (painter's algorithm).
+     * @param {boolean} [enabled] - If provided, sets the state directly. Otherwise flips the current state.
+     */
+    toggleDepthSorting(enabled) {
+        this._depthSorting = enabled !== undefined ? enabled : !this._depthSorting;
     }
 
     /**
@@ -66,18 +87,34 @@ export class Engine {
      * @private
      */
     renderAllObjects() {
+        // Collect all projected faces from all objects
+        const allFaces = [];
+
         for (const obj of this.scene.getSceneObjects()) {
             const projectedFaces = this.camera.projectSceneObject(obj);
+            allFaces.push(...projectedFaces);
+        }
 
-            for (const face of projectedFaces) {
-                const positions = face.screenPositions;
+        // Sort if depth sorting is enabled (back-to-front)
+        if (this._depthSorting) {
+            allFaces.sort(ProjectedFace.compareByDepth);
+        }
 
-                for (let i = 0; i < positions.length; i++) {
-                    this.renderer.renderEdge(
-                        positions[i],
-                        positions[(i + 1) % positions.length]
-                    );
-                }
+        // Render each face
+        for (const face of allFaces) {
+            const positions = face.screenPositions;
+
+            // Fill with background to occlude faces behind
+            if (this._depthSorting) {
+                this.renderer.fillFace(positions, this.renderer.bgColor);
+            }
+
+            // Draw edges
+            for (let i = 0; i < positions.length; i++) {
+                this.renderer.renderEdge(
+                    positions[i],
+                    positions[(i + 1) % positions.length]
+                );
             }
         }
     }

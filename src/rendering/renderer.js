@@ -81,4 +81,25 @@ export class Renderer {
             this._pointSize
         );
     }
+
+    /**
+     * Fills a polygon defined by screen positions.
+     * @param {Vector2[]} positions - The vertex positions in screen coordinates.
+     * @param {string} color - The fill color.
+     */
+    fillFace(positions, color) {
+        if (positions.length < 3)
+            return;
+
+        this.ctx.fillStyle = color;
+        this.ctx.beginPath();
+        this.ctx.moveTo(positions[0].x, positions[0].y);
+
+        for (let i = 1; i < positions.length; i++) {
+            this.ctx.lineTo(positions[i].x, positions[i].y);
+        }
+
+        this.ctx.closePath();
+        this.ctx.fill();
+    }
 }
