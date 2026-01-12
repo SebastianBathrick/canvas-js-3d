@@ -153,4 +153,35 @@ export class Vector3 {
     getMagnitude() {
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
+
+    /**
+     * Computes the dot product with another vector.
+     * @param {Vector3} other - The other vector.
+     * @returns {number} The dot product.
+     */
+    dot(other) {
+        return this.x * other.x + this.y * other.y + this.z * other.z;
+    }
+
+    /**
+     * Computes the cross product with another vector.
+     * @param {Vector3} other - The other vector.
+     * @returns {Vector3} A new vector perpendicular to both inputs.
+     */
+    cross(other) {
+        return new Vector3(
+            this.y * other.z - this.z * other.y,
+            this.z * other.x - this.x * other.z,
+            this.x * other.y - this.y * other.x
+        );
+    }
+
+    /**
+     * Returns a new vector representing the difference (this - other).
+     * @param {Vector3} other - The vector to subtract.
+     * @returns {Vector3} A new vector.
+     */
+    subtract(other) {
+        return new Vector3(this.x - other.x, this.y - other.y, this.z - other.z);
+    }
 }

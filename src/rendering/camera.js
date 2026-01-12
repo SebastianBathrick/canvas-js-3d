@@ -18,7 +18,26 @@ export class Camera {
         this.aspectRatio = screenSize.x / screenSize.y;
         /** @type {Transform} */
         this.transform = new Transform(Vector3.zero, Vector3.zero, Vector3.one);
+        /** @type {boolean} @private */
+        this._backFaceCulling = false;
         this.setFov(fov);
+    }
+
+    /**
+     * Gets whether back-face culling is enabled.
+     * @returns {boolean} True if back-face culling is enabled.
+     */
+    isBackFaceCulling() {
+        return this._backFaceCulling;
+    }
+
+    /**
+     * Toggles back-face culling on or off.
+     * When enabled, faces pointing away from the camera are not rendered.
+     * @param {boolean} [enabled] - If provided, sets the state directly. Otherwise flips the current state.
+     */
+    toggleBackFaceCulling(enabled) {
+        this._backFaceCulling = enabled !== undefined ? enabled : !this._backFaceCulling;
     }
 
     /**
@@ -54,12 +73,41 @@ export class Camera {
         // Map vertices to their associated face indices
         for (const face of sceneObject.getMesh().getFaceIndices()) {
             const faceVerts = face.map(idx => sceneVerts[idx]);
-            const screenPositions = this.getScreenPositions(faceVerts);
             
+            // Back-face culling: skip faces pointing away from camera
+            if (this._backFaceCulling && faceVerts.length >= 3) {
+                if (this.isBackFacing(faceVerts)) {
+                    continue;
+                }
+            }
+            
+            const screenPositions = this.getScreenPositions(faceVerts);
             projectedFaces.push({ screenPositions });
         }
 
         return projectedFaces;
+    }
+
+    /**
+     * Determines if a face is back-facing (pointing away from the camera).
+     * Uses the first three vertices to compute the face normal.
+     * @param {Vector3[]} faceVerts - The face vertices in world space.
+     * @returns {boolean} True if the face is back-facing.
+     */
+    isBackFacing(faceVerts) {
+        // Transform vertices to camera space
+        const v0 = this.worldToCameraSpace(faceVerts[0]);
+        const v1 = this.worldToCameraSpace(faceVerts[1]);
+        const v2 = this.worldToCameraSpace(faceVerts[2]);
+        
+        // Compute face normal using cross product of two edges
+        const edge1 = v1.subtract(v0);
+        const edge2 = v2.subtract(v0);
+        const normal = edge1.cross(edge2);
+        
+        // Face is back-facing if normal points away from camera (positive z in camera space)
+        // We use v0 as the view vector since camera is at origin in camera space
+        return normal.dot(v0) > 0;
     }
 
     /**
