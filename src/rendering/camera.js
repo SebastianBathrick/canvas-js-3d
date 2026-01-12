@@ -7,10 +7,26 @@ export class Camera {
     /**
      * Creates a new Camera.
      * @param {Vector2} screenSize - The canvas dimensions (width, height).
+     * @param {number} fov - The vertical field of view in degrees (default 60).
      */
-    constructor(screenSize) {
+    constructor(screenSize, fov = 60) {
         /** @type {Vector2} */
         this.screenSize = screenSize;
+        /** @type {number} */
+        this.aspectRatio = screenSize.x / screenSize.y;
+        this.setFov(fov);
+    }
+
+    /**
+     * Sets the field of view.
+     * @param {number} fov - The vertical field of view in degrees.
+     */
+    setFov(fov) {
+        /** @type {number} */
+        this.fov = fov;
+        const fovRadians = (fov * Math.PI) / 180;
+        /** @type {number} */
+        this.focalLength = 1 / Math.tan(fovRadians / 2);
     }
 
     /**
@@ -19,6 +35,7 @@ export class Camera {
      */
     setScreenSize(newScreenSize) {
         this.screenSize = newScreenSize;
+        this.aspectRatio = newScreenSize.x / newScreenSize.y;
     }
 
     /**
@@ -72,12 +89,9 @@ export class Camera {
         * would be zero. Thus it is in the same 3D position as the camera. As z increases the 3D point moves 
         * further away from the camera. */
 
-        // Calculate aspect ratio to divide the x screen coordinate by so the image is not stretched or squished
-        const aspectRatio = this.screenSize.x / this.screenSize.y;
-
         return new Vector2(
-            scenePos.x / scenePos.z / aspectRatio,
-            scenePos.y / scenePos.z
+            (scenePos.x / scenePos.z) * this.focalLength / this.aspectRatio,
+            (scenePos.y / scenePos.z) * this.focalLength
         );
     }
 

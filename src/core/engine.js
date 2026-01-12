@@ -12,11 +12,11 @@ export class Engine {
      * @param {string} fgColor - The foreground/wireframe color.
      * @param {string} bgColor - The background/clear color.
      */
-    constructor(canvas, fgColor, bgColor) {
+    constructor(canvas, fgColor, bgColor, fov = 60) {
         /** @type {Renderer} */
         this.renderer = new Renderer(canvas, fgColor, bgColor);
         /** @type {Camera} */
-        this.camera = new Camera(new Vector2(canvas.width, canvas.height));
+        this.camera = new Camera(new Vector2(canvas.width, canvas.height), fov);
         /** @type {SceneObject[]} */
         this.sceneObjects = [];
         /** @type {boolean} */
@@ -28,6 +28,14 @@ export class Engine {
          * @type {((deltaTime: number) => void)|null}
          */
         this.onUpdate = null;
+    }
+
+    /**
+     * Sets the camera's field of view.
+     * @param {number} fov - The vertical field of view in degrees.
+     */
+    setFov(fov) {
+        this.camera.setFov(fov);
     }
 
     /**
