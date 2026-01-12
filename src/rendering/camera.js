@@ -72,7 +72,13 @@ export class Camera {
         * would be zero. Thus it is in the same 3D position as the camera. As z increases the 3D point moves 
         * further away from the camera. */
 
-        return new Vector2(scenePos.x / scenePos.z, scenePos.y / scenePos.z);
+        // Calculate aspect ratio to divide the x screen coordinate by so the image is not stretched or squished
+        const aspectRatio = this.screenSize.x / this.screenSize.y;
+
+        return new Vector2(
+            scenePos.x / scenePos.z / aspectRatio,
+            scenePos.y / scenePos.z
+        );
     }
 
     /**
