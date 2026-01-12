@@ -44,11 +44,11 @@ async function setMesh(name) {
         : new Transform(new Vector3(0, 0, 5), Vector3.zero, Vector3.one);
     
     if (sceneObject) {
-        engine.removeSceneObject(sceneObject);
+        engine.scene.removeSceneObject(sceneObject);
     }
     
     sceneObject = new SceneObject(mesh, transform);
-    engine.addSceneObject(sceneObject);
+    engine.scene.addSceneObject(sceneObject);
 }
 
 // ============================================================================
@@ -379,9 +379,14 @@ function testCamera() {
     log('--- Camera Tests ---', 'info');
     let passed = 0, total = 0;
 
-    // isBackFaceCulling default
+    // Reset camera state before testing
+    engine.camera.toggleBackFaceCulling(false);
+    engine.camera.transform.position = Vector3.zero;
+    engine.camera.transform.rotation = Vector3.zero;
+
+    // isBackFaceCulling after reset
     total++;
-    if (assert(engine.camera.isBackFaceCulling() === false, 'Back-face culling is off by default')) passed++;
+    if (assert(engine.camera.isBackFaceCulling() === false, 'Back-face culling is off after reset')) passed++;
 
     // toggleBackFaceCulling with parameter (enable)
     total++;
@@ -402,24 +407,28 @@ function testCamera() {
     engine.camera.toggleBackFaceCulling();
     if (assert(engine.camera.isBackFaceCulling() === false, 'toggleBackFaceCulling() flips state to false')) passed++;
 
-    // isBackFacing test - create a face pointing away
+    // isBackFacing tests
+    // In this engine (+Z forward), winding determines normal direction:
+    // - Vertices (0,0,5), (1,0,5), (0,1,5) produce normal (0,0,1) pointing +Z (away from camera)
+    // - Vertices (0,0,5), (0,1,5), (1,0,5) produce normal (0,0,-1) pointing -Z (toward camera)
+
     total++;
-    const facingCamera = [
+    const backFace = [
         new Vector3(0, 0, 5),   // v0
         new Vector3(1, 0, 5),   // v1
         new Vector3(0, 1, 5),   // v2
     ];
-    // CCW winding when viewed from camera = front-facing
-    if (assert(engine.camera.isBackFacing(facingCamera) === false, 'Face with CCW winding facing camera is front-facing')) passed++;
+    // Normal points +Z (away from camera) = back-facing
+    if (assert(engine.camera.isBackFacing(backFace) === true, 'Face with normal pointing away from camera is back-facing')) passed++;
 
     total++;
-    const awayFromCamera = [
+    const frontFace = [
         new Vector3(0, 0, 5),   // v0
         new Vector3(0, 1, 5),   // v1 (swapped)
         new Vector3(1, 0, 5),   // v2 (swapped)
     ];
-    // CW winding when viewed from camera = back-facing
-    if (assert(engine.camera.isBackFacing(awayFromCamera) === true, 'Face with CW winding facing camera is back-facing')) passed++;
+    // Normal points -Z (toward camera) = front-facing
+    if (assert(engine.camera.isBackFacing(frontFace) === false, 'Face with normal pointing toward camera is front-facing')) passed++;
 
     log(`Camera: ${passed}/${total} passed`, passed === total ? 'pass' : 'fail');
     return { passed, total };
