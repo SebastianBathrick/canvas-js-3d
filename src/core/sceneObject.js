@@ -32,13 +32,15 @@ export class SceneObject {
 
     /**
      * Gets all vertices transformed to scene's world space.
-     * Applies transformations in order: scale → rotate → translate.
+     * Applies transformations in order: scale → rotate (X, Y, Z) → translate.
      * @returns {Vector3[]} Array of transformed vertex positions.
      */
     getSceneVertices() {
         return this.mesh.vertices.map(v =>
             v.getScaled(this.transform.scale)
-             .getRotatedY(this.transform.rotation)
+             .getRotatedX(this.transform.rotation.x)
+             .getRotatedY(this.transform.rotation.y)
+             .getRotatedZ(this.transform.rotation.z)
              .getTranslated(this.transform.position)
         );
     }

@@ -61,6 +61,22 @@ export class Vector3 {
     }
 
     /**
+     * Returns a new vector rotated around the X axis (YZ plane rotation).
+     * @param {number} angle - The rotation angle in radians.
+     * @returns {Vector3} A new rotated vector.
+     */
+    getRotatedX(angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+
+        return new Vector3(
+            this.x,
+            this.y * cos - this.z * sin,
+            this.y * sin + this.z * cos
+        );
+    }
+
+    /**
      * Returns a new vector rotated around the Y axis (XZ plane rotation).
      * @param {number} angle - The rotation angle in radians.
      * @returns {Vector3} A new rotated vector.
@@ -73,6 +89,22 @@ export class Vector3 {
             this.x * cos - this.z * sin,
             this.y,
             this.x * sin + this.z * cos
+        );
+    }
+
+    /**
+     * Returns a new vector rotated around the Z axis (XY plane rotation).
+     * @param {number} angle - The rotation angle in radians.
+     * @returns {Vector3} A new rotated vector.
+     */
+    getRotatedZ(angle) {
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+
+        return new Vector3(
+            this.x * cos - this.y * sin,
+            this.x * sin + this.y * cos,
+            this.z
         );
     }
 

@@ -92,7 +92,7 @@ async function addModel() {
 
     const sceneObject = new SceneObject(
         mesh,
-        new Transform(position, 0, scale)
+        new Transform(position, Vector3.zero, scale)
     );
 
     engine.addSceneObject(sceneObject);
@@ -220,13 +220,16 @@ engine.onUpdate = (deltaTime) => {
     for (let i = 0; i < models.length; i++) {
         // Alternate rotation direction for each model
         const direction = i % 2 === 0 ? 1 : -1;
-        models[i].transform.rotation += direction * Math.PI * rotationSpeed * deltaTime;
+        const rotationDelta = direction * Math.PI * rotationSpeed * deltaTime;
+        models[i].transform.rotation = models[i].transform.rotation.getTranslated(
+            new Vector3(0, rotationDelta, 0)
+        );
     }
 };
 
 // Load initial monkey and start engine
 loadMesh('./meshes/monkey.obj').then(mesh => {
-    const monkey = new SceneObject(mesh, new Transform(positionOffset, 0, scale));
+    const monkey = new SceneObject(mesh, new Transform(positionOffset, Vector3.zero, scale));
     engine.addSceneObject(monkey);
     models.push(monkey);
     updateModelCount();

@@ -91,10 +91,10 @@ const faceIndices = [
 ];
 
 const mesh = new Mesh(vertices, faceIndices);
-const cube = new SceneObject(mesh, new Transform(new Vector3(0, 0, 5), 0, 1));
+const cube = new SceneObject(mesh, new Transform(new Vector3(0, 0, 5), Vector3.zero, 1));
 
 engine.addSceneObject(cube);
-engine.onUpdate = (dt) => { cube.transform.rotation += dt; };
+engine.onUpdate = (dt) => { cube.transform.rotation = cube.transform.rotation.getTranslated(new Vector3(0, dt, 0)); };
 engine.start();
 ```
 
@@ -116,7 +116,7 @@ const mesh = await WavefrontMeshConverter.fromUrl('./model.obj');
 // Create a scene object with position, rotation, and scale
 const obj = new SceneObject(
     mesh,
-    new Transform(new Vector3(0, 0, 5), 0, 1)  // position, rotation, scale
+    new Transform(new Vector3(0, 0, 5), Vector3.zero, 1)  // position, rotation, scale
 );
 
 // Add to engine
@@ -124,7 +124,7 @@ engine.addSceneObject(obj);
 
 // Animate: rotate the object each frame
 engine.onUpdate = (deltaTime) => {
-    obj.transform.rotation += Math.PI * 0.5 * deltaTime;
+    obj.transform.rotation = obj.transform.rotation.getTranslated(new Vector3(0, Math.PI * 0.5 * deltaTime, 0));
 };
 
 // Start the render loop
@@ -195,12 +195,12 @@ Defines position, rotation, and scale. Transform order: scale → rotate → tra
 ```javascript
 const transform = new Transform(
     new Vector3(0, 0, 5),  // position
-    0,                      // rotation (radians, XZ plane)
+    Vector3.zero,           // rotation (radians for x, y, z axes)
     1.0                     // scale (uniform)
 );
 
 transform.position = new Vector3(1, 2, 3);
-transform.rotation += Math.PI * 0.5;
+transform.rotation = transform.rotation.getTranslated(new Vector3(0, Math.PI * 0.5, 0));
 transform.scale = 2.0;
 ```
 
@@ -213,7 +213,9 @@ const v = new Vector3(1, 2, 3);
 
 v.getTranslated(new Vector3(1, 0, 0));  // Returns new Vector3(2, 2, 3)
 v.getScaled(2);                          // Returns new Vector3(2, 4, 6)
-v.getRotatedY(Math.PI / 2);            // Rotate around Y axis
+v.getRotatedX(Math.PI / 2);              // Rotate around X axis (YZ plane)
+v.getRotatedY(Math.PI / 2);              // Rotate around Y axis (XZ plane)
+v.getRotatedZ(Math.PI / 2);              // Rotate around Z axis (XY plane)
 ```
 
 ### WavefrontMeshConverter

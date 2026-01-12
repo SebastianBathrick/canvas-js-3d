@@ -5,13 +5,13 @@ export class Transform {
     /**
      * Creates a new Transform.
      * @param {Vector3} position - The position in 3D space.
-     * @param {number} rotation - The rotation angle in radians (XZ plane only).
+     * @param {Vector3} rotation - The rotation angles in radians (x, y, z).
      * @param {number} scale - The uniform scale factor.
      */
     constructor(position, rotation, scale) {
         /** @type {Vector3} */
         this.position = position;
-        /** @type {number} */
+        /** @type {Vector3} */
         this.rotation = rotation;
         /** @type {number} */
         this.scale = scale;
@@ -26,11 +26,27 @@ export class Transform {
     }
 
     /**
+     * Rotates around the X axis by the given angle.
+     * @param {number} angle - The angle to rotate by in radians.
+     */
+    rotateX(angle) {
+        this.rotation = this.rotation.getTranslated(new Vector3(angle, 0, 0));
+    }
+
+    /**
      * Rotates around the Y axis by the given angle.
      * @param {number} angle - The angle to rotate by in radians.
      */
-    rotateXZ(angle) {
-        this.rotation += angle;
+    rotateY(angle) {
+        this.rotation = this.rotation.getTranslated(new Vector3(0, angle, 0));
+    }
+
+    /**
+     * Rotates around the Z axis by the given angle.
+     * @param {number} angle - The angle to rotate by in radians.
+     */
+    rotateZ(angle) {
+        this.rotation = this.rotation.getTranslated(new Vector3(0, 0, angle));
     }
 
     /**

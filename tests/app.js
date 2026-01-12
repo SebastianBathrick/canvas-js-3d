@@ -26,12 +26,16 @@ const faceIndices = [
 ];
 
 const mesh = new Mesh(vertices, faceIndices);
-const cube = new SceneObject(mesh, new Transform(new Vector3(0, 0, 5), 0, 1));
+const cube = new SceneObject(mesh, new Transform(new Vector3(0, 0, 5), new Vector3(0.5, 0.8, 0.3), 1));
 
 engine.addSceneObject(cube);
-engine.onUpdate = (dt) => { 
+engine.onUpdate = (dt) => {
     const width = document.documentElement.clientWidth;
     const height = document.documentElement.clientHeight;
     engine.setScreenSize(new Vector2(width, height));
-    cube.transform.rotation += dt; };
+    
+    cube.transform.rotation = cube.transform.rotation.getTranslated(
+        new Vector3(dt * .25, dt, 0)
+    );
+};
 engine.start();
