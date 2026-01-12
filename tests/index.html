@@ -183,6 +183,11 @@
                 <input type="checkbox" id="backFaceCulling"> Back-face Culling
             </label>
         </div>
+        <div class="control-group">
+            <label>
+                <input type="checkbox" id="depthSorting"> Depth Sorting (Occlusion)
+            </label>
+        </div>
         
         <div class="control-row">
             <div class="control-group">
@@ -218,6 +223,19 @@
         <h2>Performance</h2>
         <div class="control-group">
             <label>FPS: <span class="value" id="fpsCounter">--</span></label>
+        </div>
+        <div class="control-group">
+            <label>Resolution</label>
+            <select id="resolution">
+                <option value="400x400">400 x 400</option>
+                <option value="600x600" selected>600 x 600</option>
+                <option value="800x800">800 x 800</option>
+                <option value="640x480">640 x 480 (4:3)</option>
+                <option value="800x600">800 x 600 (4:3)</option>
+                <option value="1024x768">1024 x 768 (4:3)</option>
+                <option value="1280x720">1280 x 720 (16:9)</option>
+                <option value="1920x1080">1920 x 1080 (16:9)</option>
+            </select>
         </div>
 
         <h2>Test Mesh</h2>

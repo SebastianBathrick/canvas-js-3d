@@ -75,6 +75,8 @@ const controls = {
     camRotZ: document.getElementById('camRotZ'),
     meshSelect: document.getElementById('meshSelect'),
     backFaceCulling: document.getElementById('backFaceCulling'),
+    depthSorting: document.getElementById('depthSorting'),
+    resolution: document.getElementById('resolution'),
 };
 
 const values = {
@@ -171,6 +173,11 @@ controls.backFaceCulling.addEventListener('change', () => {
     engine.camera.toggleBackFaceCulling(controls.backFaceCulling.checked);
 });
 
+// Depth sorting toggle
+controls.depthSorting.addEventListener('change', () => {
+    engine.toggleDepthSorting(controls.depthSorting.checked);
+});
+
 // Reset camera button
 document.getElementById('resetCamera').addEventListener('click', () => {
     controls.fov.value = 60;
@@ -181,8 +188,10 @@ document.getElementById('resetCamera').addEventListener('click', () => {
     controls.camRotY.value = 0;
     controls.camRotZ.value = 0;
     controls.backFaceCulling.checked = false;
+    controls.depthSorting.checked = false;
     engine.camera.setFov(60);
     engine.camera.toggleBackFaceCulling(false);
+    engine.toggleDepthSorting(false);
     updateDisplayValues();
     updateCameraFromControls();
 });
@@ -190,6 +199,12 @@ document.getElementById('resetCamera').addEventListener('click', () => {
 // Mesh selector
 controls.meshSelect.addEventListener('change', () => {
     setMesh(controls.meshSelect.value);
+});
+
+// Resolution
+controls.resolution.addEventListener('change', () => {
+    const [width, height] = controls.resolution.value.split('x').map(Number);
+    engine.setScreenSize(new Vector2(width, height));
 });
 
 // Reset button
