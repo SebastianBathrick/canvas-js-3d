@@ -56,7 +56,7 @@ npm run dev
 
 Then open `http://localhost:8080` in your browser.
 
-### Tutorial: Create a Rotating Cube
+### Create a Rotating Cube WITHOUT an OBJ File
 
 Create `app.js`:
 
@@ -96,7 +96,7 @@ engine.onUpdate = (dt) => { cube.transform.rotation += dt; };
 engine.start();
 ```
 
-### Tutorial: Load and Render an OBJ
+### Create a Rotating Cube WITH an OBJ File
 
 Here's an example that loads a 3D model from an OBJ file:
 
@@ -131,7 +131,7 @@ engine.start();
 
 Make sure `model.obj` is in the same directory as your HTML file, or adjust the path accordingly.
 
-### Module Structure
+## Module Structure
 
 ```
 src/
