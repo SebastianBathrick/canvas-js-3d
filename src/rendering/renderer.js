@@ -22,6 +22,16 @@ export class Renderer {
     }
 
     /**
+     * Sets the screen size.
+     * @param {Vector2} newScreenSize - The new screen size.
+     */
+    setScreenSize(newScreenSize) {
+        this.canvas.width = newScreenSize.x;
+        this.canvas.height = newScreenSize.y;
+        this.ctx.scale(newScreenSize.x / this.canvas.width, newScreenSize.y / this.canvas.height);
+    }
+
+    /**
      * Clears the canvas with the background color.
      */
     clear() {

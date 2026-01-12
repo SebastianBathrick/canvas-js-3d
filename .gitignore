@@ -7,6 +7,7 @@
 .zed/
 *.aider.chat.history.md
 .anthropic/
+CLAUDE.md
 
 # Dependencies
 node_modules/

@@ -31,6 +31,15 @@ export class Engine {
     }
 
     /**
+     * Sets the screen size.
+     * @param {Vector2} newScreenSize - The new screen size.
+     */
+    setScreenSize(newScreenSize) {
+        this.renderer.setScreenSize(newScreenSize);
+        this.camera.setScreenSize(newScreenSize);
+    }
+
+    /**
      * Internal frame update loop. Calculates delta time, calls onUpdate, and renders.
      * @private
      */

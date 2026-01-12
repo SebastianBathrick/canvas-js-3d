@@ -14,6 +14,14 @@ export class Camera {
     }
 
     /**
+     * Sets the screen size.
+     * @param {Vector2} newScreenSize - The new screen size.
+     */
+    setScreenSize(newScreenSize) {
+        this.screenSize = newScreenSize;
+    }
+
+    /**
      * Projects all faces of a scene object to screen coordinates.
      * @param {SceneObject} sceneObject - The scene object to project.
      * @returns {{screenPositions: Vector2[]}[]} Array of projected faces with screen positions.
