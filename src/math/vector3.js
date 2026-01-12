@@ -65,7 +65,7 @@ export class Vector3 {
      * @param {number} angle - The rotation angle in radians.
      * @returns {Vector3} A new rotated vector.
      */
-    getRotatedXZ(angle) {
+    getRotatedY(angle) {
         const cos = Math.cos(angle);
         const sin = Math.sin(angle);
 

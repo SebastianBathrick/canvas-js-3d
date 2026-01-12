@@ -213,7 +213,7 @@ const v = new Vector3(1, 2, 3);
 
 v.getTranslated(new Vector3(1, 0, 0));  // Returns new Vector3(2, 2, 3)
 v.getScaled(2);                          // Returns new Vector3(2, 4, 6)
-v.getRotatedXZ(Math.PI / 2);            // Rotate around Y axis
+v.getRotatedY(Math.PI / 2);            // Rotate around Y axis
 ```
 
 ### WavefrontMeshConverter

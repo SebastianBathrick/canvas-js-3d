@@ -38,7 +38,7 @@ export class SceneObject {
     getSceneVertices() {
         return this.mesh.vertices.map(v =>
             v.getScaled(this.transform.scale)
-             .getRotatedXZ(this.transform.rotation)
+             .getRotatedY(this.transform.rotation)
              .getTranslated(this.transform.position)
         );
     }
