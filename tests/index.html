@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>canvas-js-3d Example</title>
+    <title>canvas-js-3d Tests</title>
     <script type="importmap">
     {
       "imports": {
@@ -9,9 +9,195 @@
       }
     }
     </script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            display: flex;
+        }
+        .sidebar {
+            width: 320px;
+            background: #16213e;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+        .sidebar h1 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #0f9;
+        }
+        .sidebar h2 {
+            font-size: 0.9rem;
+            margin: 15px 0 10px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .control-group {
+            margin-bottom: 12px;
+        }
+        .control-group label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            color: #aaa;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+        }
+        .control-group .value {
+            font-size: 0.75rem;
+            color: #0f9;
+            float: right;
+        }
+        .control-row {
+            display: flex;
+            gap: 10px;
+        }
+        .control-row .control-group {
+            flex: 1;
+        }
+        button {
+            background: #0f9;
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 4px 4px 4px 0;
+        }
+        button:hover {
+            background: #0c7;
+        }
+        button.secondary {
+            background: #444;
+            color: #fff;
+        }
+        button.secondary:hover {
+            background: #555;
+        }
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        canvas {
+            background: #000;
+            border: 2px solid #333;
+        }
+        .test-results {
+            background: #0d1117;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        .test-results .pass { color: #0f9; }
+        .test-results .fail { color: #f55; }
+        .test-results .info { color: #58f; }
+        select {
+            width: 100%;
+            padding: 6px;
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
-    <canvas id="canvas" width="800" height="800"></canvas>
+    <div class="sidebar">
+        <h1>🧪 canvas-js-3d Tests</h1>
+
+        <h2>Transform Controls</h2>
+        
+        <div class="control-row">
+            <div class="control-group">
+                <label>Position X <span class="value" id="posXVal">0</span></label>
+                <input type="range" id="posX" min="-5" max="5" step="0.1" value="0">
+            </div>
+            <div class="control-group">
+                <label>Position Y <span class="value" id="posYVal">0</span></label>
+                <input type="range" id="posY" min="-5" max="5" step="0.1" value="0">
+            </div>
+            <div class="control-group">
+                <label>Position Z <span class="value" id="posZVal">5</span></label>
+                <input type="range" id="posZ" min="1" max="15" step="0.1" value="5">
+            </div>
+        </div>
+
+        <div class="control-row">
+            <div class="control-group">
+                <label>Rotation X <span class="value" id="rotXVal">0</span></label>
+                <input type="range" id="rotX" min="0" max="6.28" step="0.01" value="0">
+            </div>
+            <div class="control-group">
+                <label>Rotation Y <span class="value" id="rotYVal">0</span></label>
+                <input type="range" id="rotY" min="0" max="6.28" step="0.01" value="0">
+            </div>
+            <div class="control-group">
+                <label>Rotation Z <span class="value" id="rotZVal">0</span></label>
+                <input type="range" id="rotZ" min="0" max="6.28" step="0.01" value="0">
+            </div>
+        </div>
+
+        <div class="control-row">
+            <div class="control-group">
+                <label>Scale X <span class="value" id="scaleXVal">1</span></label>
+                <input type="range" id="scaleX" min="0.1" max="3" step="0.1" value="1">
+            </div>
+            <div class="control-group">
+                <label>Scale Y <span class="value" id="scaleYVal">1</span></label>
+                <input type="range" id="scaleY" min="0.1" max="3" step="0.1" value="1">
+            </div>
+            <div class="control-group">
+                <label>Scale Z <span class="value" id="scaleZVal">1</span></label>
+                <input type="range" id="scaleZ" min="0.1" max="3" step="0.1" value="1">
+            </div>
+        </div>
+
+        <h2>Animation</h2>
+        <div class="control-group">
+            <label>Auto-Rotate Speed <span class="value" id="autoRotateVal">0</span></label>
+            <input type="range" id="autoRotate" min="0" max="2" step="0.1" value="0">
+        </div>
+        <button id="resetTransform">Reset Transform</button>
+
+        <h2>Test Mesh</h2>
+        <div class="control-group">
+            <select id="meshSelect">
+                <option value="cube">Cube</option>
+                <option value="cone">Cone</option>
+                <option value="sphere">Sphere</option>
+                <option value="ico-sphere">Ico Sphere</option>
+                <option value="torus">Torus</option>
+                <option value="monkey">Monkey</option>
+            </select>
+        </div>
+
+        <h2>Unit Tests</h2>
+        <button id="runTests">Run All Tests</button>
+        <button id="testVector3" class="secondary">Vector3</button>
+        <button id="testTransform" class="secondary">Transform</button>
+        <div class="test-results" id="testResults">
+            Click "Run All Tests" to execute unit tests...
+        </div>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="canvas" width="600" height="600"></canvas>
+    </div>
+
     <script type="module" src="./app.js"></script>
 </body>
 </html>
