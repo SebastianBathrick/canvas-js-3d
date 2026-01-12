@@ -1,4 +1,6 @@
 import { Vector2 } from '../math/vector2.js';
+import { Vector3 } from '../math/vector3.js';
+import { Transform } from '../math/transform.js';
 
 /**
  * Projects 3D scene coordinates to 2D screen coordinates.
@@ -14,6 +16,8 @@ export class Camera {
         this.screenSize = screenSize;
         /** @type {number} */
         this.aspectRatio = screenSize.x / screenSize.y;
+        /** @type {Transform} */
+        this.transform = new Transform(Vector3.zero, Vector3.zero, Vector3.one);
         this.setFov(fov);
     }
 
@@ -96,12 +100,32 @@ export class Camera {
     }
 
     /**
+     * Transforms a world-space position to camera-space.
+     * Applies inverse camera transform: translate by -position, then rotate by -rotation.
+     * @param {Vector3} worldPos - The position in world/scene space.
+     * @returns {Vector3} The position in camera space.
+     */
+    worldToCameraSpace(worldPos) {
+        // First translate by negative camera position
+        const translated = worldPos.getTranslated(
+            this.transform.position.getScaled(-1)
+        );
+        
+        // Then rotate by negative camera rotation (in reverse order: Z, Y, X)
+        return translated
+            .getRotatedZ(-this.transform.rotation.z)
+            .getRotatedY(-this.transform.rotation.y)
+            .getRotatedX(-this.transform.rotation.x);
+    }
+
+    /**
      * Projects a 3D position to screen pixel coordinates.
      * @param {Vector3} scenePos - The 3D position in scene/world space.
      * @returns {Vector2} The position in pixel coordinates.
      */
     getVertexScreenPos(scenePos) {
-        return this.getScaledScreenPosition(this.getNormalizedScreenPosition(scenePos));
+        const cameraSpacePos = this.worldToCameraSpace(scenePos);
+        return this.getScaledScreenPosition(this.getNormalizedScreenPosition(cameraSpacePos));
     }
 
     /**
