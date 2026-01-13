@@ -21,12 +21,12 @@ export class Engine {
         this.camera = new Camera(new Vector2(canvas.width, canvas.height), fov);
         /** @type {Scene} */
         this.scene = new Scene();
-        /** @type {boolean} @private */
+        /** @type {boolean} */
         this._depthSorting = false;
         /** @type {boolean} */
-        this.running = false;
+        this._running = false;
         /** @type {number|null} */
-        this.lastFrameTime = null;
+        this._lastFrameTime = null;
         /**
          * Callback invoked each frame with delta time.
          * @type {((deltaTime: number) => void)|null}
@@ -61,17 +61,14 @@ export class Engine {
         this.camera.setScreenSize(newScreenSize);
     }
 
-    /**
-     * Internal frame update loop. Calculates delta time, calls onUpdate, and renders.
-     * @private
-     */
+    /** @private */
     frameUpdate() {
-        if (!this.running)
+        if (!this._running)
             return;
 
         const now = performance.now();
-        const deltaTime = this.lastFrameTime ? (now - this.lastFrameTime) / 1000 : 0;
-        this.lastFrameTime = now;
+        const deltaTime = this._lastFrameTime ? (now - this._lastFrameTime) / 1000 : 0;
+        this._lastFrameTime = now;
 
         if (this.onUpdate)
             this.onUpdate(deltaTime);
@@ -82,10 +79,7 @@ export class Engine {
         requestAnimationFrame(() => this.frameUpdate());
     }
 
-    /**
-     * Renders all scene objects as wireframes.
-     * @private
-     */
+    /** @private */
     renderAllObjects() {
         // Collect all projected faces from all objects
         const allFaces = [];
@@ -106,7 +100,7 @@ export class Engine {
 
             // Fill with background to occlude faces behind
             if (this._depthSorting) {
-                this.renderer.fillFace(positions, this.renderer.bgColor);
+                this.renderer.fillFace(positions, this.renderer.getBgColor());
             }
 
             // Draw edges
@@ -123,7 +117,7 @@ export class Engine {
      * Starts the render loop.
      */
     start() {
-        this.running = true;
+        this._running = true;
         this.frameUpdate();
     }
 
@@ -131,6 +125,6 @@ export class Engine {
      * Stops the render loop.
      */
     stop() {
-        this.running = false;
+        this._running = false;
     }
 }

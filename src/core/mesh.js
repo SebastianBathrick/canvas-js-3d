@@ -9,9 +9,9 @@ export class Mesh {
      */
     constructor(vertices, faceIndices) {
         /** @type {Vector3[]} */
-        this.vertices = vertices;
+        this._vertices = vertices;
         /** @type {number[][]} */
-        this.faceIndices = faceIndices;
+        this._faceIndices = faceIndices;
     }
 
     /**
@@ -19,7 +19,7 @@ export class Mesh {
      * @returns {Vector3[]} The vertex array.
      */
     getVertices() {
-        return this.vertices;
+        return this._vertices;
     }
 
     /**
@@ -27,6 +27,6 @@ export class Mesh {
      * @returns {number[][]} Array of faces, each containing vertex indices.
      */
     getFaceIndices() {
-        return this.faceIndices;
+        return this._faceIndices;
     }
 }

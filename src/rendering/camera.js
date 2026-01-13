@@ -14,12 +14,12 @@ export class Camera {
      */
     constructor(screenSize, fov = 60) {
         /** @type {Vector2} */
-        this.screenSize = screenSize;
+        this._screenSize = screenSize;
         /** @type {number} */
-        this.aspectRatio = screenSize.x / screenSize.y;
+        this._aspectRatio = screenSize.x / screenSize.y;
         /** @type {Transform} */
         this.transform = new Transform(Vector3.zero, Vector3.zero, Vector3.one);
-        /** @type {boolean} @private */
+        /** @type {boolean} */
         this._backFaceCulling = false;
         this.setFov(fov);
     }
@@ -47,10 +47,10 @@ export class Camera {
      */
     setFov(fov) {
         /** @type {number} */
-        this.fov = fov;
+        this._fov = fov;
         const fovRadians = (fov * Math.PI) / 180;
         /** @type {number} */
-        this.focalLength = 1 / Math.tan(fovRadians / 2);
+        this._focalLength = 1 / Math.tan(fovRadians / 2);
     }
 
     /**
@@ -58,8 +58,8 @@ export class Camera {
      * @param {Vector2} newScreenSize - The new screen size.
      */
     setScreenSize(newScreenSize) {
-        this.screenSize = newScreenSize;
-        this.aspectRatio = newScreenSize.x / newScreenSize.y;
+        this._screenSize = newScreenSize;
+        this._aspectRatio = newScreenSize.x / newScreenSize.y;
     }
 
     /**
@@ -72,7 +72,7 @@ export class Camera {
         const projectedFaces = [];
         
         // Map vertices to their associated face indices
-        for (const face of sceneObject.getMesh().getFaceIndices()) {
+        for (const face of sceneObject.mesh.getFaceIndices()) {
             const faceVerts = face.map(idx => sceneVerts[idx]);
             
             // Back-face culling: skip faces pointing away from camera
@@ -101,12 +101,7 @@ export class Camera {
         return projectedFaces;
     }
 
-    /**
-     * Determines if a face is back-facing (pointing away from the camera).
-     * Uses the first three vertices to compute the face normal.
-     * @param {Vector3[]} faceVerts - The face vertices in world space.
-     * @returns {boolean} True if the face is back-facing.
-     */
+    /** @private */
     isBackFacing(faceVerts) {
         // Transform vertices to camera space
         const v0 = this.worldToCameraSpace(faceVerts[0]);
@@ -114,20 +109,16 @@ export class Camera {
         const v2 = this.worldToCameraSpace(faceVerts[2]);
         
         // Compute face normal using cross product of two edges
-        const edge1 = v1.subtract(v0);
-        const edge2 = v2.subtract(v0);
-        const normal = edge1.cross(edge2);
+        const edge1 = v1.getSubtracted(v0);
+        const edge2 = v2.getSubtracted(v0);
+        const normal = edge1.getCross(edge2);
         
         // Face is back-facing if normal points away from camera (positive z in camera space)
         // We use v0 as the view vector since camera is at origin in camera space
-        return normal.dot(v0) > 0;
+        return normal.getDot(v0) > 0;
     }
 
-    /**
-     * Converts a normalized screen position to a screen position based on the screen's/canvas's size.
-     * @param {Vector2} normScreenPos - The normalized screen position of a point
-     * @returns {Vector2} The screen position of the point relative to the screen's/canvas's size
-     */
+    /** @private */
     getScaledScreenPosition(normScreenPos) {
         /* Currently (0, 0) is the top left corner of the canvas
 
@@ -139,15 +130,11 @@ export class Camera {
         */
 
         return new Vector2(
-            (normScreenPos.x + 1) / 2 * this.screenSize.x, 
-            (1 - (normScreenPos.y + 1) / 2) * this.screenSize.y);
+            (normScreenPos.x + 1) / 2 * this._screenSize.x, 
+            (1 - (normScreenPos.y + 1) / 2) * this._screenSize.y);
     }
 
-    /**
-     * Converts a point's 3D position in the scene to a normalized screen position by dividing x and y by z individually.
-     * @param {Vector3} scenePos - The 3D position of a point in the scene
-     * @returns {Vector2} The normalized screen position of the point
-     */
+    /** @private */
     getNormalizedScreenPosition(scenePos) {
         /* 
         * If > 0 the point is in front of the camera, if <= 0 the point is not visible, because the divisor 
@@ -155,17 +142,12 @@ export class Camera {
         * further away from the camera. */
 
         return new Vector2(
-            (scenePos.x / scenePos.z) * this.focalLength / this.aspectRatio,
-            (scenePos.y / scenePos.z) * this.focalLength
+            (scenePos.x / scenePos.z) * this._focalLength / this._aspectRatio,
+            (scenePos.y / scenePos.z) * this._focalLength
         );
     }
 
-    /**
-     * Transforms a world-space position to camera-space.
-     * Applies inverse camera transform: translate by -position, then rotate by -rotation.
-     * @param {Vector3} worldPos - The position in world/scene space.
-     * @returns {Vector3} The position in camera space.
-     */
+    /** @private */
     worldToCameraSpace(worldPos) {
         // First translate by negative camera position
         const translated = worldPos.getTranslated(
@@ -179,21 +161,14 @@ export class Camera {
             .getRotatedX(-this.transform.rotation.x);
     }
 
-    /**
-     * Projects a 3D position to screen pixel coordinates.
-     * @param {Vector3} scenePos - The 3D position in scene/world space.
-     * @returns {Vector2} The position in pixel coordinates.
-     */
+    /** @private */
     getVertexScreenPos(scenePos) {
         const cameraSpacePos = this.worldToCameraSpace(scenePos);
         return this.getScaledScreenPosition(this.getNormalizedScreenPosition(cameraSpacePos));
     }
 
-    /**
-     * Projects multiple 3D positions to screen pixel coordinates.
-     * @param {Vector3[]} vertices - Array of 3D positions.
-     * @returns {Vector2[]} Array of screen positions in pixels.
-     */
+
+    /** @private */
     getScreenPositions(vertices) {
         return vertices.map(v => this.getVertexScreenPos(v));
     }

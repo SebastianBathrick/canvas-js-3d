@@ -11,11 +11,8 @@ export class Transform {
      * @param {Vector3} scale - The scale factors for each axis.
      */
     constructor(position, rotation, scale) {
-        /** @type {Vector3} */
         this.position = position;
-        /** @type {Vector3} */
         this.rotation = rotation;
-        /** @type {Vector3} */
         this.scale = scale;
     }
 

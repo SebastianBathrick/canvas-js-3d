@@ -10,15 +10,23 @@ export class Renderer {
      */
     constructor(canvas, fgColor, bgColor) {
         /** @type {HTMLCanvasElement} */
-        this.canvas = canvas;
+        this._canvas = canvas;
         /** @type {CanvasRenderingContext2D} */
-        this.ctx = canvas.getContext('2d');
+        this._ctx = canvas.getContext('2d');
         /** @type {string} */
-        this.fgColor = fgColor;
+        this._fgColor = fgColor;
         /** @type {string} */
-        this.bgColor = bgColor;
-        /** @type {number} @private */
+        this._bgColor = bgColor;
+        /** @type {number} */
         this._pointSize = 20;
+    }
+
+    /**
+     * Gets the background color.
+     * @returns {string} The background color.
+     */
+    getBgColor() {
+        return this._bgColor;
     }
 
     /**
@@ -42,17 +50,17 @@ export class Renderer {
      * @param {Vector2} newScreenSize - The new screen size.
      */
     setScreenSize(newScreenSize) {
-        this.canvas.width = newScreenSize.x;
-        this.canvas.height = newScreenSize.y;
-        this.ctx.scale(newScreenSize.x / this.canvas.width, newScreenSize.y / this.canvas.height);
+        this._canvas.width = newScreenSize.x;
+        this._canvas.height = newScreenSize.y;
+        this._ctx.scale(newScreenSize.x / this._canvas.width, newScreenSize.y / this._canvas.height);
     }
 
     /**
      * Clears the canvas with the background color.
      */
     clear() {
-        this.ctx.fillStyle = this.bgColor;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this._ctx.fillStyle = this._bgColor;
+        this._ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
     }
 
     /**
@@ -61,11 +69,11 @@ export class Renderer {
      * @param {Vector2} endVector2 - The end position in screen coordinates.
      */
     renderEdge(startVector2, endVector2) {
-        this.ctx.strokeStyle = this.fgColor;
-        this.ctx.beginPath();
-        this.ctx.moveTo(startVector2.x, startVector2.y);
-        this.ctx.lineTo(endVector2.x, endVector2.y);
-        this.ctx.stroke();
+        this._ctx.strokeStyle = this._fgColor;
+        this._ctx.beginPath();
+        this._ctx.moveTo(startVector2.x, startVector2.y);
+        this._ctx.lineTo(endVector2.x, endVector2.y);
+        this._ctx.stroke();
     }
 
     /**
@@ -73,8 +81,8 @@ export class Renderer {
      * @param {Vector2} vector2 - The position in screen coordinates.
      */
     renderPoint(vector2) {
-        this.ctx.fillStyle = this.fgColor;
-        this.ctx.fillRect(
+        this._ctx.fillStyle = this._fgColor;
+        this._ctx.fillRect(
             vector2.x - this._pointSize / 2,
             vector2.y - this._pointSize / 2,
             this._pointSize,
@@ -91,15 +99,15 @@ export class Renderer {
         if (positions.length < 3)
             return;
 
-        this.ctx.fillStyle = color;
-        this.ctx.beginPath();
-        this.ctx.moveTo(positions[0].x, positions[0].y);
+        this._ctx.fillStyle = color;
+        this._ctx.beginPath();
+        this._ctx.moveTo(positions[0].x, positions[0].y);
 
         for (let i = 1; i < positions.length; i++) {
-            this.ctx.lineTo(positions[i].x, positions[i].y);
+            this._ctx.lineTo(positions[i].x, positions[i].y);
         }
 
-        this.ctx.closePath();
-        this.ctx.fill();
+        this._ctx.closePath();
+        this._ctx.fill();
     }
 }

@@ -7,7 +7,7 @@ export class Scene {
      */
     constructor() {
         /** @type {SceneObject[]} */
-        this.sceneObjects = [];
+        this._sceneObjects = [];
     }
 
     /**
@@ -15,7 +15,7 @@ export class Scene {
      * @param {SceneObject} sceneObject - The object to add.
      */
     addSceneObject(sceneObject) {
-        this.sceneObjects.push(sceneObject);
+        this._sceneObjects.push(sceneObject);
     }
 
     /**
@@ -23,10 +23,10 @@ export class Scene {
      * @param {SceneObject} sceneObject - The object to remove.
      */
     removeSceneObject(sceneObject) {
-        const idx = this.sceneObjects.indexOf(sceneObject);
+        const idx = this._sceneObjects.indexOf(sceneObject);
 
         if (idx !== -1)
-            this.sceneObjects.splice(idx, 1);
+            this._sceneObjects.splice(idx, 1);
     }
 
     /**
@@ -34,6 +34,6 @@ export class Scene {
      * @returns {SceneObject[]} Array of scene objects.
      */
     getSceneObjects() {
-        return this.sceneObjects;
+        return this._sceneObjects;
     }
 }

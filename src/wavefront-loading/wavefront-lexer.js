@@ -9,13 +9,13 @@ export class WavefrontLexer {
      */
     constructor(source) {
         /** @type {string} */
-        this.source = source;
+        this._source = source;
         /** @type {Array<{type: string, value: *}>} */
-        this.tokens = [];
+        this._tokens = [];
         /** @type {number} */
-        this.start = 0;
+        this._start = 0;
         /** @type {number} */
-        this.current = 0;
+        this._current = 0;
     }
 
     /**
@@ -24,18 +24,15 @@ export class WavefrontLexer {
      */
     lexTokens() {
         while (!this.isAtEnd()) {
-            this.start = this.current;
+            this._start = this._current;
             this.lexToken();
         }
 
-        this.tokens.push({ type: 'EOF', value: null });
-        return this.tokens;
+        this._tokens.push({ type: 'EOF', value: null });
+        return this._tokens;
     }
 
-    /**
-     * Lexes a single token from the current position.
-     * @private
-     */
+    /** @private */
     lexToken() {
         const c = this.advance();
 
@@ -45,7 +42,7 @@ export class WavefrontLexer {
 
         // Newline
         if (c === '\n') {
-            this.tokens.push({ type: 'NEWLINE', value: '\n' });
+            this._tokens.push({ type: 'NEWLINE', value: '\n' });
             return;
         }
 
@@ -58,7 +55,7 @@ export class WavefrontLexer {
 
         // Slash (for face format like 1/2/3)
         if (c === '/') {
-            this.tokens.push({ type: 'SLASH', value: '/' });
+            this._tokens.push({ type: 'SLASH', value: '/' });
             return;
         }
 
@@ -75,10 +72,7 @@ export class WavefrontLexer {
         }
     }
 
-    /**
-     * Lexes a number token (integer, float, or scientific notation).
-     * @private
-     */
+    /** @private */
     lexNumber() {
         // Consume digits before decimal
         while (this.isDigit(this.peek()))
@@ -103,90 +97,56 @@ export class WavefrontLexer {
                 this.advance();
         }
 
-        const value = parseFloat(this.source.substring(this.start, this.current));
-        this.tokens.push({ type: 'NUMBER', value: value });
+        const value = parseFloat(this._source.substring(this._start, this._current));
+        this._tokens.push({ type: 'NUMBER', value: value });
     }
 
-    /**
-     * Lexes a keyword token.
-     * @private
-     */
+    /** @private */
     lexKeyword() {
         while (this.isAlphaNumeric(this.peek()))
             this.advance();
 
-        const value = this.source.substring(this.start, this.current);
-        this.tokens.push({ type: 'KEYWORD', value: value });
+        const value = this._source.substring(this._start, this._current);
+        this._tokens.push({ type: 'KEYWORD', value: value });
     }
 
-    /**
-     * Returns the current character and advances the position.
-     * @returns {string} The current character.
-     * @private
-     */
+    /** @private */
     advance() {
-        return this.source.charAt(this.current++);
+        return this._source.charAt(this._current++);
     }
 
-    /**
-     * Returns the current character without advancing.
-     * @returns {string} The current character, or '\0' if at end.
-     * @private
-     */
+    /** @private */
     peek() {
         if (this.isAtEnd())
             return '\0';
 
-        return this.source.charAt(this.current);
+        return this._source.charAt(this._current);
     }
 
-    /**
-     * Returns the next character without advancing.
-     * @returns {string} The next character, or '\0' if at end.
-     * @private
-     */
+    /** @private */
     peekNext() {
-        if (this.current + 1 >= this.source.length)
+        if (this._current + 1 >= this._source.length)
             return '\0';
 
-        return this.source.charAt(this.current + 1);
+        return this._source.charAt(this._current + 1);
     }
 
-    /**
-     * Checks if we've reached the end of the source.
-     * @returns {boolean} True if at end.
-     * @private
-     */
+    /** @private */
     isAtEnd() {
-        return this.current >= this.source.length;
+        return this._current >= this._source.length;
     }
 
-    /**
-     * Checks if a character is a digit (0-9).
-     * @param {string} c - The character to check.
-     * @returns {boolean} True if digit.
-     * @private
-     */
+    /** @private */
     isDigit(c) {
         return c >= '0' && c <= '9';
     }
 
-    /**
-     * Checks if a character is alphabetic (a-z, A-Z, _).
-     * @param {string} c - The character to check.
-     * @returns {boolean} True if alphabetic.
-     * @private
-     */
+    /** @private */
     isAlpha(c) {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_';
     }
 
-    /**
-     * Checks if a character is alphanumeric.
-     * @param {string} c - The character to check.
-     * @returns {boolean} True if alphanumeric.
-     * @private
-     */
+    /** @private */
     isAlphaNumeric(c) {
         return this.isAlpha(c) || this.isDigit(c);
     }

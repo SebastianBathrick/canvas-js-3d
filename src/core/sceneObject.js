@@ -8,26 +8,8 @@ export class SceneObject {
      * @param {Transform} transform - The position, rotation, and scale.
      */
     constructor(mesh, transform) {
-        /** @type {Mesh} */
         this.mesh = mesh;
-        /** @type {Transform} */
         this.transform = transform;
-    }
-
-    /**
-     * Gets the mesh geometry.
-     * @returns {Mesh} The mesh.
-     */
-    getMesh() {
-        return this.mesh;
-    }
-
-    /**
-     * Gets the transform.
-     * @returns {Transform} The transform.
-     */
-    getTransform() {
-        return this.transform;
     }
 
     /**
@@ -36,7 +18,7 @@ export class SceneObject {
      * @returns {Vector3[]} Array of transformed vertex positions.
      */
     getSceneVertices() {
-        return this.mesh.vertices.map(v =>
+        return this.mesh.getVertices().map(v =>
             v.getScaledByVector(this.transform.scale)
              .getRotatedX(this.transform.rotation.x)
              .getRotatedY(this.transform.rotation.y)

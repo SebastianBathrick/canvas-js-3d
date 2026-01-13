@@ -11,13 +11,13 @@ export class WavefrontParser {
      */
     constructor(tokens) {
         /** @type {Array<{type: string, value: *}>} */
-        this.tokens = tokens;
+        this._tokens = tokens;
         /** @type {number} */
-        this.current = 0;
+        this._current = 0;
         /** @type {Vector3[]} */
-        this.vertices = [];
+        this._vertices = [];
         /** @type {number[][]} */
-        this.faceIndices = [];
+        this._faceIndices = [];
     }
 
     /**
@@ -30,15 +30,12 @@ export class WavefrontParser {
         }
 
         return {
-            vertices: this.vertices,
-            faceIndices: this.faceIndices
+            vertices: this._vertices,
+            faceIndices: this._faceIndices
         };
     }
 
-    /**
-     * Parses a single statement (line).
-     * @private
-     */
+    /** @private */
     parseStatement() {
         const token = this.peek();
 
@@ -69,24 +66,17 @@ export class WavefrontParser {
         this.advance();
     }
 
-    /**
-     * Parses a vertex definition (v x y z).
-     * @private
-     */
+    /** @private */
     parseVertex() {
         const x = this.consumeNumber();
         const y = this.consumeNumber();
         const z = this.consumeNumber();
 
-        this.vertices.push(new Vector3(x, y, z));
+        this._vertices.push(new Vector3(x, y, z));
         this.skipToNextLine();
     }
 
-    /**
-     * Parses a face definition (f v1 v2 v3 ... or f v1/vt1/vn1 ...).
-     * Converts OBJ's 1-indexed vertices to 0-indexed.
-     * @private
-     */
+    /** @private */
     parseFace() {
         const indices = [];
 
@@ -111,16 +101,12 @@ export class WavefrontParser {
         }
 
         if (indices.length >= 3)
-            this.faceIndices.push(indices);
+            this._faceIndices.push(indices);
 
         this.skipToNextLine();
     }
 
-    /**
-     * Consumes and returns a number token value.
-     * @returns {number} The number value, or 0 if not a number token.
-     * @private
-     */
+    /** @private */
     consumeNumber() {
         const token = this.peek();
 
@@ -133,10 +119,7 @@ export class WavefrontParser {
         return 0;
     }
 
-    /**
-     * Skips tokens until the next newline or EOF.
-     * @private
-     */
+    /** @private */
     skipToNextLine() {
         while (!this.isAtEnd() && this.peek().type !== 'NEWLINE')
             this.advance();
@@ -146,33 +129,21 @@ export class WavefrontParser {
             this.advance();
     }
 
-    /**
-     * Returns the current token without advancing.
-     * @returns {{type: string, value: *}} The current token.
-     * @private
-     */
+    /** @private */
     peek() {
-        return this.tokens[this.current];
+        return this._tokens[this._current];
     }
 
-    /**
-     * Returns the current token and advances the position.
-     * @returns {{type: string, value: *}} The current token.
-     * @private
-     */
+    /** @private */
     advance() {
         if (!this.isAtEnd())
-            this.current++;
+            this._current++;
 
-        return this.tokens[this.current - 1];
+        return this._tokens[this._current - 1];
     }
 
-    /**
-     * Checks if we've reached the end of tokens.
-     * @returns {boolean} True if at end or at EOF token.
-     * @private
-     */
+    /** @private */
     isAtEnd() {
-        return this.current >= this.tokens.length || this.peek().type === 'EOF';
+        return this._current >= this._tokens.length || this.peek().type === 'EOF';
     }
 }

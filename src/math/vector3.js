@@ -159,7 +159,7 @@ export class Vector3 {
      * @param {Vector3} other - The other vector.
      * @returns {number} The dot product.
      */
-    dot(other) {
+    getDot(other) {
         return this.x * other.x + this.y * other.y + this.z * other.z;
     }
 
@@ -168,7 +168,7 @@ export class Vector3 {
      * @param {Vector3} other - The other vector.
      * @returns {Vector3} A new vector perpendicular to both inputs.
      */
-    cross(other) {
+    getCross(other) {
         return new Vector3(
             this.y * other.z - this.z * other.y,
             this.z * other.x - this.x * other.z,
@@ -181,7 +181,7 @@ export class Vector3 {
      * @param {Vector3} other - The vector to subtract.
      * @returns {Vector3} A new vector.
      */
-    subtract(other) {
+    getSubtracted(other) {
         return new Vector3(this.x - other.x, this.y - other.y, this.z - other.z);
     }
 }
