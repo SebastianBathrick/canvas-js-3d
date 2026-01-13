@@ -201,7 +201,7 @@ const transform = new Transform(
 
 transform.position = new Vector3(1, 2, 3);
 transform.rotation = transform.rotation.getTranslated(new Vector3(0, Math.PI * 0.5, 0));
-transform.scale = 2.0;
+transform.scale = new Vector3(2, 2, 2);  // Non-uniform scaling supported
 ```
 
 ### Vector3

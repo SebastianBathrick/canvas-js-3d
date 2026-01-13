@@ -48,7 +48,7 @@ const spawnOffsets = [
 
 // Control values
 let rotationSpeed = 0.5;
-let scale = 1.0;
+let scale = new Vector3(1, 1, 1);
 let positionOffset = new Vector3(0, 0, 5);
 
 // UI Elements
@@ -66,6 +66,7 @@ const posYValue = document.getElementById('posYValue');
 const posZSlider = document.getElementById('posZ');
 const posZValue = document.getElementById('posZValue');
 const clearSceneBtn = document.getElementById('clearSceneBtn');
+const depthSortingCheckbox = document.getElementById('depthSorting');
 const fpsCounter = document.getElementById('fpsCounter');
 const meshStats = document.getElementById('meshStats');
 
@@ -95,7 +96,7 @@ async function addModel() {
         new Transform(position, Vector3.zero, scale)
     );
 
-    engine.addSceneObject(sceneObject);
+    engine.scene.addSceneObject(sceneObject);
     models.push(sceneObject);
 
     updateModelCount();
@@ -104,7 +105,7 @@ async function addModel() {
 // Clear all models from the scene
 function clearScene() {
     for (const model of models)
-        engine.removeSceneObject(model);
+        engine.scene.removeSceneObject(model);
 
     models.length = 0;
     updateModelCount();
@@ -137,12 +138,12 @@ function updateMeshStats() {
 
     for (const model of models) {
         const mesh = model.mesh;
-        totalVerts += mesh.vertices.length;
-        totalFaces += mesh.faceIndices.length;
+        totalVerts += mesh.getVertices().length;
+        totalFaces += mesh.getFaceIndices().length;
 
         // Count unique edges per mesh
         const edgeSet = new Set();
-        for (const face of mesh.faceIndices) {
+        for (const face of mesh.getFaceIndices()) {
             for (let i = 0; i < face.length; i++) {
                 const a = face[i];
                 const b = face[(i + 1) % face.length];
@@ -161,14 +162,19 @@ function updateMeshStats() {
 addModelBtn.addEventListener('click', addModel);
 clearSceneBtn.addEventListener('click', clearScene);
 
+depthSortingCheckbox.addEventListener('change', () => {
+    engine.toggleDepthSorting(depthSortingCheckbox.checked);
+});
+
 rotationSpeedSlider.addEventListener('input', () => {
     rotationSpeed = parseFloat(rotationSpeedSlider.value);
     rotationSpeedValue.textContent = rotationSpeed.toFixed(1);
 });
 
 scaleSlider.addEventListener('input', () => {
-    scale = parseFloat(scaleSlider.value);
-    scaleValue.textContent = scale.toFixed(1);
+    const scaleVal = parseFloat(scaleSlider.value);
+    scale = new Vector3(scaleVal, scaleVal, scaleVal);
+    scaleValue.textContent = scaleVal.toFixed(1);
     updateModelTransforms();
 });
 
@@ -230,7 +236,7 @@ engine.onUpdate = (deltaTime) => {
 // Load initial monkey and start engine
 loadMesh('./meshes/monkey.obj').then(mesh => {
     const monkey = new SceneObject(mesh, new Transform(positionOffset, Vector3.zero, scale));
-    engine.addSceneObject(monkey);
+    engine.scene.addSceneObject(monkey);
     models.push(monkey);
     updateModelCount();
     engine.start();

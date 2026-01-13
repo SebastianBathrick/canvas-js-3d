@@ -165,6 +165,26 @@ button.danger:hover {
 .xyz-controls .axis-label.y { color: #6f6; }
 .xyz-controls .axis-label.z { color: #66f; }
 
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #0f0;
+    cursor: pointer;
+}
+
+.checkbox-row label {
+    font-size: 14px;
+    color: #eee;
+    text-transform: none;
+    cursor: pointer;
+}
+
 /* Mobile responsive styles */
 @media (max-width: 768px) {
     body {
