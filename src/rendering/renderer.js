@@ -17,8 +17,12 @@ export class Renderer {
         this._fgColor = fgColor;
         /** @type {string} */
         this._bgColor = bgColor;
+        /** @type {string|null} */
+        this._bgGradientColor = null;
         /** @type {number} */
         this._pointSize = 20;
+        /** @type {{enabled: boolean, blur: number, color: string|null}} */
+        this._bloom = { enabled: false, blur: 15, color: null };
     }
 
     /**
@@ -27,6 +31,30 @@ export class Renderer {
      */
     getBgColor() {
         return this._bgColor;
+    }
+
+    /**
+     * Sets the background color.
+     * @param {string} color - The new background color (hex string or CSS color).
+     */
+    setBgColor(color) {
+        this._bgColor = color;
+    }
+
+    /**
+     * Gets the background gradient end color.
+     * @returns {string|null} The gradient end color, or null if no gradient.
+     */
+    getBgGradientColor() {
+        return this._bgGradientColor;
+    }
+
+    /**
+     * Sets the background gradient end color. Set to null to disable gradient.
+     * @param {string|null} color - The gradient end color, or null to disable.
+     */
+    setBgGradientColor(color) {
+        this._bgGradientColor = color;
     }
 
     /**
@@ -46,6 +74,85 @@ export class Renderer {
     }
 
     /**
+     * Configures global bloom effect.
+     * @param {{enabled?: boolean, blur?: number, color?: string|null}} options - Bloom settings.
+     */
+    setBloom(options) {
+        if (options.enabled !== undefined) this._bloom.enabled = options.enabled;
+        if (options.blur !== undefined) this._bloom.blur = options.blur;
+        if (options.color !== undefined) this._bloom.color = options.color;
+    }
+
+    /**
+     * Gets the current bloom configuration.
+     * @returns {{enabled: boolean, blur: number, color: string|null}} Bloom settings.
+     */
+    getBloom() {
+        return { ...this._bloom };
+    }
+
+    /**
+     * Begins bloom rendering. Call once per frame before drawing edges.
+     */
+    beginBloom() {
+        if (this._bloom.enabled) {
+            this._ctx.shadowBlur = this._bloom.blur;
+            this._ctx.shadowOffsetX = 0;
+            this._ctx.shadowOffsetY = 0;
+            if (this._bloom.color) {
+                this._ctx.shadowColor = this._bloom.color;
+            }
+        }
+    }
+
+    /**
+     * Updates bloom color for per-edge coloring. Only needed when bloom.color is null.
+     * @param {string} color - The edge color to use for glow.
+     */
+    setBloomColor(color) {
+        this._ctx.shadowColor = color;
+    }
+
+    /**
+     * Ends bloom rendering. Call once per frame after drawing all edges.
+     */
+    endBloom() {
+        if (this._bloom.enabled) {
+            this._ctx.shadowBlur = 0;
+        }
+    }
+
+    /**
+     * Temporarily disables bloom for operations like face fills.
+     */
+    pauseBloom() {
+        this._ctx.shadowBlur = 0;
+    }
+
+    /**
+     * Restores bloom after a pause.
+     */
+    resumeBloom() {
+        this._ctx.shadowBlur = this._bloom.blur;
+    }
+
+    /**
+     * Checks if bloom is currently enabled.
+     * @returns {boolean} True if bloom is enabled.
+     */
+    isBloomEnabled() {
+        return this._bloom.enabled;
+    }
+
+    /**
+     * Checks if bloom needs per-edge color updates.
+     * @returns {boolean} True if bloom is enabled but has no fixed color.
+     */
+    needsPerEdgeBloomColor() {
+        return this._bloom.enabled && !this._bloom.color;
+    }
+
+    /**
      * Sets the screen size.
      * @param {Vector2} newScreenSize - The new screen size.
      */
@@ -56,10 +163,20 @@ export class Renderer {
     }
 
     /**
-     * Clears the canvas with the background color.
+     * Clears the canvas with the background color or gradient.
      */
     clear() {
-        this._ctx.fillStyle = this._bgColor;
+        if (this._bgGradientColor) {
+            const gradient = this._ctx.createLinearGradient(
+                0, 0,
+                0, this._canvas.height
+            );
+            gradient.addColorStop(0, this._bgColor);
+            gradient.addColorStop(1, this._bgGradientColor);
+            this._ctx.fillStyle = gradient;
+        } else {
+            this._ctx.fillStyle = this._bgColor;
+        }
         this._ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
     }
 

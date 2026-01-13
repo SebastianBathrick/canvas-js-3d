@@ -96,10 +96,11 @@ export class Camera {
             
             const averageDepth = depthSum / faceVerts.length;
             projectedFaces.push(new ProjectedFace(
-                screenPositions, 
+                screenPositions,
                 averageDepth,
                 sceneObject.color,
-                sceneObject.gradientColor
+                sceneObject.gradientColor,
+                sceneObject.faceColor
             ));
         }
 

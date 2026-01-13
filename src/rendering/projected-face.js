@@ -8,8 +8,9 @@ export class ProjectedFace {
      * @param {number} depth - The average depth (Z) in camera space for sorting.
      * @param {string|null} color - Primary edge color (hex string).
      * @param {string|null} gradientColor - End color for gradient edges (hex string).
+     * @param {string|null} faceColor - Fill color for the face (hex string).
      */
-    constructor(screenPositions, depth, color = null, gradientColor = null) {
+    constructor(screenPositions, depth, color = null, gradientColor = null, faceColor = null) {
         /** @type {Vector2[]} */
         this.screenPositions = screenPositions;
         /** @type {number} */
@@ -18,6 +19,8 @@ export class ProjectedFace {
         this.color = color;
         /** @type {string|null} */
         this.gradientColor = gradientColor;
+        /** @type {string|null} */
+        this.faceColor = faceColor;
     }
 
     /**

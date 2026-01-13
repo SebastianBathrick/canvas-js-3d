@@ -86,6 +86,26 @@ export class Engine {
     }
 
     /**
+     * Configures global bloom effect.
+     * When enabled, edges glow with a soft blur effect.
+     * @param {{enabled?: boolean, blur?: number, color?: string|null}} options - Bloom settings.
+     *   - enabled: Whether bloom is active (default false)
+     *   - blur: Blur radius in pixels (default 15)
+     *   - color: Glow color, or null to use edge color (default null)
+     */
+    setBloom(options) {
+        this.renderer.setBloom(options);
+    }
+
+    /**
+     * Gets the current bloom configuration.
+     * @returns {{enabled: boolean, blur: number, color: string|null}} Bloom settings.
+     */
+    getBloom() {
+        return this.renderer.getBloom();
+    }
+
+    /**
      * Sets the screen size.
      * @param {Vector2} newScreenSize - The new screen size.
      */
@@ -127,18 +147,19 @@ export class Engine {
             allFaces.sort(ProjectedFace.compareByDepth);
         }
 
+        // Begin bloom once per frame (sets blur, offsets, and fixed color if set)
+        this.renderer.beginBloom();
+        const bloomEnabled = this.renderer.isBloomEnabled();
+        const needsPerEdgeBloom = this.renderer.needsPerEdgeBloomColor();
+
         // Render each face
         for (const face of allFaces) {
             const positions = face.screenPositions;
 
-            // Fill with background to occlude faces behind
-            if (this._depthSorting) {
-                this.renderer.fillFace(positions, this.renderer.getBgColor());
-            }
-
             // Determine edge color(s)
             let edgeColor = face.color || this._fgColor;
             let gradientEndColor = face.gradientColor;
+            let fillColor = face.faceColor;
 
             // Apply depth fog if enabled
             if (this._depthFog.enabled) {
@@ -151,6 +172,22 @@ export class Engine {
                 if (gradientEndColor) {
                     gradientEndColor = ColorUtils.applyFog(gradientEndColor, this._depthFog.color, fogAmount);
                 }
+                if (fillColor) {
+                    fillColor = ColorUtils.applyFog(fillColor, this._depthFog.color, fogAmount);
+                }
+            }
+
+            // Fill face to occlude faces behind (depth sorting) or render face color
+            // Pause bloom for face fills to prevent glow on fills
+            if (this._depthSorting) {
+                if (bloomEnabled) this.renderer.pauseBloom();
+                this.renderer.fillFace(positions, fillColor || this.renderer.getBgColor());
+                if (bloomEnabled) this.renderer.resumeBloom();
+            }
+
+            // Update bloom color per-edge if no fixed color is set
+            if (needsPerEdgeBloom) {
+                this.renderer.setBloomColor(edgeColor);
             }
 
             // Draw edges
@@ -165,6 +202,9 @@ export class Engine {
                 }
             }
         }
+
+        // End bloom once per frame
+        this.renderer.endBloom();
     }
 
     /**
