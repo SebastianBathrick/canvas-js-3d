@@ -23,6 +23,10 @@ export class Renderer {
         this._pointSize = 20;
         /** @type {{enabled: boolean, blur: number, color: string|null}} */
         this._bloom = { enabled: false, blur: 15, color: null };
+        /** @type {HTMLCanvasElement|null} */
+        this._bloomCanvas = null;
+        /** @type {CanvasRenderingContext2D|null} */
+        this._bloomCtx = null;
     }
 
     /**
@@ -92,51 +96,6 @@ export class Renderer {
     }
 
     /**
-     * Begins bloom rendering. Call once per frame before drawing edges.
-     */
-    beginBloom() {
-        if (this._bloom.enabled) {
-            this._ctx.shadowBlur = this._bloom.blur;
-            this._ctx.shadowOffsetX = 0;
-            this._ctx.shadowOffsetY = 0;
-            if (this._bloom.color) {
-                this._ctx.shadowColor = this._bloom.color;
-            }
-        }
-    }
-
-    /**
-     * Updates bloom color for per-edge coloring. Only needed when bloom.color is null.
-     * @param {string} color - The edge color to use for glow.
-     */
-    setBloomColor(color) {
-        this._ctx.shadowColor = color;
-    }
-
-    /**
-     * Ends bloom rendering. Call once per frame after drawing all edges.
-     */
-    endBloom() {
-        if (this._bloom.enabled) {
-            this._ctx.shadowBlur = 0;
-        }
-    }
-
-    /**
-     * Temporarily disables bloom for operations like face fills.
-     */
-    pauseBloom() {
-        this._ctx.shadowBlur = 0;
-    }
-
-    /**
-     * Restores bloom after a pause.
-     */
-    resumeBloom() {
-        this._ctx.shadowBlur = this._bloom.blur;
-    }
-
-    /**
      * Checks if bloom is currently enabled.
      * @returns {boolean} True if bloom is enabled.
      */
@@ -145,11 +104,83 @@ export class Renderer {
     }
 
     /**
-     * Checks if bloom needs per-edge color updates.
-     * @returns {boolean} True if bloom is enabled but has no fixed color.
+     * Initializes or resizes the bloom canvas to match the main canvas.
+     * @private
      */
-    needsPerEdgeBloomColor() {
-        return this._bloom.enabled && !this._bloom.color;
+    _initBloomCanvas() {
+        if (!this._bloomCanvas) {
+            this._bloomCanvas = document.createElement('canvas');
+            this._bloomCtx = this._bloomCanvas.getContext('2d');
+        }
+        if (this._bloomCanvas.width !== this._canvas.width ||
+            this._bloomCanvas.height !== this._canvas.height) {
+            this._bloomCanvas.width = this._canvas.width;
+            this._bloomCanvas.height = this._canvas.height;
+        }
+    }
+
+    /**
+     * Clears the bloom canvas for a new frame.
+     */
+    clearBloomCanvas() {
+        if (!this._bloom.enabled) return;
+        this._initBloomCanvas();
+        this._bloomCtx.clearRect(0, 0, this._bloomCanvas.width, this._bloomCanvas.height);
+    }
+
+    /**
+     * Renders an edge to the bloom canvas.
+     * @param {Vector2} startVector2 - The start position.
+     * @param {Vector2} endVector2 - The end position.
+     * @param {string} color - The stroke color.
+     */
+    renderEdgeToBloom(startVector2, endVector2, color) {
+        const ctx = this._bloomCtx;
+        ctx.strokeStyle = this._bloom.color || color;
+        ctx.beginPath();
+        ctx.moveTo(startVector2.x, startVector2.y);
+        ctx.lineTo(endVector2.x, endVector2.y);
+        ctx.stroke();
+    }
+
+    /**
+     * Renders a gradient edge to the bloom canvas.
+     * @param {Vector2} startVector2 - The start position.
+     * @param {Vector2} endVector2 - The end position.
+     * @param {string} startColor - The color at the start.
+     * @param {string} endColor - The color at the end.
+     */
+    renderEdgeGradientToBloom(startVector2, endVector2, startColor, endColor) {
+        const ctx = this._bloomCtx;
+        if (this._bloom.color) {
+            ctx.strokeStyle = this._bloom.color;
+        } else {
+            const gradient = ctx.createLinearGradient(
+                startVector2.x, startVector2.y,
+                endVector2.x, endVector2.y
+            );
+            gradient.addColorStop(0, startColor);
+            gradient.addColorStop(1, endColor);
+            ctx.strokeStyle = gradient;
+        }
+        ctx.beginPath();
+        ctx.moveTo(startVector2.x, startVector2.y);
+        ctx.lineTo(endVector2.x, endVector2.y);
+        ctx.stroke();
+    }
+
+    /**
+     * Applies blur to bloom canvas and composites onto main canvas.
+     */
+    compositeBloom() {
+        if (!this._bloom.enabled || !this._bloomCanvas) return;
+
+        // Apply blur filter and draw to main canvas with additive blending
+        this._ctx.save();
+        this._ctx.filter = `blur(${this._bloom.blur}px)`;
+        this._ctx.globalCompositeOperation = 'lighter';
+        this._ctx.drawImage(this._bloomCanvas, 0, 0);
+        this._ctx.restore();
     }
 
     /**
@@ -159,7 +190,7 @@ export class Renderer {
     setScreenSize(newScreenSize) {
         this._canvas.width = newScreenSize.x;
         this._canvas.height = newScreenSize.y;
-        this._ctx.scale(newScreenSize.x / this._canvas.width, newScreenSize.y / this._canvas.height);
+        // Bloom canvas will be resized on next clearBloomCanvas call
     }
 
     /**
@@ -221,7 +252,7 @@ export class Renderer {
         );
         gradient.addColorStop(0, startColor);
         gradient.addColorStop(1, endColor);
-        
+
         this._ctx.strokeStyle = gradient;
         this._ctx.beginPath();
         this._ctx.moveTo(startVector2.x, startVector2.y);

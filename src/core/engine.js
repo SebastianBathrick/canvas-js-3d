@@ -147,10 +147,11 @@ export class Engine {
             allFaces.sort(ProjectedFace.compareByDepth);
         }
 
-        // Begin bloom once per frame (sets blur, offsets, and fixed color if set)
-        this.renderer.beginBloom();
+        // Clear bloom canvas at start of frame
         const bloomEnabled = this.renderer.isBloomEnabled();
-        const needsPerEdgeBloom = this.renderer.needsPerEdgeBloomColor();
+        if (bloomEnabled) {
+            this.renderer.clearBloomCanvas();
+        }
 
         // Render each face
         for (const face of allFaces) {
@@ -178,19 +179,11 @@ export class Engine {
             }
 
             // Fill face to occlude faces behind (depth sorting) or render face color
-            // Pause bloom for face fills to prevent glow on fills
             if (this._depthSorting) {
-                if (bloomEnabled) this.renderer.pauseBloom();
                 this.renderer.fillFace(positions, fillColor || this.renderer.getBgColor());
-                if (bloomEnabled) this.renderer.resumeBloom();
             }
 
-            // Update bloom color per-edge if no fixed color is set
-            if (needsPerEdgeBloom) {
-                this.renderer.setBloomColor(edgeColor);
-            }
-
-            // Draw edges
+            // Draw edges to main canvas
             for (let i = 0; i < positions.length; i++) {
                 const startPos = positions[i];
                 const endPos = positions[(i + 1) % positions.length];
@@ -200,11 +193,22 @@ export class Engine {
                 } else {
                     this.renderer.renderEdgeWithColor(startPos, endPos, edgeColor);
                 }
+
+                // Also draw to bloom canvas if enabled
+                if (bloomEnabled) {
+                    if (gradientEndColor) {
+                        this.renderer.renderEdgeGradientToBloom(startPos, endPos, edgeColor, gradientEndColor);
+                    } else {
+                        this.renderer.renderEdgeToBloom(startPos, endPos, edgeColor);
+                    }
+                }
             }
         }
 
-        // End bloom once per frame
-        this.renderer.endBloom();
+        // Composite bloom at end of frame
+        if (bloomEnabled) {
+            this.renderer.compositeBloom();
+        }
     }
 
     /**
