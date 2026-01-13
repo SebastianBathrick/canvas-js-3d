@@ -77,6 +77,42 @@ export class Renderer {
     }
 
     /**
+     * Renders a line between two screen positions with a specific color.
+     * @param {Vector2} startVector2 - The start position in screen coordinates.
+     * @param {Vector2} endVector2 - The end position in screen coordinates.
+     * @param {string} color - The stroke color (hex string or CSS color).
+     */
+    renderEdgeWithColor(startVector2, endVector2, color) {
+        this._ctx.strokeStyle = color;
+        this._ctx.beginPath();
+        this._ctx.moveTo(startVector2.x, startVector2.y);
+        this._ctx.lineTo(endVector2.x, endVector2.y);
+        this._ctx.stroke();
+    }
+
+    /**
+     * Renders a line between two screen positions with a linear gradient.
+     * @param {Vector2} startVector2 - The start position in screen coordinates.
+     * @param {Vector2} endVector2 - The end position in screen coordinates.
+     * @param {string} startColor - The color at the start of the edge.
+     * @param {string} endColor - The color at the end of the edge.
+     */
+    renderEdgeGradient(startVector2, endVector2, startColor, endColor) {
+        const gradient = this._ctx.createLinearGradient(
+            startVector2.x, startVector2.y,
+            endVector2.x, endVector2.y
+        );
+        gradient.addColorStop(0, startColor);
+        gradient.addColorStop(1, endColor);
+        
+        this._ctx.strokeStyle = gradient;
+        this._ctx.beginPath();
+        this._ctx.moveTo(startVector2.x, startVector2.y);
+        this._ctx.lineTo(endVector2.x, endVector2.y);
+        this._ctx.stroke();
+    }
+
+    /**
      * Renders a point as a square at the given screen position.
      * @param {Vector2} vector2 - The position in screen coordinates.
      */

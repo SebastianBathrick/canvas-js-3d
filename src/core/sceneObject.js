@@ -6,10 +6,16 @@ export class SceneObject {
      * Creates a new SceneObject.
      * @param {Mesh} mesh - The mesh geometry.
      * @param {Transform} transform - The position, rotation, and scale.
+     * @param {string|null} color - Primary edge color (hex string, e.g., '#ff00ff').
+     * @param {string|null} gradientColor - End color for gradient edges (hex string).
      */
-    constructor(mesh, transform) {
+    constructor(mesh, transform, color = null, gradientColor = null) {
         this.mesh = mesh;
         this.transform = transform;
+        /** @type {string|null} Primary edge color */
+        this.color = color;
+        /** @type {string|null} End color for gradient edges */
+        this.gradientColor = gradientColor;
     }
 
     /**
