@@ -93,7 +93,7 @@ async function addModel() {
 
     const sceneObject = new SceneObject(
         mesh,
-        new Transform(position, Vector3.zero, scale)
+        new Transform(position, Vector3.zero(), scale)
     );
 
     engine.scene.addSceneObject(sceneObject);
@@ -235,7 +235,7 @@ engine.onUpdate = (deltaTime) => {
 
 // Load initial monkey and start engine
 loadMesh('./meshes/monkey.obj').then(mesh => {
-    const monkey = new SceneObject(mesh, new Transform(positionOffset, Vector3.zero, scale));
+    const monkey = new SceneObject(mesh, new Transform(positionOffset, Vector3.zero(), scale));
     engine.scene.addSceneObject(monkey);
     models.push(monkey);
     updateModelCount();
