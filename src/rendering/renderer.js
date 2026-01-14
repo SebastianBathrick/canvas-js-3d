@@ -5,20 +5,20 @@ export class Renderer {
     /**
      * Creates a new Renderer.
      * @param {HTMLCanvasElement} canvas - The canvas element to render to.
-     * @param {string} fgColor - The foreground/stroke color (e.g., 'green', '#00ff00').
-     * @param {string} bgColor - The background/clear color (e.g., 'black', '#000000').
+     * @param {string} foregroundColor - The foreground/stroke color (e.g., 'green', '#00ff00').
+     * @param {string} backgroundColor - The background/clear color (e.g., 'black', '#000000').
      */
-    constructor(canvas, fgColor, bgColor) {
+    constructor(canvas, foregroundColor, backgroundColor) {
         /** @type {HTMLCanvasElement} */
         this._canvas = canvas;
         /** @type {CanvasRenderingContext2D} */
         this._ctx = canvas.getContext('2d');
         /** @type {string} */
-        this._fgColor = fgColor;
+        this._foregroundColor = foregroundColor;
         /** @type {string} */
-        this._bgColor = bgColor;
+        this._backgroundColor = backgroundColor;
         /** @type {string|null} */
-        this._bgGradientColor = null;
+        this._backgroundGradientColor = null;
         /** @type {number} */
         this._pointSize = 20;
         /** @type {{enabled: boolean, blur: number, color: string|null}} */
@@ -33,8 +33,8 @@ export class Renderer {
      * Gets the background color.
      * @returns {string} The background color.
      */
-    getBgColor() {
-        return this._bgColor;
+    getBackgroundColor() {
+        return this._backgroundColor;
     }
 
     /**
@@ -42,7 +42,7 @@ export class Renderer {
      * @param {string} color - The new background color (hex string or CSS color).
      */
     setBgColor(color) {
-        this._bgColor = color;
+        this._backgroundColor = color;
     }
 
     /**
@@ -202,11 +202,11 @@ export class Renderer {
                 0, 0,
                 0, this._canvas.height
             );
-            gradient.addColorStop(0, this._bgColor);
+            gradient.addColorStop(0, this._backgroundColor);
             gradient.addColorStop(1, this._bgGradientColor);
             this._ctx.fillStyle = gradient;
         } else {
-            this._ctx.fillStyle = this._bgColor;
+            this._ctx.fillStyle = this._backgroundColor;
         }
         this._ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
     }
