@@ -11,9 +11,7 @@ export class SceneObject {
      * Creates a new SceneObject.
      * @param {Mesh} mesh - The mesh geometry.
      * @param {Transform} transform - The position, rotation, and scale.
-     * @param {string|null} color - Primary edge color (hex string, e.g., '#ff00ff').
-     * @param {string|null} gradientColor - End color for gradient edges (hex string).
-     * @param {string|null} faceColor - Fill color for faces (hex string). Only visible with depth sorting.
+     * @param {Material|null} material - The material to be applied to the mesh when rendering.
      */
     constructor(mesh, transform, material) {
         /** @type {Mesh} @private */

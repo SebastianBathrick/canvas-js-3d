@@ -122,13 +122,4 @@ export class Material {
     resetFaceColor() {
         this._faceColor = this.#originalFaceColor;
     }
-
-    /**
-     * Resets all colors (edge, gradient, and face) to their original values from construction.
-     */
-    resetAllColors() {
-        this.resetEdgeColor();
-        this.resetEdgeGradientColor();
-        this.resetFaceColor();
-    }
 }
