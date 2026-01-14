@@ -11,9 +11,60 @@ export class Transform {
      * @param {Vector3} scale - The scale factors for each axis.
      */
     constructor(position, rotation, scale) {
-        this.position = position;
-        this.rotation = rotation;
-        this.scale = scale;
+        /** @type {Vector3} @private */
+        this._position = position;
+        /** @type {Vector3} @private */
+        this._rotation = rotation;
+        /** @type {Vector3} @private */
+        this._scale = scale;
+    }
+
+    /**
+     * Gets the position.
+     * @returns {Vector3} The position in 3D space.
+     */
+    get position() {
+        return this._position;
+    }
+
+    /**
+     * Gets the rotation.
+     * @returns {Vector3} The rotation angles in radians.
+     */
+    get rotation() {
+        return this._rotation;
+    }
+
+    /**
+     * Gets the scale.
+     * @returns {Vector3} The scale factors for each axis.
+     */
+    get scale() {
+        return this._scale;
+    }
+
+    /**
+     * Sets the position.
+     * @param {Vector3} value - The new position in 3D space.
+     */
+    setPosition(value) {
+        this._position = value;
+    }
+
+    /**
+     * Sets the rotation.
+     * @param {Vector3} value - The new rotation angles in radians.
+     */
+    setRotation(value) {
+        this._rotation = value;
+    }
+
+    /**
+     * Sets the scale.
+     * @param {Vector3} value - The new scale factors for each axis.
+     */
+    setScale(value) {
+        this._scale = value;
     }
 
     /**
@@ -21,15 +72,15 @@ export class Transform {
      * @param {Vector3} movement - The translation to apply.
      */
     move(movement) {
-        this.position = this.position.getTranslated(movement);
+        this._position = this._position.getTranslated(movement);
     }
 
     /**
      * Rotates around the X axis by the given angle.
-     * @param {number} angle - The angle to rotate by inas radians.
+     * @param {number} angle - The angle to rotate by in radians.
      */
     rotateX(angle) {
-        this.rotation = this.rotation.getTranslated(new Vector3(angle, 0, 0));
+        this._rotation = this._rotation.getTranslated(new Vector3(angle, 0, 0));
     }
 
     /**
@@ -37,7 +88,7 @@ export class Transform {
      * @param {number} angle - The angle to rotate by in radians.
      */
     rotateY(angle) {
-        this.rotation = this.rotation.getTranslated(new Vector3(0, angle, 0));
+        this._rotation = this._rotation.getTranslated(new Vector3(0, angle, 0));
     }
 
     /**
@@ -45,7 +96,7 @@ export class Transform {
      * @param {number} angle - The angle to rotate by in radians.
      */
     rotateZ(angle) {
-        this.rotation = this.rotation.getTranslated(new Vector3(0, 0, angle));
+        this._rotation = this._rotation.getTranslated(new Vector3(0, 0, angle));
     }
 
     /**
@@ -53,7 +104,7 @@ export class Transform {
      * @param {number} scalar - The scalar to multiply by.
      */
     scaleBy(scalar) {
-        this.scale = this.scale.getScaled(scalar);
+        this._scale = this._scale.getScaled(scalar);
     }
 
     /**
@@ -61,7 +112,7 @@ export class Transform {
      * @param {number} scalar - The scalar to multiply by.
      */
     scaleX(scalar) {
-        this.scale = new Vector3(this.scale.x * scalar, this.scale.y, this.scale.z);
+        this._scale = new Vector3(this._scale.x * scalar, this._scale.y, this._scale.z);
     }
 
     /**
@@ -69,7 +120,7 @@ export class Transform {
      * @param {number} scalar - The scalar to multiply by.
      */
     scaleY(scalar) {
-        this.scale = new Vector3(this.scale.x, this.scale.y * scalar, this.scale.z);
+        this._scale = new Vector3(this._scale.x, this._scale.y * scalar, this._scale.z);
     }
 
     /**
@@ -77,6 +128,6 @@ export class Transform {
      * @param {number} scalar - The scalar to multiply by.
      */
     scaleZ(scalar) {
-        this.scale = new Vector3(this.scale.x, this.scale.y, this.scale.z * scalar);
+        this._scale = new Vector3(this._scale.x, this._scale.y, this._scale.z * scalar);
     }
 }

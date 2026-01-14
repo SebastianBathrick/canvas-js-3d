@@ -1,6 +1,6 @@
 /**
  * A 3D vector class for positions and directions in 3D space.
- * Methods return new instances (immutable style).
+ * Completely immutable - all methods return new instances.
  */
 export class Vector3 {
     /**
@@ -10,9 +10,36 @@ export class Vector3 {
      * @param {number} z - The z component.
      */
     constructor(x, y, z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        /** @type {number} @private */
+        this._x = x;
+        /** @type {number} @private */
+        this._y = y;
+        /** @type {number} @private */
+        this._z = z;
+    }
+
+    /**
+     * Gets the x component.
+     * @returns {number} The x component.
+     */
+    get x() {
+        return this._x;
+    }
+
+    /**
+     * Gets the y component.
+     * @returns {number} The y component.
+     */
+    get y() {
+        return this._y;
+    }
+
+    /**
+     * Gets the z component.
+     * @returns {number} The z component.
+     */
+    get z() {
+        return this._z;
     }
 
     /**
@@ -69,7 +96,7 @@ export class Vector3 {
      * @returns {Vector3} A new translated vector.
      */
     getTranslated(dir) {
-        return new Vector3(this.x + dir.x, this.y + dir.y, this.z + dir.z);
+        return new Vector3(this._x + dir._x, this._y + dir._y, this._z + dir._z);
     }
 
     /**
@@ -82,9 +109,9 @@ export class Vector3 {
         const sin = Math.sin(angle);
 
         return new Vector3(
-            this.x,
-            this.y * cos - this.z * sin,
-            this.y * sin + this.z * cos
+            this._x,
+            this._y * cos - this._z * sin,
+            this._y * sin + this._z * cos
         );
     }
 
@@ -98,9 +125,9 @@ export class Vector3 {
         const sin = Math.sin(angle);
 
         return new Vector3(
-            this.x * cos - this.z * sin,
-            this.y,
-            this.x * sin + this.z * cos
+            this._x * cos - this._z * sin,
+            this._y,
+            this._x * sin + this._z * cos
         );
     }
 
@@ -114,9 +141,9 @@ export class Vector3 {
         const sin = Math.sin(angle);
 
         return new Vector3(
-            this.x * cos - this.y * sin,
-            this.x * sin + this.y * cos,
-            this.z
+            this._x * cos - this._y * sin,
+            this._x * sin + this._y * cos,
+            this._z
         );
     }
 
@@ -126,7 +153,7 @@ export class Vector3 {
      * @returns {Vector3} A new scaled vector.
      */
     getScaled(scalar) {
-        return new Vector3(this.x * scalar, this.y * scalar, this.z * scalar);
+        return new Vector3(this._x * scalar, this._y * scalar, this._z * scalar);
     }
 
     /**
@@ -135,7 +162,7 @@ export class Vector3 {
      * @returns {Vector3} A new scaled vector.
      */
     getScaledByVector(scale) {
-        return new Vector3(this.x * scale.x, this.y * scale.y, this.z * scale.z);
+        return new Vector3(this._x * scale._x, this._y * scale._y, this._z * scale._z);
     }
 
     /**
@@ -143,7 +170,7 @@ export class Vector3 {
      * @returns {boolean} True if the vector is zero.
      */
     isZero() {
-        return this.x === 0 && this.y === 0 && this.z === 0;
+        return this._x === 0 && this._y === 0 && this._z === 0;
     }
 
     /**
@@ -151,11 +178,11 @@ export class Vector3 {
      * @returns {Vector3} A new normalized vector, or zero vector if magnitude is 0.
      */
     getNormalized() {
-        const mag = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+        const mag = Math.sqrt(this._x * this._x + this._y * this._y + this._z * this._z);
 
         if (mag === 0) return Vector3.zero();
 
-        return new Vector3(this.x / mag, this.y / mag, this.z / mag);
+        return new Vector3(this._x / mag, this._y / mag, this._z / mag);
     }
 
     /**
@@ -163,7 +190,7 @@ export class Vector3 {
      * @returns {number} The magnitude.
      */
     getMagnitude() {
-        return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+        return Math.sqrt(this._x * this._x + this._y * this._y + this._z * this._z);
     }
 
     /**
@@ -172,7 +199,7 @@ export class Vector3 {
      * @returns {number} The dot product.
      */
     getDot(other) {
-        return this.x * other.x + this.y * other.y + this.z * other.z;
+        return this._x * other._x + this._y * other._y + this._z * other._z;
     }
 
     /**
@@ -182,9 +209,9 @@ export class Vector3 {
      */
     getCross(other) {
         return new Vector3(
-            this.y * other.z - this.z * other.y,
-            this.z * other.x - this.x * other.z,
-            this.x * other.y - this.y * other.x
+            this._y * other._z - this._z * other._y,
+            this._z * other._x - this._x * other._z,
+            this._x * other._y - this._y * other._x
         );
     }
 
@@ -194,6 +221,6 @@ export class Vector3 {
      * @returns {Vector3} A new vector.
      */
     getDifference(other) {
-        return new Vector3(this.x - other.x, this.y - other.y, this.z - other.z);
+        return new Vector3(this._x - other._x, this._y - other._y, this._z - other._z);
     }
 }
