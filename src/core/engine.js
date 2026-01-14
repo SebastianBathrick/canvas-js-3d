@@ -115,7 +115,7 @@ export class Engine {
     }
 
     /** @private */
-    frameUpdate() {
+    _frameUpdate() {
         if (!this._running)
             return;
 
@@ -127,13 +127,13 @@ export class Engine {
             this.onUpdate(deltaTime);
 
         this.renderer.clear();
-        this.renderAllObjects();
+        this._renderAllObjects();
 
-        requestAnimationFrame(() => this.frameUpdate());
+        requestAnimationFrame(() => this._frameUpdate());
     }
 
     /** @private */
-    renderAllObjects() {
+    _renderAllObjects() {
         // Collect all projected faces from all objects
         const allFaces = [];
 
@@ -180,7 +180,7 @@ export class Engine {
 
             // Fill face to occlude faces behind (depth sorting) or render face color
             if (this._depthSorting) {
-                this.renderer.fillFace(positions, fillColor || this.renderer.getBgColor());
+                this.renderer.fillFace(positions, fillColor || this.renderer.getBackgroundColor());
             }
 
             // Draw edges to main canvas
@@ -216,7 +216,7 @@ export class Engine {
      */
     start() {
         this._running = true;
-        this.frameUpdate();
+        this._frameUpdate();
     }
 
     /**

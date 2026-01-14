@@ -23,9 +23,9 @@ export class WavefrontLexer {
      * @returns {Array<{type: string, value: *}>} Array of token objects.
      */
     lexTokens() {
-        while (!this.isAtEnd()) {
+        while (!this._isAtEnd()) {
             this._start = this._current;
-            this.lexToken();
+            this._lexToken();
         }
 
         this._tokens.push({ type: 'EOF', value: null });
@@ -33,8 +33,8 @@ export class WavefrontLexer {
     }
 
     /** @private */
-    lexToken() {
-        const c = this.advance();
+    _lexToken() {
+        const c = this._advance();
 
         // Skip whitespace (except newlines)
         if (c === ' ' || c === '\t' || c === '\r')
@@ -48,8 +48,8 @@ export class WavefrontLexer {
 
         // Comment - skip to end of line
         if (c === '#') {
-            while (this.peek() !== '\n' && !this.isAtEnd())
-                this.advance();
+            while (this._peek() !== '\n' && !this._isAtEnd())
+                this._advance();
             return;
         }
 
@@ -60,41 +60,41 @@ export class WavefrontLexer {
         }
 
         // Number (including negative)
-        if (this.isDigit(c) || (c === '-' && this.isDigit(this.peek()))) {
-            this.lexNumber();
+        if (this._isDigit(c) || (c === '-' && this._isDigit(this._peek()))) {
+            this._lexNumber();
             return;
         }
 
         // Keyword/identifier
-        if (this.isAlpha(c)) {
-            this.lexKeyword();
+        if (this._isAlpha(c)) {
+            this._lexKeyword();
             return;
         }
     }
 
     /** @private */
-    lexNumber() {
+    _lexNumber() {
         // Consume digits before decimal
-        while (this.isDigit(this.peek()))
-            this.advance();
+        while (this._isDigit(this._peek()))
+            this._advance();
 
         // Look for decimal part
-        if (this.peek() === '.' && this.isDigit(this.peekNext())) {
-            this.advance(); // consume '.'
+        if (this._peek() === '.' && this._isDigit(this._peekNext())) {
+            this._advance(); // consume '.'
 
-            while (this.isDigit(this.peek()))
-                this.advance();
+            while (this._isDigit(this._peek()))
+                this._advance();
         }
 
         // Handle scientific notation (e.g., 1.5e-10)
-        if (this.peek() === 'e' || this.peek() === 'E') {
-            this.advance(); // consume 'e'
+        if (this._peek() === 'e' || this._peek() === 'E') {
+            this._advance(); // consume 'e'
 
-            if (this.peek() === '+' || this.peek() === '-')
-                this.advance(); // consume sign
+            if (this._peek() === '+' || this._peek() === '-')
+                this._advance(); // consume sign
 
-            while (this.isDigit(this.peek()))
-                this.advance();
+            while (this._isDigit(this._peek()))
+                this._advance();
         }
 
         const value = parseFloat(this._source.substring(this._start, this._current));
@@ -102,29 +102,29 @@ export class WavefrontLexer {
     }
 
     /** @private */
-    lexKeyword() {
-        while (this.isAlphaNumeric(this.peek()))
-            this.advance();
+    _lexKeyword() {
+        while (this._isAlphaNumeric(this._peek()))
+            this._advance();
 
         const value = this._source.substring(this._start, this._current);
         this._tokens.push({ type: 'KEYWORD', value: value });
     }
 
     /** @private */
-    advance() {
+    _advance() {
         return this._source.charAt(this._current++);
     }
 
     /** @private */
-    peek() {
-        if (this.isAtEnd())
+    _peek() {
+        if (this._isAtEnd())
             return '\0';
 
         return this._source.charAt(this._current);
     }
 
     /** @private */
-    peekNext() {
+    _peekNext() {
         if (this._current + 1 >= this._source.length)
             return '\0';
 
@@ -132,22 +132,22 @@ export class WavefrontLexer {
     }
 
     /** @private */
-    isAtEnd() {
+    _isAtEnd() {
         return this._current >= this._source.length;
     }
 
     /** @private */
-    isDigit(c) {
+    _isDigit(c) {
         return c >= '0' && c <= '9';
     }
 
     /** @private */
-    isAlpha(c) {
+    _isAlpha(c) {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_';
     }
 
     /** @private */
-    isAlphaNumeric(c) {
-        return this.isAlpha(c) || this.isDigit(c);
+    _isAlphaNumeric(c) {
+        return this._isAlpha(c) || this._isDigit(c);
     }
 }

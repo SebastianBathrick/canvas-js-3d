@@ -77,7 +77,7 @@ export class Camera {
             
             // Back-face culling: skip faces pointing away from camera
             if (this._backFaceCulling && faceVerts.length >= 3) {
-                if (this.isBackFacing(faceVerts)) {
+                if (this._isBackFacing(faceVerts)) {
                     continue;
                 }
             }
@@ -88,10 +88,10 @@ export class Camera {
             let isValid = true;
             
             for (const vert of faceVerts) {
-                const cameraSpacePos = this.worldToCameraSpace(vert);
+                const cameraSpacePos = this._worldToCameraSpace(vert);
                 depthSum += cameraSpacePos.z;
 
-                const normScreenPos = this.getNormalizedScreenPosition(cameraSpacePos);
+                const normScreenPos = this._getNormalizedScreenPosition(cameraSpacePos);
                 if (normScreenPos === null) 
                 {
                     isValid = false;
@@ -99,7 +99,7 @@ export class Camera {
                 }
 
                 screenPositions.push(
-                    this.getScaledScreenPosition(normScreenPos)
+                    this._getScaledScreenPosition(normScreenPos)
                 );
             }
 
@@ -120,11 +120,11 @@ export class Camera {
     }
 
     /** @private */
-    isBackFacing(faceVerts) {
+    _isBackFacing(faceVerts) {
         // Transform vertices to camera space
-        const v0 = this.worldToCameraSpace(faceVerts[0]);
-        const v1 = this.worldToCameraSpace(faceVerts[1]);
-        const v2 = this.worldToCameraSpace(faceVerts[2]);
+        const v0 = this._worldToCameraSpace(faceVerts[0]);
+        const v1 = this._worldToCameraSpace(faceVerts[1]);
+        const v2 = this._worldToCameraSpace(faceVerts[2]);
         
         // Compute face normal using cross product of two edges
         const edge1 = v1.getSubtracted(v0);
@@ -137,7 +137,7 @@ export class Camera {
     }
 
     /** @private */
-    getScaledScreenPosition(normScreenPos) {
+    _getScaledScreenPosition(normScreenPos) {
         /* Currently (0, 0) is the top left corner of the canvas
 
         * Convert from normalized coordinates to respective screen coordinates based on the canvas size:
@@ -153,7 +153,7 @@ export class Camera {
     }
 
     /** @private */
-    getNormalizedScreenPosition(scenePos) {
+    _getNormalizedScreenPosition(scenePos) {
         /* 
         * If > 0 the point is in front of the camera, if <= 0 the point is not visible, because the divisor 
         * would be zero. Thus it is in the same 3D position as the camera. As z increases the 3D point moves 
@@ -169,7 +169,7 @@ export class Camera {
     }
 
     /** @private */
-    worldToCameraSpace(worldPos) {
+    _worldToCameraSpace(worldPos) {
         // First translate by negative camera position
         const translated = worldPos.getTranslated(
             this.transform.position.getScaled(-1)
@@ -180,22 +180,5 @@ export class Camera {
             .getRotatedZ(-this.transform.rotation.z)
             .getRotatedY(-this.transform.rotation.y)
             .getRotatedX(-this.transform.rotation.x);
-    }
-
-    /** @private */
-    getVertexScreenPos(scenePos) {
-        const cameraSpacePos = this.worldToCameraSpace(scenePos);
-        const normScreenPos = this.getNormalizedScreenPosition(cameraSpacePos);
-
-        if (normScreenPos === null) 
-            return null;
-
-        return this.getScaledScreenPosition(normScreenPos);
-    }
-
-
-    /** @private */
-    getScreenPositions(vertices) {
-        return vertices.map(v => this.getVertexScreenPos(v));
     }
 }

@@ -103,10 +103,7 @@ export class Renderer {
         return this._bloom.enabled;
     }
 
-    /**
-     * Initializes or resizes the bloom canvas to match the main canvas.
-     * @private
-     */
+    /** @private */
     _initBloomCanvas() {
         if (!this._bloomCanvas) {
             this._bloomCanvas = document.createElement('canvas');
