@@ -17,8 +17,16 @@ export class Renderer {
         this._fgColor = fgColor;
         /** @type {string} */
         this._bgColor = bgColor;
+        /** @type {string|null} */
+        this._bgGradientColor = null;
         /** @type {number} */
         this._pointSize = 20;
+        /** @type {{enabled: boolean, blur: number, color: string|null}} */
+        this._bloom = { enabled: false, blur: 15, color: null };
+        /** @type {HTMLCanvasElement|null} */
+        this._bloomCanvas = null;
+        /** @type {CanvasRenderingContext2D|null} */
+        this._bloomCtx = null;
     }
 
     /**
@@ -27,6 +35,30 @@ export class Renderer {
      */
     getBgColor() {
         return this._bgColor;
+    }
+
+    /**
+     * Sets the background color.
+     * @param {string} color - The new background color (hex string or CSS color).
+     */
+    setBgColor(color) {
+        this._bgColor = color;
+    }
+
+    /**
+     * Gets the background gradient end color.
+     * @returns {string|null} The gradient end color, or null if no gradient.
+     */
+    getBgGradientColor() {
+        return this._bgGradientColor;
+    }
+
+    /**
+     * Sets the background gradient end color. Set to null to disable gradient.
+     * @param {string|null} color - The gradient end color, or null to disable.
+     */
+    setBgGradientColor(color) {
+        this._bgGradientColor = color;
     }
 
     /**
@@ -46,20 +78,136 @@ export class Renderer {
     }
 
     /**
+     * Configures global bloom effect.
+     * @param {{enabled?: boolean, blur?: number, color?: string|null}} options - Bloom settings.
+     */
+    setBloom(options) {
+        if (options.enabled !== undefined) this._bloom.enabled = options.enabled;
+        if (options.blur !== undefined) this._bloom.blur = options.blur;
+        if (options.color !== undefined) this._bloom.color = options.color;
+    }
+
+    /**
+     * Gets the current bloom configuration.
+     * @returns {{enabled: boolean, blur: number, color: string|null}} Bloom settings.
+     */
+    getBloom() {
+        return { ...this._bloom };
+    }
+
+    /**
+     * Checks if bloom is currently enabled.
+     * @returns {boolean} True if bloom is enabled.
+     */
+    isBloomEnabled() {
+        return this._bloom.enabled;
+    }
+
+    /**
+     * Initializes or resizes the bloom canvas to match the main canvas.
+     * @private
+     */
+    _initBloomCanvas() {
+        if (!this._bloomCanvas) {
+            this._bloomCanvas = document.createElement('canvas');
+            this._bloomCtx = this._bloomCanvas.getContext('2d');
+        }
+        if (this._bloomCanvas.width !== this._canvas.width ||
+            this._bloomCanvas.height !== this._canvas.height) {
+            this._bloomCanvas.width = this._canvas.width;
+            this._bloomCanvas.height = this._canvas.height;
+        }
+    }
+
+    /**
+     * Clears the bloom canvas for a new frame.
+     */
+    clearBloomCanvas() {
+        if (!this._bloom.enabled) return;
+        this._initBloomCanvas();
+        this._bloomCtx.clearRect(0, 0, this._bloomCanvas.width, this._bloomCanvas.height);
+    }
+
+    /**
+     * Renders an edge to the bloom canvas.
+     * @param {Vector2} startVector2 - The start position.
+     * @param {Vector2} endVector2 - The end position.
+     * @param {string} color - The stroke color.
+     */
+    renderEdgeToBloom(startVector2, endVector2, color) {
+        const ctx = this._bloomCtx;
+        ctx.strokeStyle = this._bloom.color || color;
+        ctx.beginPath();
+        ctx.moveTo(startVector2.x, startVector2.y);
+        ctx.lineTo(endVector2.x, endVector2.y);
+        ctx.stroke();
+    }
+
+    /**
+     * Renders a gradient edge to the bloom canvas.
+     * @param {Vector2} startVector2 - The start position.
+     * @param {Vector2} endVector2 - The end position.
+     * @param {string} startColor - The color at the start.
+     * @param {string} endColor - The color at the end.
+     */
+    renderEdgeGradientToBloom(startVector2, endVector2, startColor, endColor) {
+        const ctx = this._bloomCtx;
+        if (this._bloom.color) {
+            ctx.strokeStyle = this._bloom.color;
+        } else {
+            const gradient = ctx.createLinearGradient(
+                startVector2.x, startVector2.y,
+                endVector2.x, endVector2.y
+            );
+            gradient.addColorStop(0, startColor);
+            gradient.addColorStop(1, endColor);
+            ctx.strokeStyle = gradient;
+        }
+        ctx.beginPath();
+        ctx.moveTo(startVector2.x, startVector2.y);
+        ctx.lineTo(endVector2.x, endVector2.y);
+        ctx.stroke();
+    }
+
+    /**
+     * Applies blur to bloom canvas and composites onto main canvas.
+     */
+    compositeBloom() {
+        if (!this._bloom.enabled || !this._bloomCanvas) return;
+
+        // Apply blur filter and draw to main canvas with additive blending
+        this._ctx.save();
+        this._ctx.filter = `blur(${this._bloom.blur}px)`;
+        this._ctx.globalCompositeOperation = 'lighter';
+        this._ctx.drawImage(this._bloomCanvas, 0, 0);
+        this._ctx.restore();
+    }
+
+    /**
      * Sets the screen size.
      * @param {Vector2} newScreenSize - The new screen size.
      */
     setScreenSize(newScreenSize) {
         this._canvas.width = newScreenSize.x;
         this._canvas.height = newScreenSize.y;
-        this._ctx.scale(newScreenSize.x / this._canvas.width, newScreenSize.y / this._canvas.height);
+        // Bloom canvas will be resized on next clearBloomCanvas call
     }
 
     /**
-     * Clears the canvas with the background color.
+     * Clears the canvas with the background color or gradient.
      */
     clear() {
-        this._ctx.fillStyle = this._bgColor;
+        if (this._bgGradientColor) {
+            const gradient = this._ctx.createLinearGradient(
+                0, 0,
+                0, this._canvas.height
+            );
+            gradient.addColorStop(0, this._bgColor);
+            gradient.addColorStop(1, this._bgGradientColor);
+            this._ctx.fillStyle = gradient;
+        } else {
+            this._ctx.fillStyle = this._bgColor;
+        }
         this._ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
     }
 
@@ -70,6 +218,42 @@ export class Renderer {
      */
     renderEdge(startVector2, endVector2) {
         this._ctx.strokeStyle = this._fgColor;
+        this._ctx.beginPath();
+        this._ctx.moveTo(startVector2.x, startVector2.y);
+        this._ctx.lineTo(endVector2.x, endVector2.y);
+        this._ctx.stroke();
+    }
+
+    /**
+     * Renders a line between two screen positions with a specific color.
+     * @param {Vector2} startVector2 - The start position in screen coordinates.
+     * @param {Vector2} endVector2 - The end position in screen coordinates.
+     * @param {string} color - The stroke color (hex string or CSS color).
+     */
+    renderEdgeWithColor(startVector2, endVector2, color) {
+        this._ctx.strokeStyle = color;
+        this._ctx.beginPath();
+        this._ctx.moveTo(startVector2.x, startVector2.y);
+        this._ctx.lineTo(endVector2.x, endVector2.y);
+        this._ctx.stroke();
+    }
+
+    /**
+     * Renders a line between two screen positions with a linear gradient.
+     * @param {Vector2} startVector2 - The start position in screen coordinates.
+     * @param {Vector2} endVector2 - The end position in screen coordinates.
+     * @param {string} startColor - The color at the start of the edge.
+     * @param {string} endColor - The color at the end of the edge.
+     */
+    renderEdgeGradient(startVector2, endVector2, startColor, endColor) {
+        const gradient = this._ctx.createLinearGradient(
+            startVector2.x, startVector2.y,
+            endVector2.x, endVector2.y
+        );
+        gradient.addColorStop(0, startColor);
+        gradient.addColorStop(1, endColor);
+
+        this._ctx.strokeStyle = gradient;
         this._ctx.beginPath();
         this._ctx.moveTo(startVector2.x, startVector2.y);
         this._ctx.lineTo(endVector2.x, endVector2.y);

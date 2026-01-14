@@ -1,6 +1,7 @@
 import { Renderer } from '../rendering/renderer.js';
 import { Camera } from '../rendering/camera.js';
 import { ProjectedFace } from '../rendering/projected-face.js';
+import { ColorUtils } from '../rendering/color-utils.js';
 import { Vector2 } from '../math/vector2.js';
 import { Scene } from './scene.js';
 
@@ -32,6 +33,18 @@ export class Engine {
          * @type {((deltaTime: number) => void)|null}
          */
         this.onUpdate = null;
+        /** @type {string} Default foreground color for edges */
+        this._fgColor = fgColor;
+        /** 
+         * Depth fog configuration.
+         * @type {{enabled: boolean, color: string, near: number, far: number}}
+         */
+        this._depthFog = {
+            enabled: false,
+            color: '#000000',
+            near: 5,
+            far: 50
+        };
     }
 
     /**
@@ -50,6 +63,46 @@ export class Engine {
      */
     toggleDepthSorting(enabled) {
         this._depthSorting = enabled !== undefined ? enabled : !this._depthSorting;
+    }
+
+    /**
+     * Configures depth fog effect.
+     * When enabled, objects fade toward the fog color based on their distance from the camera.
+     * @param {{enabled?: boolean, color?: string, near?: number, far?: number}} options - Fog configuration.
+     */
+    setDepthFog(options) {
+        if (options.enabled !== undefined) this._depthFog.enabled = options.enabled;
+        if (options.color !== undefined) this._depthFog.color = options.color;
+        if (options.near !== undefined) this._depthFog.near = options.near;
+        if (options.far !== undefined) this._depthFog.far = options.far;
+    }
+
+    /**
+     * Gets the current depth fog configuration.
+     * @returns {{enabled: boolean, color: string, near: number, far: number}} The fog settings.
+     */
+    getDepthFog() {
+        return { ...this._depthFog };
+    }
+
+    /**
+     * Configures global bloom effect.
+     * When enabled, edges glow with a soft blur effect.
+     * @param {{enabled?: boolean, blur?: number, color?: string|null}} options - Bloom settings.
+     *   - enabled: Whether bloom is active (default false)
+     *   - blur: Blur radius in pixels (default 15)
+     *   - color: Glow color, or null to use edge color (default null)
+     */
+    setBloom(options) {
+        this.renderer.setBloom(options);
+    }
+
+    /**
+     * Gets the current bloom configuration.
+     * @returns {{enabled: boolean, blur: number, color: string|null}} Bloom settings.
+     */
+    getBloom() {
+        return this.renderer.getBloom();
     }
 
     /**
@@ -94,22 +147,67 @@ export class Engine {
             allFaces.sort(ProjectedFace.compareByDepth);
         }
 
+        // Clear bloom canvas at start of frame
+        const bloomEnabled = this.renderer.isBloomEnabled();
+        if (bloomEnabled) {
+            this.renderer.clearBloomCanvas();
+        }
+
         // Render each face
         for (const face of allFaces) {
             const positions = face.screenPositions;
 
-            // Fill with background to occlude faces behind
-            if (this._depthSorting) {
-                this.renderer.fillFace(positions, this.renderer.getBgColor());
+            // Determine edge color(s)
+            let edgeColor = face.color || this._fgColor;
+            let gradientEndColor = face.gradientColor;
+            let fillColor = face.faceColor;
+
+            // Apply depth fog if enabled
+            if (this._depthFog.enabled) {
+                const fogAmount = ColorUtils.calculateFogAmount(
+                    face.depth,
+                    this._depthFog.near,
+                    this._depthFog.far
+                );
+                edgeColor = ColorUtils.applyFog(edgeColor, this._depthFog.color, fogAmount);
+                if (gradientEndColor) {
+                    gradientEndColor = ColorUtils.applyFog(gradientEndColor, this._depthFog.color, fogAmount);
+                }
+                if (fillColor) {
+                    fillColor = ColorUtils.applyFog(fillColor, this._depthFog.color, fogAmount);
+                }
             }
 
-            // Draw edges
-            for (let i = 0; i < positions.length; i++) {
-                this.renderer.renderEdge(
-                    positions[i],
-                    positions[(i + 1) % positions.length]
-                );
+            // Fill face to occlude faces behind (depth sorting) or render face color
+            if (this._depthSorting) {
+                this.renderer.fillFace(positions, fillColor || this.renderer.getBgColor());
             }
+
+            // Draw edges to main canvas
+            for (let i = 0; i < positions.length; i++) {
+                const startPos = positions[i];
+                const endPos = positions[(i + 1) % positions.length];
+
+                if (gradientEndColor) {
+                    this.renderer.renderEdgeGradient(startPos, endPos, edgeColor, gradientEndColor);
+                } else {
+                    this.renderer.renderEdgeWithColor(startPos, endPos, edgeColor);
+                }
+
+                // Also draw to bloom canvas if enabled
+                if (bloomEnabled) {
+                    if (gradientEndColor) {
+                        this.renderer.renderEdgeGradientToBloom(startPos, endPos, edgeColor, gradientEndColor);
+                    } else {
+                        this.renderer.renderEdgeToBloom(startPos, endPos, edgeColor);
+                    }
+                }
+            }
+        }
+
+        // Composite bloom at end of frame
+        if (bloomEnabled) {
+            this.renderer.compositeBloom();
         }
     }
 

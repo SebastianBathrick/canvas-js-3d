@@ -18,7 +18,7 @@ export class Camera {
         /** @type {number} */
         this._aspectRatio = screenSize.x / screenSize.y;
         /** @type {Transform} */
-        this.transform = new Transform(Vector3.zero, Vector3.zero, Vector3.one);
+        this.transform = new Transform(Vector3.zero(), Vector3.zero(), Vector3.one());
         /** @type {boolean} */
         this._backFaceCulling = false;
         this.setFov(fov);
@@ -107,7 +107,13 @@ export class Camera {
                 continue;
             
             const averageDepth = depthSum / faceVerts.length;
-            projectedFaces.push(new ProjectedFace(screenPositions, averageDepth));
+            projectedFaces.push(new ProjectedFace(
+                screenPositions,
+                averageDepth,
+                sceneObject.color,
+                sceneObject.gradientColor,
+                sceneObject.faceColor
+            ));
         }
 
         return projectedFaces;

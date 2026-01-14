@@ -39,14 +39,14 @@ let sceneObject = null;
 
 async function setMesh(name) {
     const mesh = await loadMesh(name);
-    const transform = sceneObject 
-        ? sceneObject.transform 
-        : new Transform(new Vector3(0, 0, 5), Vector3.zero, Vector3.one);
-    
+    const transform = sceneObject
+        ? sceneObject.transform
+        : new Transform(new Vector3(0, 0, 5), Vector3.zero(), Vector3.one());
+
     if (sceneObject) {
         engine.scene.removeSceneObject(sceneObject);
     }
-    
+
     sceneObject = new SceneObject(mesh, transform);
     engine.scene.addSceneObject(sceneObject);
 }
@@ -267,12 +267,12 @@ function testVector3() {
     const v = new Vector3(1, 2, 3);
     if (assert(v.x === 1 && v.y === 2 && v.z === 3, 'Constructor sets x, y, z')) passed++;
 
-    // Static properties
+    // Static methods
     total++;
-    if (assert(Vector3.zero.x === 0 && Vector3.zero.y === 0 && Vector3.zero.z === 0, 'Vector3.zero is (0,0,0)')) passed++;
+    if (assert(Vector3.zero().x === 0 && Vector3.zero().y === 0 && Vector3.zero().z === 0, 'Vector3.zero() is (0,0,0)')) passed++;
 
     total++;
-    if (assert(Vector3.one.x === 1 && Vector3.one.y === 1 && Vector3.one.z === 1, 'Vector3.one is (1,1,1)')) passed++;
+    if (assert(Vector3.one().x === 1 && Vector3.one().y === 1 && Vector3.one().z === 1, 'Vector3.one() is (1,1,1)')) passed++;
 
     // getTranslated
     total++;
@@ -319,7 +319,7 @@ function testVector3() {
 
     // isZero
     total++;
-    if (assert(Vector3.zero.isZero() && !v.isZero(), 'isZero correctly identifies zero vectors')) passed++;
+    if (assert(Vector3.zero().isZero() && !v.isZero(), 'isZero correctly identifies zero vectors')) passed++;
 
     log(`Vector3: ${passed}/${total} passed`, passed === total ? 'pass' : 'fail');
     return { passed, total };
@@ -342,7 +342,7 @@ function testTransform() {
 
     // rotateX
     total++;
-    const t2 = new Transform(Vector3.zero, Vector3.zero, Vector3.one);
+    const t2 = new Transform(Vector3.zero(), Vector3.zero(), Vector3.one());
     t2.rotateX(0.5);
     if (assert(approxEqual(t2.rotation.x, 0.5), 'rotateX adds to rotation.x')) passed++;
 
@@ -358,13 +358,13 @@ function testTransform() {
 
     // scaleBy (uniform)
     total++;
-    const t3 = new Transform(Vector3.zero, Vector3.zero, Vector3.one);
+    const t3 = new Transform(Vector3.zero(), Vector3.zero(), Vector3.one());
     t3.scaleBy(2);
     if (assert(t3.scale.x === 2 && t3.scale.y === 2 && t3.scale.z === 2, 'scaleBy scales uniformly')) passed++;
 
     // scaleX
     total++;
-    const t4 = new Transform(Vector3.zero, Vector3.zero, Vector3.one);
+    const t4 = new Transform(Vector3.zero(), Vector3.zero(), Vector3.one());
     t4.scaleX(3);
     if (assert(t4.scale.x === 3 && t4.scale.y === 1 && t4.scale.z === 1, 'scaleX only scales X')) passed++;
 
@@ -381,7 +381,7 @@ function testTransform() {
     // Non-uniform scale in SceneObject
     total++;
     const mesh = new Mesh([new Vector3(1, 1, 1)], []);
-    const obj = new SceneObject(mesh, new Transform(Vector3.zero, Vector3.zero, new Vector3(2, 3, 4)));
+    const obj = new SceneObject(mesh, new Transform(Vector3.zero(), Vector3.zero(), new Vector3(2, 3, 4)));
     const verts = obj.getSceneVertices();
     if (assert(verts[0].x === 2 && verts[0].y === 3 && verts[0].z === 4, 'SceneObject applies non-uniform scale')) passed++;
 
@@ -396,8 +396,8 @@ function testCamera() {
 
     // Reset camera state before testing
     engine.camera.toggleBackFaceCulling(false);
-    engine.camera.transform.position = Vector3.zero;
-    engine.camera.transform.rotation = Vector3.zero;
+    engine.camera.transform.position = Vector3.zero();
+    engine.camera.transform.rotation = Vector3.zero();
 
     // isBackFaceCulling after reset
     total++;
