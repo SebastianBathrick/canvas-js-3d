@@ -16,40 +16,52 @@ export class Vector3 {
     }
 
     /**
-     * The zero vector (0, 0, 0).
-     * @type {Vector3}
+     * Returns a new zero vector (0, 0, 0).
+     * @returns {Vector3} A new zero vector.
      */
-    static zero = Object.freeze(new Vector3(0, 0, 0));
+    static zero() {
+        return new Vector3(0, 0, 0);
+    }
 
     /**
-     * The one vector (1, 1, 1).
-     * @type {Vector3}
+     * Returns a new one vector (1, 1, 1).
+     * @returns {Vector3} A new one vector.
      */
-    static one = Object.freeze(new Vector3(1, 1, 1));
+    static one() {
+        return new Vector3(1, 1, 1);
+    }
 
     /**
-     * The left direction (-1, 0, 0).
-     * @type {Vector3}
+     * Returns a new left direction vector (-1, 0, 0).
+     * @returns {Vector3} A new left direction vector.
      */
-    static left = Object.freeze(new Vector3(-1, 0, 0));
+    static left() {
+        return new Vector3(-1, 0, 0);
+    }
 
     /**
-     * The right direction (1, 0, 0).
-     * @type {Vector3}
+     * Returns a new right direction vector (1, 0, 0).
+     * @returns {Vector3} A new right direction vector.
      */
-    static right = Object.freeze(new Vector3(1, 0, 0));
+    static right() {
+        return new Vector3(1, 0, 0);
+    }
 
     /**
-     * The up direction (0, 1, 0).
-     * @type {Vector3}
+     * Returns a new up direction vector (0, 1, 0).
+     * @returns {Vector3} A new up direction vector.
      */
-    static up = Object.freeze(new Vector3(0, 1, 0));
+    static up() {
+        return new Vector3(0, 1, 0);
+    }
 
     /**
-     * The down direction (0, -1, 0).
-     * @type {Vector3}
+     * Returns a new down direction vector (0, -1, 0).
+     * @returns {Vector3} A new down direction vector.
      */
-    static down = Object.freeze(new Vector3(0, -1, 0));
+    static down() {
+        return new Vector3(0, -1, 0);
+    }
 
     /**
      * Returns a new vector translated by the given direction.
@@ -141,7 +153,7 @@ export class Vector3 {
     getNormalized() {
         const mag = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
 
-        if (mag === 0) return Vector3.zero;
+        if (mag === 0) return Vector3.zero();
 
         return new Vector3(this.x / mag, this.y / mag, this.z / mag);
     }

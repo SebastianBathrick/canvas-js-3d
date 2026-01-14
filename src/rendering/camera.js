@@ -18,7 +18,7 @@ export class Camera {
         /** @type {number} */
         this._aspectRatio = screenSize.x / screenSize.y;
         /** @type {Transform} */
-        this.transform = new Transform(Vector3.zero, Vector3.zero, Vector3.one);
+        this.transform = new Transform(Vector3.zero(), Vector3.zero(), Vector3.one());
         /** @type {boolean} */
         this._backFaceCulling = false;
         this.setFov(fov);
