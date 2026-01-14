@@ -118,6 +118,7 @@ async function createSceneObject(engine, posOverride = null, rotOverride = null,
 
     let spawnPos = null;
     let spawnRot = null;
+
     function randomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
@@ -410,7 +411,7 @@ function addOptionGradient(title, parentElement, onChange, initialStartColor = "
         });
     }
 
-    return { startInput, endInput };
+    return {startInput, endInput};
 }
 
 /**
@@ -619,7 +620,7 @@ function addTransformInput(
     isScale = true,
     childIndex = null,
     panelId = null
-  ) {
+) {
     // The template contains a single div element with a header element child
     const template = document.getElementById(TRANSFORM_INPUTS_TEMPLATE_ID);
     const subpanel = template.content.cloneNode(true).firstElementChild;
@@ -627,7 +628,7 @@ function addTransformInput(
 
     // Set custom ID if provided
     if (panelId) {
-      subpanel.id = panelId;
+        subpanel.id = panelId;
     }
 
     // Use a unique prefix per panel to avoid duplicate IDs like "posX" etc.
@@ -635,61 +636,61 @@ function addTransformInput(
     const panelKey = makeDomSafeKey(transformName);
 
     if (isPos)
-      addVectorInput(
-        subpanel,
-        `${panelKey}-${POS_PREFIX}`,   // unique prefix
-        POS_INC,
-        POS_LABEL,
-        (pos) => {
-          transform.setPosition(pos);
-        },
-        transform.position
-      );
+        addVectorInput(
+            subpanel,
+            `${panelKey}-${POS_PREFIX}`,   // unique prefix
+            POS_INC,
+            POS_LABEL,
+            (pos) => {
+                transform.setPosition(pos);
+            },
+            transform.position
+        );
 
 
     if (isRot)
-      addVectorInput(
-        subpanel,
-        `${panelKey}-${ROT_PREFIX}`,
-        ROT_INC,
-        ROT_LABEL,
-        (rot) => {
-          transform.setRotation(rot);
-        },
-        transform.rotation
-      );
+        addVectorInput(
+            subpanel,
+            `${panelKey}-${ROT_PREFIX}`,
+            ROT_INC,
+            ROT_LABEL,
+            (rot) => {
+                transform.setRotation(rot);
+            },
+            transform.rotation
+        );
 
 
     if (isScale)
-      addVectorInput(
-        subpanel,
-        `${panelKey}-${SCALE_PREFIX}`,
-        SCALE_INC,
-        SCALE_LABEL,
-        (scale) => {
-          transform.setScale(scale);
-        },
-        transform.scale
-      );
+        addVectorInput(
+            subpanel,
+            `${panelKey}-${SCALE_PREFIX}`,
+            SCALE_INC,
+            SCALE_LABEL,
+            (scale) => {
+                transform.setScale(scale);
+            },
+            transform.scale
+        );
 
 
     const inspectorPanel = document.getElementById(INSPECTOR_PANEL_ID);
 
     // If childIndex is specified and valid, insert at that position
     if (childIndex !== null && childIndex >= 0 && childIndex < inspectorPanel.children.length) {
-      inspectorPanel.insertBefore(subpanel, inspectorPanel.children[childIndex]);
+        inspectorPanel.insertBefore(subpanel, inspectorPanel.children[childIndex]);
     } else {
-      // Otherwise append to the end
-      inspectorPanel.appendChild(subpanel);
+        // Otherwise append to the end
+        inspectorPanel.appendChild(subpanel);
     }
-  }
-  
-  /**
-   * Adds a vector input (label + 3 number inputs) and optionally wires onChange(Vector3).
-   * - prefix should be UNIQUE within the document (we build this from transformName + type).
-   * - onChange is called whenever any component changes, passing the full Vector3.
-   */
-  function addVectorInput(parentElement, prefix, step, labelText, onChange, initialValue = null) {
+}
+
+/**
+ * Adds a vector input (label + 3 number inputs) and optionally wires onChange(Vector3).
+ * - prefix should be UNIQUE within the document (we build this from transformName + type).
+ * - onChange is called whenever any component changes, passing the full Vector3.
+ */
+function addVectorInput(parentElement, prefix, step, labelText, onChange, initialValue = null) {
     const template = document.getElementById(VECTOR_INPUT_TEMPLATE_ID);
     const clone = template.content.cloneNode(true);
 
@@ -707,58 +708,58 @@ function addTransformInput(
 
     // Set initial values if provided
     if (initialValue !== null) {
-      x.value = initialValue.x;
-      y.value = initialValue.y;
-      z.value = initialValue.z;
+        x.value = initialValue.x;
+        y.value = initialValue.y;
+        z.value = initialValue.z;
     }
 
     if (typeof step === "number" && step > 0) {
-      x.step = step;
-      y.step = step;
-      z.step = step;
+        x.step = step;
+        y.step = step;
+        z.step = step;
     } else {
-      x.removeAttribute("step");
-      y.removeAttribute("step");
-      z.removeAttribute("step");
+        x.removeAttribute("step");
+        y.removeAttribute("step");
+        z.removeAttribute("step");
     }
 
     // Wire change events if a callback was provided
     if (typeof onChange === "function") {
-      const emit = () => {
-        const v = readVector3FromInputs(x, y, z);
-        onChange(v);
-      };
+        const emit = () => {
+            const v = readVector3FromInputs(x, y, z);
+            onChange(v);
+        };
 
-      // "input" fires immediately while typing; "change" fires on blur/enter.
-      x.addEventListener("input", emit);
-      y.addEventListener("input", emit);
-      z.addEventListener("input", emit);
+        // "input" fires immediately while typing; "change" fires on blur/enter.
+        x.addEventListener("input", emit);
+        y.addEventListener("input", emit);
+        z.addEventListener("input", emit);
     }
 
     parentElement.appendChild(clone);
-  }
-  
-  function readVector3FromInputs(xEl, yEl, zEl) {
+}
+
+function readVector3FromInputs(xEl, yEl, zEl) {
     // Number inputs return "" when empty; treat as 0 instead of NaN.
     const x = parseFloat(xEl.value);
     const y = parseFloat(yEl.value);
     const z = parseFloat(zEl.value);
-  
+
     return new Vector3(
-      Number.isFinite(x) ? x : 0,
-      Number.isFinite(y) ? y : 0,
-      Number.isFinite(z) ? z : 0
+        Number.isFinite(x) ? x : 0,
+        Number.isFinite(y) ? y : 0,
+        Number.isFinite(z) ? z : 0
     );
-  }
-  
-  function makeDomSafeKey(text) {
+}
+
+function makeDomSafeKey(text) {
     return String(text)
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9\-_]/g, "");
-  }
-  
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9\-_]/g, "");
+}
+
 // #endregion
 
 function updateToBrowserSize(engine) {
@@ -773,29 +774,29 @@ function updateToBrowserSize(engine) {
 
     if (isMobile) {
         body.style.flexDirection = "column-reverse";
-      
+
         inspector.style.width = "100%";
         inspector.style.maxHeight = MOBILE_INSPECTOR_HEIGHT + "px";
         inspector.style.overflowY = "auto";
-      
+
         baseRenderWidth = body.clientWidth;
         baseRenderHeight = body.clientHeight - MOBILE_INSPECTOR_HEIGHT;
-      } else {
+    } else {
         body.style.flexDirection = "row";
-      
+
         inspector.style.width = DESKTOP_INSPECTOR_WIDTH + "px";
         inspector.style.maxHeight = viewport.clientHeight + "px";
         inspector.style.overflowY = "auto";
-      
+
         baseRenderWidth = body.clientWidth - DESKTOP_INSPECTOR_WIDTH;
         baseRenderHeight = viewport.clientHeight;
-      }
+    }
 
     engine.setScreenSize(new Vector2(
         Math.floor(baseRenderWidth * resolutionScale),
         Math.floor(baseRenderHeight * resolutionScale)
     ));
-    
+
 }
 
 function initListeners(engine) {
@@ -920,7 +921,7 @@ async function init() {
     engine.start();
 }
 
-import { Engine, SceneObject, Transform, Vector3, WavefrontMeshConverter, Vector2, Material } from 'canvas-js-3d';
+import {Engine, SceneObject, Transform, Vector3, WavefrontMeshConverter, Vector2, Material} from 'canvas-js-3d';
 
 let isMobile = false;
 let resolutionScale = DEFAULT_RESOLUTION_SCALE;

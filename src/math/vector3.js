@@ -6,6 +6,7 @@ export class Vector3 {
     #x;
     #y;
     #z;
+
     /**
      * Creates a new Vector3.
      * @param {number} x - The x component.

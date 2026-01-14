@@ -1,124 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>canvas-js-3d Demo</title>
-  <script type="importmap">
-    {
-      "imports": {
-        "canvas-js-3d": "../../src/index.js"
-      }
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canvas-js-3d Demo</title>
+    <script type="importmap">
+        {
+          "imports": {
+            "canvas-js-3d": "../../src/index.js"
+          }
+        }
     </script>
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
 
-  <!-- Reusable templates -->
-  <template id="vector-input-template">
+<!-- Reusable templates -->
+<template id="vector-input-template">
     <div class="sub-panel-item">
-      <div class="vector-input">
+        <div class="vector-input">
 
-        <h4 class="vector-label"></h4>
+            <h4 class="vector-label"></h4>
 
-        <div class="vector-axes">
-          <div class="vector-axis">
-            <h5>X</h5>
-            <input type="number" class="x" value="0">
-          </div>
-          <div class="vector-axis">
-            <h5>Y</h5>
-            <input type="number" class="y" value="0">
-          </div>
-          <div class="vector-axis">
-            <h5>Z</h5>
-            <input type="number" class="z" value="0">
-          </div>
+            <div class="vector-axes">
+                <div class="vector-axis">
+                    <h5>X</h5>
+                    <input type="number" class="x" value="0">
+                </div>
+                <div class="vector-axis">
+                    <h5>Y</h5>
+                    <input type="number" class="y" value="0">
+                </div>
+                <div class="vector-axis">
+                    <h5>Z</h5>
+                    <input type="number" class="z" value="0">
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </template>
+</template>
 
-  <template id="transform-input-template">
+<template id="transform-input-template">
     <div class="sub-panel" id="selected-scene-obj-controls">
         <h3 class="transform-controls-title">Transform Controls</h3>
     </div>
 </template>
 
 <template id="option-input-checkbox-template">
-  <div class="sub-panel-item">
-    <input type="checkbox" id="option-input-checkbox">
-    <h4>Option Input Checkbox</h4>
-  </div>
+    <div class="sub-panel-item">
+        <input type="checkbox" id="option-input-checkbox">
+        <h4>Option Input Checkbox</h4>
+    </div>
 </template>
 
 <template id="option-input-slider-template">
-  <div class="sub-panel-item">
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-      <h4 class="slider-label">Slider Label</h4>
-      <h4 class="slider-value">0</h4>
+    <div class="sub-panel-item">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <h4 class="slider-label">Slider Label</h4>
+            <h4 class="slider-value">0</h4>
+        </div>
+        <input type="range" class="slider-input" min="0" max="100" step="1" value="0">
     </div>
-    <input type="range" class="slider-input" min="0" max="100" step="1" value="0">
-  </div>
 </template>
 
 <template id="option-input-color-template">
-  <div class="sub-panel-item">
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-      <h4 class="color-label">Color Label</h4>
-      <input type="color" class="color-input" value="#000000">
+    <div class="sub-panel-item">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <h4 class="color-label">Color Label</h4>
+            <input type="color" class="color-input" value="#000000">
+        </div>
     </div>
-  </div>
 </template>
 
 <template id="option-input-gradient-template">
-  <div class="sub-panel-item">
-    <h4 class="gradient-label">Gradient Label</h4>
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 8px;">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 12px;">Start</span>
-        <input type="color" class="gradient-start-input" value="#000000">
-      </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 12px;">End</span>
-        <input type="color" class="gradient-end-input" value="#ffffff">
-      </div>
+    <div class="sub-panel-item">
+        <h4 class="gradient-label">Gradient Label</h4>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 12px;">Start</span>
+                <input type="color" class="gradient-start-input" value="#000000">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 12px;">End</span>
+                <input type="color" class="gradient-end-input" value="#ffffff">
+            </div>
+        </div>
     </div>
-  </div>
 </template>
 
 <template id="option-input-color-or-gradient-template">
-  <div class="sub-panel-item">
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-      <h4 class="color-or-gradient-label">Color/Gradient Label</h4>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <input type="checkbox" class="gradient-toggle-checkbox">
-        <span style="font-size: 12px;">Gradient</span>
-      </div>
-    </div>
+    <div class="sub-panel-item">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <h4 class="color-or-gradient-label">Color/Gradient Label</h4>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" class="gradient-toggle-checkbox">
+                <span style="font-size: 12px;">Gradient</span>
+            </div>
+        </div>
 
-    <!-- Single color input (shown when gradient is disabled) -->
-    <div class="single-color-container" style="display: flex; justify-content: flex-end; align-items: center; width: 100%; margin-top: 8px;">
-      <input type="color" class="single-color-input" value="#ffffff">
-    </div>
+        <!-- Single color input (shown when gradient is disabled) -->
+        <div class="single-color-container"
+             style="display: flex; justify-content: flex-end; align-items: center; width: 100%; margin-top: 8px;">
+            <input type="color" class="single-color-input" value="#ffffff">
+        </div>
 
-    <!-- Gradient inputs (shown when gradient is enabled) -->
-    <div class="gradient-colors-container" style="display: none; justify-content: space-between; align-items: center; width: 100%; margin-top: 8px;">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 12px;">Start</span>
-        <input type="color" class="gradient-start-color-input" value="#000000">
-      </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 12px;">End</span>
-        <input type="color" class="gradient-end-color-input" value="#ffffff">
-      </div>
+        <!-- Gradient inputs (shown when gradient is enabled) -->
+        <div class="gradient-colors-container"
+             style="display: none; justify-content: space-between; align-items: center; width: 100%; margin-top: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 12px;">Start</span>
+                <input type="color" class="gradient-start-color-input" value="#000000">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 12px;">End</span>
+                <input type="color" class="gradient-end-color-input" value="#ffffff">
+            </div>
+        </div>
     </div>
-  </div>
 </template>
 
-  <div class="panel" id="inspector-panel">
+<div class="panel" id="inspector-panel">
     <div class="sub-panel">
         <h3>Scene Objects</h3>
 
@@ -141,11 +143,11 @@
     <div class="sub-panel" id="rendering-options-panel">
 
     </div>
-  </div>
+</div>
 
-  <div class="panel" id="viewport-panel">
+<div class="panel" id="viewport-panel">
     <canvas id="canvas"></canvas>
-  </div>
-  <script type="module" src="./app.js"></script>
+</div>
+<script type="module" src="./app.js"></script>
 </body>
 </html>

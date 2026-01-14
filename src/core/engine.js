@@ -1,9 +1,9 @@
-import { Renderer } from '../rendering/renderer.js';
-import { Camera } from '../rendering/camera.js';
-import { ProjectedFace } from '../rendering/projected-face.js';
-import { ColorUtils } from '../rendering/color-utils.js';
-import { Vector2 } from '../math/vector2.js';
-import { Scene } from './scene.js';
+import {Renderer} from '../rendering/renderer.js';
+import {Camera} from '../rendering/camera.js';
+import {ProjectedFace} from '../rendering/projected-face.js';
+import {ColorUtils} from '../rendering/color-utils.js';
+import {Vector2} from '../math/vector2.js';
+import {Scene} from './scene.js';
 
 /**
  * The main engine that manages the render loop, camera, and scene.
@@ -85,16 +85,16 @@ export class Engine {
      * @param {{enabled?: boolean, color?: string, near?: number, far?: number}} options - Fog configuration.
      */
     setDepthFog(options) {
-        if (options.enabled !== undefined) 
+        if (options.enabled !== undefined)
             this._depthFog.enabled = options.enabled;
 
-        if (options.color !== undefined) 
+        if (options.color !== undefined)
             this._depthFog.color = options.color;
-        
-        if (options.near !== undefined) 
+
+        if (options.near !== undefined)
             this._depthFog.near = options.near;
 
-        if (options.far !== undefined) 
+        if (options.far !== undefined)
             this._depthFog.far = options.far;
     }
 
@@ -103,7 +103,7 @@ export class Engine {
      * @returns {{enabled: boolean, color: string, near: number, far: number}} The fog settings.
      */
     getDepthFog() {
-        return { ...this._depthFog };
+        return {...this._depthFog};
     }
 
     /**

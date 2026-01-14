@@ -1,57 +1,57 @@
 :root {
-  --level-1-background-color: #1e1e1e;
-  --level-2-background-color: #252526;
-  --level-3-background-color: #2d2d30;
-  --level-4-background-color: #3e3e4291;
+    --level-1-background-color: #1e1e1e;
+    --level-2-background-color: #252526;
+    --level-3-background-color: #2d2d30;
+    --level-4-background-color: #3e3e4291;
 
-  --disabled-background-color: #3e3e42;
-  --disabled-text-color: #555555;
+    --disabled-background-color: #3e3e42;
+    --disabled-text-color: #555555;
 
-  --extra-large-distance: 20px;
-  --large-distance: 15px;
-  --mid-distance: 11px;
-  --small-distance: 5px;
+    --extra-large-distance: 20px;
+    --large-distance: 15px;
+    --mid-distance: 11px;
+    --small-distance: 5px;
 
-  
-  --border-radius: 3px;
 
-  --text-color: #dfdfdf;
-  --subtext-color: #b6b6b6;
+    --border-radius: 3px;
 
-  --inner-text-color: #b5b5b5;
-  --inner-padding-top-bottom: 2px;
-  --inner-padding-left-right: 2px;
-  
-  --selectable-padding-top-bottom: 6px;
-  --selectable-padding-left-right: 12px;
-  --selectable-text-color: #dfdfdf;
+    --text-color: #dfdfdf;
+    --subtext-color: #b6b6b6;
+
+    --inner-text-color: #b5b5b5;
+    --inner-padding-top-bottom: 2px;
+    --inner-padding-left-right: 2px;
+
+    --selectable-padding-top-bottom: 6px;
+    --selectable-padding-left-right: 12px;
+    --selectable-text-color: #dfdfdf;
 
 }
 
 html {
-  height: 100%;
+    height: 100%;
 }
 
 h3 {
-  margin: 0px;
-  margin-bottom: var(--small-distance);
-  font-weight: normal;
-  font-size: 15px;
+    margin: 0px;
+    margin-bottom: var(--small-distance);
+    font-weight: normal;
+    font-size: 15px;
 }
 
 h4 {
-  margin: 0;
-  font-size: 13px;
-  font-weight: normal;
+    margin: 0;
+    font-size: 13px;
+    font-weight: normal;
 }
 
 h5 {
-  margin: 0;
-  font-size: 12px;
-  font-weight: lighter;
+    margin: 0;
+    font-size: 12px;
+    font-weight: lighter;
 }
 
-body{
+body {
     display: flex;
     height: 100%;
     flex-direction: row;
@@ -62,19 +62,19 @@ body{
 }
 
 button {
-  background-color: var(--level-4-background-color);
-  border: none;
-  border-radius: var(--border-radius);
-  color: var(--selectable-text-color);
-  padding-top: var(--selectable-padding-top-bottom);
-  padding-bottom: var(--selectable-padding-top-bottom);
-  padding-left: var(--selectable-padding-left-right);
-  padding-right: var(--selectable-padding-left-right);
+    background-color: var(--level-4-background-color);
+    border: none;
+    border-radius: var(--border-radius);
+    color: var(--selectable-text-color);
+    padding-top: var(--selectable-padding-top-bottom);
+    padding-bottom: var(--selectable-padding-top-bottom);
+    padding-left: var(--selectable-padding-left-right);
+    padding-right: var(--selectable-padding-left-right);
 }
 
 button:disabled {
-  background-color: var(--disabled-background-color);
-  color: var(--disabled-text-color);
+    background-color: var(--disabled-background-color);
+    color: var(--disabled-text-color);
 }
 
 input {
@@ -87,7 +87,7 @@ input {
     padding-left: var(--inner-padding-left-right);
     padding-right: var(--inner-padding-left-right);
     font-size: 12px;
-  }
+}
 
 select {
     background-color: var(--level-3-background-color);
@@ -102,7 +102,7 @@ select {
 
 
 p {
-  margin: 0;
+    margin: 0;
 }
 
 canvas {
@@ -111,23 +111,23 @@ canvas {
 }
 
 #scene-objs-select {
-  width: 100%;
+    width: 100%;
 }
 
 #create-scene-obj-control {
-  display: flex;
-  flex-direction: row;
-  gap: var(--small-distance);
+    display: flex;
+    flex-direction: row;
+    gap: var(--small-distance);
 }
 
-#remove-clear-scene-objs-control {  
-  display: flex;
-  justify-content: end;
-  gap: var(--small-distance);
+#remove-clear-scene-objs-control {
+    display: flex;
+    justify-content: end;
+    gap: var(--small-distance);
 }
 
 #create-scene-obj-mesh-select {
-  flex-grow: 1;
+    flex-grow: 1;
 }
 
 #viewport-panel {
@@ -135,34 +135,34 @@ canvas {
 }
 
 .vector-input {
-  width: 100%;
+    width: 100%;
 }
 
 .vector-axes {
-  background-color: var(--level-3-background-color);
-  display: flex;
-  flex-direction: row;
-  gap: var(--mid-distance);
-  margin-top: var(--small-distance);
-  padding-left: var(--mid-distance);
-  padding-top: var(--small-distance);
-  padding-bottom: var(--small-distance);
-  border-radius: var(--border-radius);
+    background-color: var(--level-3-background-color);
+    display: flex;
+    flex-direction: row;
+    gap: var(--mid-distance);
+    margin-top: var(--small-distance);
+    padding-left: var(--mid-distance);
+    padding-top: var(--small-distance);
+    padding-bottom: var(--small-distance);
+    border-radius: var(--border-radius);
 }
 
 .vector-axes h5 {
-  color: var(--subtext-color);
+    color: var(--subtext-color);
 }
 
 .vector-axis {
-  display: flex;
-  flex-direction: row;
-  gap: var(--small-distance);
-  align-items: center;
+    display: flex;
+    flex-direction: row;
+    gap: var(--small-distance);
+    align-items: center;
 }
 
 .vector-axis input {
-  margin: 0px;
+    margin: 0px;
     width: 50px;
     background-color: var(--level-4-background-color);
 }
@@ -172,30 +172,30 @@ canvas {
     flex-direction: column;
     overflow-y: auto;
     min-height: 0;
-  }
+}
 
 .panel {
-  background-color: var(--level-1-background-color);
+    background-color: var(--level-1-background-color);
 }
 
 .sub-panel {
-  margin-top: var(--mid-distance);
-  display: flex;
-  flex-direction: column;
-  gap: var(--mid-distance);
-  background-color: var(--level-2-background-color);
-  padding-left: var(--small-distance);
-  padding-right: var(--small-distance);
-  padding-top: var(--mid-distance);
-  padding-bottom: var(--mid-distance);
-  border-radius: var(--border-radius);
+    margin-top: var(--mid-distance);
+    display: flex;
+    flex-direction: column;
+    gap: var(--mid-distance);
+    background-color: var(--level-2-background-color);
+    padding-left: var(--small-distance);
+    padding-right: var(--small-distance);
+    padding-top: var(--mid-distance);
+    padding-bottom: var(--mid-distance);
+    border-radius: var(--border-radius);
 }
 
 .sub-panel-item {
-  color: var(--subtext-color);
-  display: flex;
-  flex-direction: row;
-  margin-left: var(--small-distance);
-  margin-right: var(--small-distance);
-  gap: var(--small-distance);
+    color: var(--subtext-color);
+    display: flex;
+    flex-direction: row;
+    margin-left: var(--small-distance);
+    margin-right: var(--small-distance);
+    gap: var(--small-distance);
 }

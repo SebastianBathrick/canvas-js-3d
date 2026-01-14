@@ -1,6 +1,7 @@
 # canvas-js-3d
 
-A lightweight 3D graphics library that uses the Canvas API for wireframe rendering. Zero dependencies, pure vanilla JavaScript.
+A lightweight 3D graphics library that uses the Canvas API for wireframe rendering. Zero dependencies, pure vanilla
+JavaScript.
 
 ### Interactive Web Demo: [https://sebastianbathrick.github.io/canvas-js-3d/](https://sebastianbathrick.github.io/canvas-js-3d/)
 
@@ -50,7 +51,8 @@ Create your HTML file:
 </html>
 ```
 
-**Important**: You must run a local server. The library won't work if you open the HTML file directly with `file://`. Use the included dev server:
+**Important**: You must run a local server. The library won't work if you open the HTML file directly with `file://`.
+Use the included dev server:
 
 ```bash
 npm run dev
@@ -241,6 +243,7 @@ const mesh = WavefrontMeshConverter.fromText(objString);
 ### "Failed to resolve module specifier" error
 
 Make sure you have:
+
 1. The import map in your HTML `<head>` (see Setup section above)
 2. `type="module"` on your script tag
 3. A local server running (not opening the file with `file://`)
@@ -248,6 +251,7 @@ Make sure you have:
 ### Canvas is blank
 
 Check that:
+
 1. Your canvas has width and height attributes
 2. Objects are positioned at z > 0 (positive z is away from the camera)
 3. The scale and rotation values are reasonable

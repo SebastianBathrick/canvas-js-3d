@@ -20,7 +20,7 @@ export class Renderer {
         /** @type {number} */
         this._pointSize = 20;
         /** @type {{enabled: boolean, blur: number, color: string|null}} */
-        this._bloom = { enabled: false, blur: 15, color: null };
+        this._bloom = {enabled: false, blur: 15, color: null};
         /** @type {HTMLCanvasElement|null} */
         this._bloomCanvas = null;
         /** @type {CanvasRenderingContext2D|null} */
@@ -106,7 +106,7 @@ export class Renderer {
      * @returns {{enabled: boolean, blur: number, color: string|null}} Bloom settings.
      */
     getBloom() {
-        return { ...this._bloom };
+        return {...this._bloom};
     }
 
     /**

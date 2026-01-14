@@ -1,7 +1,7 @@
-import { Vector2 } from '../math/vector2.js';
-import { Vector3 } from '../math/vector3.js';
-import { Transform } from '../math/transform.js';
-import { ProjectedFace } from './projected-face.js';
+import {Vector2} from '../math/vector2.js';
+import {Vector3} from '../math/vector3.js';
+import {Transform} from '../math/transform.js';
+import {ProjectedFace} from './projected-face.js';
 
 /**
  * Projects 3D scene coordinates to 2D screen coordinates.
@@ -70,30 +70,29 @@ export class Camera {
     projectSceneObject(sceneObject) {
         const sceneVerts = sceneObject.getSceneVertices();
         const projectedFaces = [];
-        
+
         // Map vertices to their associated face indices
         for (const face of sceneObject.mesh.getFaceIndices()) {
             const faceVerts = face.map(idx => sceneVerts[idx]);
-            
+
             // Back-face culling: skip faces pointing away from camera
             if (this._backFaceCulling && faceVerts.length >= 3) {
                 if (this._isBackFacing(faceVerts)) {
                     continue;
                 }
             }
-            
+
             // Project vertices and calculate average depth
             let depthSum = 0;
             const screenPositions = [];
             let isValid = true;
-            
+
             for (const vert of faceVerts) {
                 const cameraSpacePos = this._worldToCameraSpace(vert);
                 depthSum += cameraSpacePos.z;
 
                 const normScreenPos = this._getNormalizedScreenPosition(cameraSpacePos);
-                if (normScreenPos === null) 
-                {
+                if (normScreenPos === null) {
                     isValid = false;
                     break;
                 }
@@ -105,7 +104,7 @@ export class Camera {
 
             if (!isValid)
                 continue;
-            
+
             const averageDepth = depthSum / faceVerts.length;
             projectedFaces.push(new ProjectedFace(
                 screenPositions,
@@ -126,12 +125,12 @@ export class Camera {
         const v0 = this._worldToCameraSpace(faceVerts[0]);
         const v1 = this._worldToCameraSpace(faceVerts[1]);
         const v2 = this._worldToCameraSpace(faceVerts[2]);
-        
+
         // Compute face normal using cross product of two edges
         const edge1 = v1.getDifference(v0);
         const edge2 = v2.getDifference(v0);
         const normal = edge1.getCross(edge2);
-        
+
         // Face is back-facing if normal points away from camera (positive z in camera space)
         // We use v0 as the view vector since camera is at origin in camera space
         return normal.getDot(v0) > 0;
@@ -149,7 +148,7 @@ export class Camera {
         */
 
         return new Vector2(
-            (normScreenPos.x + 1) / 2 * this._screenSize.x, 
+            (normScreenPos.x + 1) / 2 * this._screenSize.x,
             (1 - (normScreenPos.y + 1) / 2) * this._screenSize.y);
     }
 
@@ -160,7 +159,7 @@ export class Camera {
         * would be zero. Thus it is in the same 3D position as the camera. As z increases the 3D point moves 
         * further away from the camera. */
         const near = 1e-4;
-        if (scenePos.z <= near) 
+        if (scenePos.z <= near)
             return null;
 
         return new Vector2(
@@ -175,7 +174,7 @@ export class Camera {
         const translated = worldPos.getTranslated(
             this.transform.position.getScaled(-1)
         );
-        
+
         // Then rotate by negative camera rotation (in reverse order: Z, Y, X)
         return translated
             .getRotatedZ(-this.transform.rotation.z)
