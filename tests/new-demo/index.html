@@ -7,158 +7,69 @@
   <script type="importmap">
     {
       "imports": {
-        "canvas-js-3d": "../src/index.js"
+        "canvas-js-3d": "../../src/index.js"
       }
     }
     </script>
-
-  <style>
-    .inspector {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-    .sub-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .sub-panel-column {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-    .sub-panel-row {
-      display: flex;
-      flex-direction: row;
-      gap: 7px;
-    }
-  </style>
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
 
-  <!-- Reusable template -->
-  <template id="transform-controls-template">
-    <div class="sub-panel-column" >
-      <label class="group-label"></label>
-      <div class="sub-panel-row">
-        <div class="sub-panel-row">
-        <label>X</label>
-        <input type="number" class="x" value="0">
-    </div>
-    <div class="sub-panel-row">
-        <label>Y</label>
-        <input type="number" class="y" value="0">
-    </div>
-    <div class="sub-panel-row">
-        <label>Z</label>
-        <input type="number" class="z" value="0">
-      </div>
-    </div>
+  <!-- Reusable templates -->
+  <template id="vector-input-template">
+    <div class="sub-panel-item">
+      <div class="vector-input">
+
+        <h4 class="vector-label"></h4>
+
+        <div class="vector-axes">      
+          <div class="vector-axis">
+            <h5>X</h5>
+            <input type="number" class="x" value="0">
+          </div>
+          <div class="vector-axis">
+            <h5>Y</h5>
+            <input type="number" class="y" value="0">
+          </div>
+          <div class="vector-axis">
+            <h5>Z</h5>
+            <input type="number" class="z" value="0">
+          </div>
+        </div>
     </div>
   </template>
 
-  <div class="panel">
+  <template id="transform-input-template">
+    <div class="sub-panel" id="selected-scene-obj-controls">
+        <h3 class="transform-controls-title">Transform Controls</h3>
+    </div>
+</template>
+
+  <div class="panel" id="inspector-panel">
     <div class="sub-panel">
-        <h2>Scene Objects</h2>
-        <div class="panel-row">
-            <select id="create-scene-obj-mesh-select">
-                <option value="../meshes/monkey.obj">Monkey</option>
-                <option value="../meshes/cube.obj">Cube</option>
-                <option value="../meshes/cone.obj">Cone</option>
-                <option value="../meshes/sphere.obj">Sphere</option>
-                <option value="../meshes/ico-sphere.obj">Ico Sphere</option>
-                <option value="../meshes/torus.obj">Torus</option>
-              </select>
-              <button id="create-scene-obj-btn">Create</button>
+        <h3>Scene Objects</h3>
+
+        <div class="sub-panel-item" id="create-scene-obj-control">
+            <select id="create-scene-obj-mesh-select"></select>
+            <button id="create-scene-obj-btn">Create</button>
         </div>
-        <div class="panel-row">
-            <select id="scene-objs-select" size="3">
-                <option>Object1Name</option>
-                <option>Object2Name</option>
-                <option>Object3Name</option>
+
+        <div class="sub-panel-item">
+            <select id="scene-objs-select" size="5">
             </select>
         </div>
-        <div class="panel-row">
+
+        <div class="sub-panel-item" id="remove-clear-scene-objs-control">
             <button id="remove-scene-obj-btn">Remove</button>
-            <button id="clear-scene-objs-btn">Clear All</button>
-        </div>
-    </div>
-    <div class="sub-panel" id="selected-scene-obj-controls">
-        <h2>Selected Object Controls</h2>
-    </div>
-    <div class="sub-panel" id="render-controls">
-        <h2>Render Controls</h2>
-        <div class="sub-panel-row">
-            <input type="checkbox" id="back-face-culling-checkbox">
-            <label for="back-face-culling-checkbox">Back Face Culling</label>
-        </div>
-        <div class="sub-panel-row">
-            <input type="checkbox" id="depth-sorting-checkbox">
-            <label for="depth-sorting-checkbox">Depth Sorting</label>
+            <button id="clear-scene-objs-btn">Clear</button>
         </div>
     </div>
   </div>
 
-  <div class="viewport-container">
+  <div class="panel" id="viewport-panel">
     <canvas id="canvas"></canvas>
   </div>
-
-
-  <script type="module">
-    import { Engine, SceneObject, Transform, Vector3, WavefrontMeshConverter } from 'canvas-js-3d';
-
-    // Set create SceneObject button click listener
-    document.getElementById("create-scene-obj-btn").addEventListener("click", createSceneObject);
-
-    const template = document.getElementById("transform-controls-template");
-    const engine = new Engine(document.getElementById("canvas"), "cyan", "black");
-
-
-
-    async function createSceneObject() {
-        // The select element where the user picks from a limited list of predefined meshes
-        const meshSelectElement = document.getElementById("create-scene-obj-mesh-select");
-
-        const objFileUrl = meshSelectElement.value;
-        const displayName = meshSelectElement.options[meshSelectElement.selectedIndex].text;
-        const mesh = await WavefrontMeshConverter.fromUrl(objFileUrl);
-        const sceneObject = new SceneObject(mesh, new Transform(Vector3.zero(), Vector3.zero(), 1));
-        const id = engine.scene.addSceneObject(sceneObject);
-
-        // The select element that's used to display the list of current scene objects
-        const sceneObjsSelectElement = document.getElementById("scene-objs-select");
-        sceneObjsSelectElement.appendChild(new Option(displayName, id));
-    }
-
-    function addTransformControls(parentElement,prefix, step, labelText) {
-      const clone = template.content.cloneNode(true);
-
-      const groupLabel = clone.querySelector(".group-label");
-      const x = clone.querySelector(".x");
-      const y = clone.querySelector(".y");
-      const z = clone.querySelector(".z");
-
-      groupLabel.textContent = labelText;
-
-      x.id = prefix + "X";
-      y.id = prefix + "Y";
-      z.id = prefix + "Z";
-
-      x.step = step;
-      y.step = step;
-      z.step = step;
-
-      parentElement.appendChild(clone);
-    }
-
-    const sceneObjControls = document.getElementById("selected-scene-obj-controls");
-
-    // Examples
-    addTransformControls(sceneObjControls, "pos", 0.01, "Position");
-    addTransformControls(sceneObjControls, "rot", 0.785, "Rotation");
-  </script>
-
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
