@@ -22,6 +22,9 @@
     "obj",
     "wavefront"
   ],
+  "engines": {
+    "node": ">=16"
+  },
   "author": {
   "name": "Sebastian Bathrick",
   "email": "sebastianbathrick@gmail.com"

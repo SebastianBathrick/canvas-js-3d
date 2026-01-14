@@ -101,17 +101,17 @@ const values = {
 
 function updateTransformFromControls() {
     if (!sceneObject) return;
-    sceneObject.transform.position = new Vector3(
+    sceneObject.transform.setPosition(
         parseFloat(controls.posX.value),
         parseFloat(controls.posY.value),
         parseFloat(controls.posZ.value)
     );
-    sceneObject.transform.rotation = new Vector3(
+    sceneObject.transform.setRotation(
         parseFloat(controls.rotX.value),
         parseFloat(controls.rotY.value),
         parseFloat(controls.rotZ.value)
     );
-    sceneObject.transform.scale = new Vector3(
+    sceneObject.transform.setScale(
         parseFloat(controls.scaleX.value),
         parseFloat(controls.scaleY.value),
         parseFloat(controls.scaleZ.value)
@@ -139,12 +139,12 @@ function updateDisplayValues() {
 }
 
 function updateCameraFromControls() {
-    engine.camera.transform.position = new Vector3(
+    engine.camera.transform.setPosition(
         parseFloat(controls.camPosX.value),
         parseFloat(controls.camPosY.value),
         parseFloat(controls.camPosZ.value)
     );
-    engine.camera.transform.rotation = new Vector3(
+    engine.camera.transform.setRotation(
         parseFloat(controls.camRotX.value),
         parseFloat(controls.camRotY.value),
         parseFloat(controls.camRotZ.value)
@@ -396,8 +396,8 @@ function testCamera() {
 
     // Reset camera state before testing
     engine.camera.toggleBackFaceCulling(false);
-    engine.camera.transform.position = Vector3.zero();
-    engine.camera.transform.rotation = Vector3.zero();
+    engine.camera.transform.setPosition(0, 0, 0);
+    engine.camera.transform.setRotation(0, 0, 0);
 
     // isBackFaceCulling after reset
     total++;

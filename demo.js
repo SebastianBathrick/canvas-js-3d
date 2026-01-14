@@ -118,8 +118,8 @@ function updateModelTransforms() {
         const spawnOffset = spawnOffsets[i];
         const position = positionOffset.getTranslated(spawnOffset);
 
-        model.transform.position = position;
-        model.transform.scale = scale;
+        model.transform.setPosition(position);
+        model.transform.setScale(scale);
     }
 }
 
@@ -227,8 +227,8 @@ engine.onUpdate = (deltaTime) => {
         // Alternate rotation direction for each model
         const direction = i % 2 === 0 ? 1 : -1;
         const rotationDelta = direction * Math.PI * rotationSpeed * deltaTime;
-        models[i].transform.rotation = models[i].transform.rotation.getTranslated(
-            new Vector3(0, rotationDelta, 0)
+        models[i].transform.setRotation(
+            models[i].transform.rotation.getTranslated(new Vector3(0, rotationDelta, 0))
         );
     }
 };

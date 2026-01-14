@@ -1,5 +1,6 @@
 // #region Constants
 // ID for the selected object's transform controls
+const SCENE_OBJ_DEFAULT_EDGE_COLOR = "white";
 const SELECTED_OBJ_TRANSFORM_PANEL_ID = "selected-obj-transform-panel";
 
 // The select element where the user picks from a limited list of predefined meshes
@@ -15,6 +16,11 @@ const CREATE_SCENE_OBJ_BTN_ID = "create-scene-obj-btn";
 const REMOVE_SCENE_OBJ_BTN_ID = "remove-scene-obj-btn";
 const CLEAR_SCENE_OBJS_BTN_ID = "clear-scene-objs-btn";
 
+const OPTION_INPUT_CHECKBOX_TEMPLATE_ID = "option-input-checkbox-template";
+const OPTION_INPUT_SLIDER_TEMPLATE_ID = "option-input-slider-template";
+const OPTION_INPUT_COLOR_TEMPLATE_ID = "option-input-color-template";
+const OPTION_INPUT_GRADIENT_TEMPLATE_ID = "option-input-gradient-template";
+const OPTION_INPUT_COLOR_OR_GRADIENT_TEMPLATE_ID = "option-input-color-or-gradient-template";
 
 const MOBILE_WIDTH_THRESHOLD = 768;
 const MOBILE_INSPECTOR_HEIGHT = 300;
@@ -40,10 +46,7 @@ const DEFAULT_CREATE_Z_ROT = .15;
 const CREATE_MIN_ROT = 0;
 const CREATE_MAX_ROT = Math.PI * 2 - .1;
 
-const DEFAULT_IS_DEPTH_SORTING = true;
-const DEFAULT_IS_BACK_FACE_CULLING = true;
 const DEFAULT_FOV = 60;
-
 const MAX_FOV = 120;
 const MIN_FOV = 30;
 const FOV_STEP = 1;
@@ -64,15 +67,11 @@ const MESH_PATHS = {
     Torus: "../../meshes/torus.obj",
 };
 
-const SELECTED_SCENE_OBJ_COLOR = "cyan";
-const UNSELECTED_SCENE_OBJ_COLOR = "white";
+const DEFAULT_SELECTED_SCENE_OBJ_COLOR = "cyan";
 
 // #endregion
 
 // #region Add/Remove SceneObjects Functions
-
-const meshCache = new Map();
-let currentlySelectedSceneObjectId = null;
 
 function getUniqueName(baseName) {
     const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
@@ -97,45 +96,6 @@ function getUniqueName(baseName) {
     } while (existingNames.has(uniqueName));
 
     return uniqueName;
-}
-
-function updateClearButtonState(engine) {
-    const clearButton = document.getElementById(CLEAR_SCENE_OBJS_BTN_ID);
-    const hasSceneObjects = engine.scene.getSceneObjects().length > 0;
-    clearButton.disabled = !hasSceneObjects;
-}
-
-function updateRemoveButtonState() {
-    const removeButton = document.getElementById(REMOVE_SCENE_OBJ_BTN_ID);
-    const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
-    const hasSelection = sceneObjsSelectElement.selectedIndex !== -1;
-    const hasSceneObjects = sceneObjsSelectElement.options.length > 0;
-    removeButton.disabled = !hasSelection || !hasSceneObjects;
-}
-
-function updateSceneObjectSelectionColors(engine) {
-    const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
-    const selectedIndex = sceneObjsSelectElement.selectedIndex;
-
-    // Unselect the previous object
-    if (currentlySelectedSceneObjectId !== null) {
-        const previousSceneObject = engine.scene.getSceneObjectById(currentlySelectedSceneObjectId);
-        if (previousSceneObject) {
-            previousSceneObject.color = UNSELECTED_SCENE_OBJ_COLOR;
-        }
-    }
-
-    // Select the new object
-    if (selectedIndex !== -1 && sceneObjsSelectElement.options.length > 0) {
-        const selectedId = parseInt(sceneObjsSelectElement.value, 10);
-        const sceneObject = engine.scene.getSceneObjectById(selectedId);
-        if (sceneObject) {
-            sceneObject.color = SELECTED_SCENE_OBJ_COLOR;
-            currentlySelectedSceneObjectId = selectedId;
-        }
-    } else {
-        currentlySelectedSceneObjectId = null;
-    }
 }
 
 async function createSceneObject(engine, posOverride = null, rotOverride = null, meshIndexOverride = -1) {
@@ -189,8 +149,8 @@ async function createSceneObject(engine, posOverride = null, rotOverride = null,
     }
 
     const sceneObject = new SceneObject(mesh, new Transform(spawnPos, spawnRot, Vector3.one()));
-    sceneObject.color = UNSELECTED_SCENE_OBJ_COLOR;
     const id = engine.scene.addSceneObject(sceneObject);
+    sceneObject.setMaterial(new Material(SCENE_OBJ_DEFAULT_EDGE_COLOR));
 
     // The select element that's used to display the list of current scene objects
     const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
@@ -250,10 +210,6 @@ function clearSceneObjects(engine) {
 // #endregion
 
 // #region Option Checkbox Input
-
-const OPTION_INPUT_CHECKBOX_TEMPLATE_ID = "option-input-checkbox-template";
-const OPTION_INPUT_SLIDER_TEMPLATE_ID = "option-input-slider-template";
-const OPTION_INPUT_COLOR_TEMPLATE_ID = "option-input-color-template";
 
 /**
  * Creates a checkbox option input from the template and adds it to a parent element.
@@ -400,9 +356,177 @@ function addOptionColor(title, parentElement, onChange, initialColor = "#000000"
     return colorInput;
 }
 
+/**
+ * Creates a gradient color picker input from the template and adds it to a parent element.
+ * @param {string} title - The label text to display for the gradient picker
+ * @param {HTMLElement} parentElement - The element to append the gradient picker to
+ * @param {function} onChange - Callback function that receives an object with startColor and endColor (e.g., {startColor: "#ff0000", endColor: "#0000ff"})
+ * @param {string} initialStartColor - Initial start color value in hex format (default: "#000000")
+ * @param {string} initialEndColor - Initial end color value in hex format (default: "#ffffff")
+ * @param {string} uniqueId - Optional unique ID prefix for the gradient picker inputs (auto-generated if not provided)
+ * @returns {Object} Object containing {startInput, endInput} - the created color input elements
+ */
+function addOptionGradient(title, parentElement, onChange, initialStartColor = "#000000", initialEndColor = "#ffffff", uniqueId = null) {
+    const template = document.getElementById(OPTION_INPUT_GRADIENT_TEMPLATE_ID);
+    const clone = template.content.cloneNode(true);
+
+    const startInput = clone.querySelector('.gradient-start-input');
+    const endInput = clone.querySelector('.gradient-end-input');
+    const label = clone.querySelector('.gradient-label');
+
+    // Set the label text
+    label.textContent = title;
+
+    // Set unique IDs (generate from title if not provided)
+    const gradientIdPrefix = uniqueId || `${makeDomSafeKey(title)}-gradient`;
+    startInput.id = `${gradientIdPrefix}-start`;
+    endInput.id = `${gradientIdPrefix}-end`;
+
+    // Set initial colors
+    startInput.value = initialStartColor;
+    endInput.value = initialEndColor;
+
+    // Wire input events to call callback with both colors
+    const emitChange = () => {
+        if (typeof onChange === "function") {
+            onChange({
+                startColor: startInput.value,
+                endColor: endInput.value
+            });
+        }
+    };
+
+    startInput.addEventListener("input", emitChange);
+    endInput.addEventListener("input", emitChange);
+
+    // Append to parent
+    parentElement.appendChild(clone);
+
+    // Call the onChange callback with initial values after setup is complete
+    if (typeof onChange === "function") {
+        onChange({
+            startColor: initialStartColor,
+            endColor: initialEndColor
+        });
+    }
+
+    return { startInput, endInput };
+}
+
+/**
+ * Creates a color OR gradient picker input with a toggle checkbox.
+ * When the checkbox is unchecked (default), displays a single color picker.
+ * When checked, displays gradient start/end color pickers.
+ * @param {string} title - The label text to display for the picker
+ * @param {HTMLElement} parentElement - The element to append the picker to
+ * @param {function} onChange - Callback function that receives an object: {isGradient: boolean, color?: string, startColor?: string, endColor?: string}
+ * @param {boolean} initialIsGradient - Whether gradient mode is initially enabled (default: false)
+ * @param {string} initialColor - Initial single color value in hex format (default: "#ffffff")
+ * @param {string} initialStartColor - Initial gradient start color in hex format (default: "#000000")
+ * @param {string} initialEndColor - Initial gradient end color in hex format (default: "#ffffff")
+ * @param {string} uniqueId - Optional unique ID prefix for the inputs (auto-generated if not provided)
+ * @returns {Object} Object containing {checkbox, singleColorInput, startColorInput, endColorInput, singleColorContainer, gradientColorsContainer}
+ */
+function addOptionColorOrGradient(
+    title,
+    parentElement,
+    onChange,
+    initialIsGradient = false,
+    initialColor = "#ffffff",
+    initialStartColor = "#000000",
+    initialEndColor = "#ffffff",
+    uniqueId = null
+) {
+    const template = document.getElementById(OPTION_INPUT_COLOR_OR_GRADIENT_TEMPLATE_ID);
+    const clone = template.content.cloneNode(true);
+
+    const label = clone.querySelector('.color-or-gradient-label');
+    const checkbox = clone.querySelector('.gradient-toggle-checkbox');
+    const singleColorContainer = clone.querySelector('.single-color-container');
+    const singleColorInput = clone.querySelector('.single-color-input');
+    const gradientColorsContainer = clone.querySelector('.gradient-colors-container');
+    const startColorInput = clone.querySelector('.gradient-start-color-input');
+    const endColorInput = clone.querySelector('.gradient-end-color-input');
+
+    // Set the label text
+    label.textContent = title;
+
+    // Set unique IDs (generate from title if not provided)
+    const idPrefix = uniqueId || `${makeDomSafeKey(title)}-color-or-gradient`;
+    checkbox.id = `${idPrefix}-checkbox`;
+    singleColorInput.id = `${idPrefix}-single`;
+    startColorInput.id = `${idPrefix}-start`;
+    endColorInput.id = `${idPrefix}-end`;
+
+    // Set initial colors
+    singleColorInput.value = initialColor;
+    startColorInput.value = initialStartColor;
+    endColorInput.value = initialEndColor;
+
+    // Set initial checkbox state and visibility
+    checkbox.checked = initialIsGradient;
+    if (initialIsGradient) {
+        singleColorContainer.style.display = 'none';
+        gradientColorsContainer.style.display = 'flex';
+    } else {
+        singleColorContainer.style.display = 'flex';
+        gradientColorsContainer.style.display = 'none';
+    }
+
+    // Helper to emit the current state
+    const emitChange = () => {
+        if (typeof onChange === "function") {
+            if (checkbox.checked) {
+                onChange({
+                    isGradient: true,
+                    startColor: startColorInput.value,
+                    endColor: endColorInput.value
+                });
+            } else {
+                onChange({
+                    isGradient: false,
+                    color: singleColorInput.value
+                });
+            }
+        }
+    };
+
+    // Handle checkbox toggle
+    checkbox.addEventListener("change", () => {
+        if (checkbox.checked) {
+            singleColorContainer.style.display = 'none';
+            gradientColorsContainer.style.display = 'flex';
+        } else {
+            singleColorContainer.style.display = 'flex';
+            gradientColorsContainer.style.display = 'none';
+        }
+        emitChange();
+    });
+
+    // Handle color input changes
+    singleColorInput.addEventListener("input", emitChange);
+    startColorInput.addEventListener("input", emitChange);
+    endColorInput.addEventListener("input", emitChange);
+
+    // Append to parent
+    parentElement.appendChild(clone);
+
+    // Call the onChange callback with initial values after setup is complete
+    emitChange();
+
+    return {
+        checkbox,
+        singleColorInput,
+        startColorInput,
+        endColorInput,
+        singleColorContainer,
+        gradientColorsContainer
+    };
+}
+
 // #endregion
 
-// #region Selected Object Transform Controls
+// #region SceneObject Selection
 
 function updateSelectedObjectControls(engine) {
     // Remove existing controls if they exist
@@ -444,6 +568,45 @@ function updateSelectedObjectControls(engine) {
     );
 }
 
+function updateSceneObjectSelectionColors(engine) {
+    const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
+    const selectedIndex = sceneObjsSelectElement.selectedIndex;
+
+    // Unselect the previous object
+    if (currentlySelectedSceneObjectId !== null) {
+        const previousSceneObject = engine.scene.getSceneObjectById(currentlySelectedSceneObjectId);
+        if (previousSceneObject) {
+            previousSceneObject.material.resetColor();
+        }
+    }
+
+    // Select the new object
+    if (selectedIndex !== -1 && sceneObjsSelectElement.options.length > 0) {
+        const selectedId = parseInt(sceneObjsSelectElement.value, 10);
+        const sceneObject = engine.scene.getSceneObjectById(selectedId);
+        if (sceneObject) {
+            sceneObject.material.setColor(selectedSceneObjectColor);
+            currentlySelectedSceneObjectId = selectedId;
+        }
+    } else {
+        currentlySelectedSceneObjectId = null;
+    }
+}
+
+function updateClearButtonState(engine) {
+    const clearButton = document.getElementById(CLEAR_SCENE_OBJS_BTN_ID);
+    const hasSceneObjects = engine.scene.getSceneObjects().length > 0;
+    clearButton.disabled = !hasSceneObjects;
+}
+
+function updateRemoveButtonState() {
+    const removeButton = document.getElementById(REMOVE_SCENE_OBJ_BTN_ID);
+    const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
+    const hasSelection = sceneObjsSelectElement.selectedIndex !== -1;
+    const hasSceneObjects = sceneObjsSelectElement.options.length > 0;
+    removeButton.disabled = !hasSelection || !hasSceneObjects;
+}
+
 // #endregion
 
 // #region Transform Input
@@ -478,9 +641,7 @@ function addTransformInput(
         POS_INC,
         POS_LABEL,
         (pos) => {
-          transform.position.x = pos.x;
-          transform.position.y = pos.y;
-          transform.position.z = pos.z;
+          transform.setPosition(pos);
         },
         transform.position
       );
@@ -493,9 +654,7 @@ function addTransformInput(
         ROT_INC,
         ROT_LABEL,
         (rot) => {
-          transform.rotation.x = rot.x;
-          transform.rotation.y = rot.y;
-          transform.rotation.z = rot.z;
+          transform.setRotation(rot);
         },
         transform.rotation
       );
@@ -508,9 +667,7 @@ function addTransformInput(
         SCALE_INC,
         SCALE_LABEL,
         (scale) => {
-          transform.scale.x = scale.x;
-          transform.scale.y = scale.y;
-          transform.scale.z = scale.z;
+          transform.setScale(scale);
         },
         transform.scale
       );
@@ -641,20 +798,17 @@ function updateToBrowserSize(engine) {
     
 }
 
-
 function initListeners(engine) {
     document.getElementById(CREATE_SCENE_OBJ_BTN_ID).addEventListener("click", () => createSceneObject(engine));
     document.getElementById(REMOVE_SCENE_OBJ_BTN_ID).addEventListener("click", () => removeSceneObject(engine));
     document.getElementById(CLEAR_SCENE_OBJS_BTN_ID).addEventListener("click", () => clearSceneObjects(engine));
     document.getElementById(SCENE_OBJS_SELECT_ID).addEventListener("change", () => {
         updateRemoveButtonState();
-        updateSceneObjectSelectionColors(engine);
         updateSelectedObjectControls(engine);
+        updateSceneObjectSelectionColors(engine);
     });
     window.addEventListener("resize", () => updateToBrowserSize(engine));
 }
-
-import { Engine, SceneObject, Transform, Vector3, WavefrontMeshConverter, Vector2 } from 'canvas-js-3d';
 
 function addOptionsToMeshSelect() {
     const meshSelectElement = document.getElementById(CREATE_SCENE_OBJ_MESH_SELECT_ID);
@@ -743,38 +897,19 @@ async function init() {
     );
 
     addOptionColor(
-        "Unselected Object Color",
-        renderingOptionsPanel,
-        (color) => {
-            // Update all unselected objects
-            const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
-            for (let i = 0; i < sceneObjsSelectElement.options.length; i++) {
-                const id = parseInt(sceneObjsSelectElement.options[i].value, 10);
-                // Only update if not currently selected
-                if (id !== currentlySelectedSceneObjectId) {
-                    const sceneObject = engine.scene.getSceneObjectById(id);
-                    if (sceneObject) {
-                        sceneObject.color = color;
-                    }
-                }
-            }
-        },
-        UNSELECTED_SCENE_OBJ_COLOR // white
-    );
-
-    addOptionColor(
         "Selected Object Color",
         renderingOptionsPanel,
         (color) => {
+            selectedSceneObjectColor = color;
             // Update the selected object immediately if there is one
             if (currentlySelectedSceneObjectId !== null) {
                 const selectedObject = engine.scene.getSceneObjectById(currentlySelectedSceneObjectId);
                 if (selectedObject) {
-                    selectedObject.color = color;
+                    selectedObject.material.setColor(color);
                 }
             }
         },
-        SELECTED_SCENE_OBJ_COLOR // cyan
+        selectedSceneObjectColor
     );
 
     // Create a scene object in the center of the screen
@@ -791,7 +926,12 @@ async function init() {
     engine.start();
 }
 
+import { Engine, SceneObject, Transform, Vector3, WavefrontMeshConverter, Vector2, Material } from 'canvas-js-3d';
+
 let isMobile = false;
 let resolutionScale = DEFAULT_RESOLUTION_SCALE;
+let selectedSceneObjectColor = DEFAULT_SELECTED_SCENE_OBJ_COLOR;
+const meshCache = new Map();
+let currentlySelectedSceneObjectId = null;
 
 init();
