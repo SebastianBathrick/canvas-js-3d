@@ -67,13 +67,4 @@ export class Scene {
     getSceneObjectById(id) {
         return this._idToObject.get(id);
     }
-
-    /**
-     * Gets the unique ID of a scene object.
-     * @param {SceneObject} sceneObject - The scene object.
-     * @returns {number|undefined} The unique ID, or undefined if not in the scene.
-     */
-    getSceneObjectId(sceneObject) {
-        return this._objectToId.get(sceneObject);
-    }
 }
