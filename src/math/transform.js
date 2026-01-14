@@ -45,26 +45,116 @@ export class Transform {
 
     /**
      * Sets the position.
-     * @param {Vector3} value - The new position in 3D space.
+     * @param {Vector3|number} valueOrX - The new position Vector3, or the x component.
+     * @param {number} [y] - The y component (if x was provided as first parameter).
+     * @param {number} [z] - The z component (if x was provided as first parameter).
      */
-    setPosition(value) {
-        this._position = value;
+    setPosition(valueOrX, y, z) {
+        if (valueOrX instanceof Vector3) {
+            this._position = valueOrX;
+        } else {
+            this._position = new Vector3(valueOrX, y, z);
+        }
+    }
+
+    /**
+     * Sets the x component of position.
+     * @param {number} x - The new x position.
+     */
+    setPositionX(x) {
+        this._position = new Vector3(x, this._position.y, this._position.z);
+    }
+
+    /**
+     * Sets the y component of position.
+     * @param {number} y - The new y position.
+     */
+    setPositionY(y) {
+        this._position = new Vector3(this._position.x, y, this._position.z);
+    }
+
+    /**
+     * Sets the z component of position.
+     * @param {number} z - The new z position.
+     */
+    setPositionZ(z) {
+        this._position = new Vector3(this._position.x, this._position.y, z);
     }
 
     /**
      * Sets the rotation.
-     * @param {Vector3} value - The new rotation angles in radians.
+     * @param {Vector3|number} valueOrX - The new rotation Vector3, or the x component in radians.
+     * @param {number} [y] - The y component in radians (if x was provided as first parameter).
+     * @param {number} [z] - The z component in radians (if x was provided as first parameter).
      */
-    setRotation(value) {
-        this._rotation = value;
+    setRotation(valueOrX, y, z) {
+        if (valueOrX instanceof Vector3) {
+            this._rotation = valueOrX;
+        } else {
+            this._rotation = new Vector3(valueOrX, y, z);
+        }
+    }
+
+    /**
+     * Sets the x component of rotation.
+     * @param {number} x - The new x rotation in radians.
+     */
+    setRotationX(x) {
+        this._rotation = new Vector3(x, this._rotation.y, this._rotation.z);
+    }
+
+    /**
+     * Sets the y component of rotation.
+     * @param {number} y - The new y rotation in radians.
+     */
+    setRotationY(y) {
+        this._rotation = new Vector3(this._rotation.x, y, this._rotation.z);
+    }
+
+    /**
+     * Sets the z component of rotation.
+     * @param {number} z - The new z rotation in radians.
+     */
+    setRotationZ(z) {
+        this._rotation = new Vector3(this._rotation.x, this._rotation.y, z);
     }
 
     /**
      * Sets the scale.
-     * @param {Vector3} value - The new scale factors for each axis.
+     * @param {Vector3|number} valueOrX - The new scale Vector3, or the x component.
+     * @param {number} [y] - The y component (if x was provided as first parameter).
+     * @param {number} [z] - The z component (if x was provided as first parameter).
      */
-    setScale(value) {
-        this._scale = value;
+    setScale(valueOrX, y, z) {
+        if (valueOrX instanceof Vector3) {
+            this._scale = valueOrX;
+        } else {
+            this._scale = new Vector3(valueOrX, y, z);
+        }
+    }
+
+    /**
+     * Sets the x component of scale.
+     * @param {number} x - The new x scale.
+     */
+    setScaleX(x) {
+        this._scale = new Vector3(x, this._scale.y, this._scale.z);
+    }
+
+    /**
+     * Sets the y component of scale.
+     * @param {number} y - The new y scale.
+     */
+    setScaleY(y) {
+        this._scale = new Vector3(this._scale.x, y, this._scale.z);
+    }
+
+    /**
+     * Sets the z component of scale.
+     * @param {number} z - The new z scale.
+     */
+    setScaleZ(z) {
+        this._scale = new Vector3(this._scale.x, this._scale.y, z);
     }
 
     /**
