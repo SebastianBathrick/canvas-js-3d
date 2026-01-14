@@ -110,15 +110,16 @@ export class Camera {
             projectedFaces.push(new ProjectedFace(
                 screenPositions,
                 averageDepth,
-                sceneObject.color,
-                sceneObject.gradientColor,
-                sceneObject.faceColor
+                sceneObject.material.color,
+                sceneObject.material.gradientColor,
+                sceneObject.material.faceColor
             ));
         }
 
         return projectedFaces;
     }
 
+    // TODO: Optimize to NOT use Vector3 helper functions
     /** @private */
     _isBackFacing(faceVerts) {
         // Transform vertices to camera space

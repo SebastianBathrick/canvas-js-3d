@@ -12,6 +12,7 @@ export { Transform } from './math/transform.js';
 export { Mesh } from './core/mesh.js';
 export { Scene } from './core/scene.js';
 export { SceneObject } from './core/sceneObject.js';
+export { Material } from './core/material.js';
 
 // Rendering
 export { Camera } from './rendering/camera.js';
