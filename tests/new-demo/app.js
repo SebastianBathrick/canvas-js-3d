@@ -831,6 +831,9 @@ async function init() {
     updateClearButtonState(engine);
     updateRemoveButtonState();
 
+
+    engine.toggleFPS(true);
+
     // Add camera transform controls at the top of the inspector panel
     addTransformInput(
         "Camera",
@@ -885,15 +888,6 @@ async function init() {
         MAX_RESOLUTION_SCALE,
         RESOLUTION_SCALE_STEP,
         DEFAULT_RESOLUTION_SCALE
-    );
-
-    addOptionColor(
-        "Background Color",
-        renderingOptionsPanel,
-        (color) => {
-            engine.renderer.setBackgroundColor(color);
-        },
-        "#000000" // black
     );
 
     addOptionColor(

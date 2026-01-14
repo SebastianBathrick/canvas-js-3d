@@ -9,17 +9,19 @@ import { Scene } from './scene.js';
  * The main engine that manages the render loop, camera, and scene.
  */
 export class Engine {
+    /** @type {Renderer} */
+    #renderer;
+    /** @type {Camera} */
+    #camera;
+
     /**
      * Creates a new Engine.
      * @param {HTMLCanvasElement} canvas - The canvas element to render to.
-     * @param {string} fgColor - The foreground/wireframe color.
-     * @param {string} bgColor - The background/clear color.
+     * @param {number} [fov=60] - The field of view in degrees.
      */
-    constructor(canvas, fgColor, bgColor, fov = 60) {
-        /** @type {Renderer} */
-        this.renderer = new Renderer(canvas, fgColor, bgColor);
-        /** @type {Camera} */
-        this.camera = new Camera(new Vector2(canvas.width, canvas.height), fov);
+    constructor(canvas, fov = 60) {
+        this.#renderer = new Renderer(canvas);
+        this.#camera = new Camera(new Vector2(canvas.width, canvas.height), fov);
         /** @type {Scene} */
         this.scene = new Scene();
         /** @type {boolean} */
@@ -28,14 +30,18 @@ export class Engine {
         this._running = false;
         /** @type {number|null} */
         this._lastFrameTime = null;
+        /** @type {number} */
+        this._fps = 0;
+        /** @type {boolean} @private */
+        this._showFPS = false;
         /**
          * Callback invoked each frame with delta time.
          * @type {((deltaTime: number) => void)|null}
          */
         this.onUpdate = null;
-        /** @type {string} Default foreground color for edges */
-        this._fgColor = fgColor;
-        /** 
+        /** @type {string} Default edge color for faces without explicit color */
+        this._defaultEdgeColor = '#ffffff';
+        /**
          * Depth fog configuration.
          * @type {{enabled: boolean, color: string, near: number, far: number}}
          */
@@ -45,6 +51,14 @@ export class Engine {
             near: 5,
             far: 50
         };
+    }
+
+    /**
+     * Gets the camera instance.
+     * @returns {Camera} The camera.
+     */
+    get camera() {
+        return this.#camera;
     }
 
     /**
@@ -71,10 +85,17 @@ export class Engine {
      * @param {{enabled?: boolean, color?: string, near?: number, far?: number}} options - Fog configuration.
      */
     setDepthFog(options) {
-        if (options.enabled !== undefined) this._depthFog.enabled = options.enabled;
-        if (options.color !== undefined) this._depthFog.color = options.color;
-        if (options.near !== undefined) this._depthFog.near = options.near;
-        if (options.far !== undefined) this._depthFog.far = options.far;
+        if (options.enabled !== undefined) 
+            this._depthFog.enabled = options.enabled;
+
+        if (options.color !== undefined) 
+            this._depthFog.color = options.color;
+        
+        if (options.near !== undefined) 
+            this._depthFog.near = options.near;
+
+        if (options.far !== undefined) 
+            this._depthFog.far = options.far;
     }
 
     /**
@@ -86,6 +107,78 @@ export class Engine {
     }
 
     /**
+     * Gets the background color.
+     * @returns {string} The background color.
+     */
+    getBackgroundColor() {
+        return this.#renderer.getBackgroundColor();
+    }
+
+    /**
+     * Sets the background color.
+     * @param {string} color - The background color (hex string or CSS color).
+     */
+    setBackgroundColor(color) {
+        this.#renderer.setBackgroundColor(color);
+    }
+
+    /**
+     * Gets the background gradient end color.
+     * @returns {string|null} The gradient end color, or null if no gradient.
+     */
+    getBackgroundGradientColor() {
+        return this.#renderer.getBackgroundGradientColor();
+    }
+
+    /**
+     * Sets the background gradient end color. Set to null to disable gradient.
+     * @param {string|null} color - The gradient end color, or null to disable.
+     */
+    setBackgroundGradientColor(color) {
+        this.#renderer.setBackgroundGradientColor(color);
+    }
+
+    /**
+     * Gets the debug text color (used for FPS counter).
+     * @returns {string} The debug text color.
+     */
+    getDebugTextColor() {
+        return this.#renderer.getDebugTextColor();
+    }
+
+    /**
+     * Sets the debug text color (used for FPS counter).
+     * @param {string} color - The debug text color.
+     */
+    setDebugTextColor(color) {
+        this.#renderer.setDebugTextColor(color);
+    }
+
+    /**
+     * Gets the default edge color for faces without explicit color.
+     * @returns {string} The default edge color.
+     */
+    getDefaultEdgeColor() {
+        return this._defaultEdgeColor;
+    }
+
+    /**
+     * Sets the default edge color for faces without explicit color.
+     * @param {string} color - The default edge color.
+     */
+    setDefaultEdgeColor(color) {
+        this._defaultEdgeColor = color;
+    }
+
+    /**
+     * Enables or disables the FPS counter display.
+     * @param {boolean} enabled - Whether to show the FPS counter.
+     */
+    toggleFPS(enabled) {
+        this._showFPS = enabled;
+    }
+
+    /**
      * Configures global bloom effect.
      * When enabled, edges glow with a soft blur effect.
      * @param {{enabled?: boolean, blur?: number, color?: string|null}} options - Bloom settings.
@@ -94,7 +187,7 @@ export class Engine {
      *   - color: Glow color, or null to use edge color (default null)
      */
     setBloom(options) {
-        this.renderer.setBloom(options);
+        this.#renderer.setBloom(options);
     }
 
     /**
@@ -102,7 +195,7 @@ export class Engine {
      * @returns {{enabled: boolean, blur: number, color: string|null}} Bloom settings.
      */
     getBloom() {
-        return this.renderer.getBloom();
+        return this.#renderer.getBloom();
     }
 
     /**
@@ -110,8 +203,8 @@ export class Engine {
      * @param {Vector2} newScreenSize - The new screen size.
      */
     setScreenSize(newScreenSize) {
-        this.renderer.setScreenSize(newScreenSize);
-        this.camera.setScreenSize(newScreenSize);
+        this.#renderer.setScreenSize(newScreenSize);
+        this.#camera.setScreenSize(newScreenSize);
     }
 
     /** @private */
@@ -122,12 +215,17 @@ export class Engine {
         const now = performance.now();
         const deltaTime = this._lastFrameTime ? (now - this._lastFrameTime) / 1000 : 0;
         this._lastFrameTime = now;
+        this._fps = deltaTime > 0 ? 1 / deltaTime : 0;
 
         if (this.onUpdate)
             this.onUpdate(deltaTime);
 
-        this.renderer.clear();
+        this.#renderer.clear();
         this._renderAllObjects();
+
+        if (this._showFPS) {
+            this.#renderer.renderFPS(this._fps);
+        }
 
         requestAnimationFrame(() => this._frameUpdate());
     }
@@ -138,7 +236,7 @@ export class Engine {
         const allFaces = [];
 
         for (const obj of this.scene.getSceneObjects()) {
-            const projectedFaces = this.camera.projectSceneObject(obj);
+            const projectedFaces = this.#camera.projectSceneObject(obj);
             allFaces.push(...projectedFaces);
         }
 
@@ -148,9 +246,9 @@ export class Engine {
         }
 
         // Clear bloom canvas at start of frame
-        const bloomEnabled = this.renderer.isBloomEnabled();
+        const bloomEnabled = this.#renderer.isBloomEnabled();
         if (bloomEnabled) {
-            this.renderer.clearBloomCanvas();
+            this.#renderer.clearBloomCanvas();
         }
 
         // Render each face
@@ -158,7 +256,7 @@ export class Engine {
             const positions = face.screenPositions;
 
             // Determine edge color(s)
-            let edgeColor = face.color || this._fgColor;
+            let edgeColor = face.color || this._defaultEdgeColor;
             let gradientEndColor = face.gradientColor;
             let fillColor = face.faceColor;
 
@@ -180,7 +278,7 @@ export class Engine {
 
             // Fill face to occlude faces behind (depth sorting) or render face color
             if (this._depthSorting) {
-                this.renderer.fillFace(positions, fillColor || this.renderer.getBackgroundColor());
+                this.#renderer.fillFace(positions, fillColor || this.#renderer.getBackgroundColor());
             }
 
             // Draw edges to main canvas
@@ -189,17 +287,17 @@ export class Engine {
                 const endPos = positions[(i + 1) % positions.length];
 
                 if (gradientEndColor) {
-                    this.renderer.renderEdgeGradient(startPos, endPos, edgeColor, gradientEndColor);
+                    this.#renderer.renderEdgeGradient(startPos, endPos, edgeColor, gradientEndColor);
                 } else {
-                    this.renderer.renderEdgeWithColor(startPos, endPos, edgeColor);
+                    this.#renderer.renderEdgeWithColor(startPos, endPos, edgeColor);
                 }
 
                 // Also draw to bloom canvas if enabled
                 if (bloomEnabled) {
                     if (gradientEndColor) {
-                        this.renderer.renderEdgeGradientToBloom(startPos, endPos, edgeColor, gradientEndColor);
+                        this.#renderer.renderEdgeGradientToBloom(startPos, endPos, edgeColor, gradientEndColor);
                     } else {
-                        this.renderer.renderEdgeToBloom(startPos, endPos, edgeColor);
+                        this.#renderer.renderEdgeToBloom(startPos, endPos, edgeColor);
                     }
                 }
             }
@@ -207,7 +305,7 @@ export class Engine {
 
         // Composite bloom at end of frame
         if (bloomEnabled) {
-            this.renderer.compositeBloom();
+            this.#renderer.compositeBloom();
         }
     }
 
