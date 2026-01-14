@@ -17,7 +17,8 @@ const CLEAR_SCENE_OBJS_BTN_ID = "clear-scene-objs-btn";
 
 
 const MOBILE_WIDTH_THRESHOLD = 768;
-const INSPECTOR_PANEL_DESKTOP_WIDTH_PX = 275;
+const MOBILE_INSPECTOR_HEIGHT = 300;
+const DESKTOP_INSPECTOR_WIDTH = 275;
 
 const POS_INC = 0.5;
 const ROT_INC = .01;
@@ -34,7 +35,7 @@ const CREATE_MAX_X = 7;
 const CREATE_MAX_Y = 7;
 const CREATE_MIN_Z = 7;
 const CREATE_MAX_Z = 30;
-const DEFAULT_CREATE_Y_ROT = Math.PI + .25;
+const DEFAULT_CREATE_Y_ROT = Math.PI + .35;
 const DEFAULT_CREATE_Z_ROT = .15;
 const CREATE_MIN_ROT = 0;
 const CREATE_MAX_ROT = Math.PI * 2 - .1;
@@ -252,6 +253,7 @@ function clearSceneObjects(engine) {
 
 const OPTION_INPUT_CHECKBOX_TEMPLATE_ID = "option-input-checkbox-template";
 const OPTION_INPUT_SLIDER_TEMPLATE_ID = "option-input-slider-template";
+const OPTION_INPUT_COLOR_TEMPLATE_ID = "option-input-color-template";
 
 /**
  * Creates a checkbox option input from the template and adds it to a parent element.
@@ -354,6 +356,50 @@ function addOptionSlider(title, parentElement, onChange, min = 0, max = 100, ste
     return slider;
 }
 
+/**
+ * Creates a color picker input from the template and adds it to a parent element.
+ * @param {string} title - The label text to display for the color picker
+ * @param {HTMLElement} parentElement - The element to append the color picker to
+ * @param {function} onChange - Callback function that receives the color value (string, hex format like "#ff0000")
+ * @param {string} initialColor - Initial color value in hex format (default: "#000000")
+ * @param {string} uniqueId - Optional unique ID for the color picker (auto-generated if not provided)
+ * @returns {HTMLInputElement} The created color input element
+ */
+function addOptionColor(title, parentElement, onChange, initialColor = "#000000", uniqueId = null) {
+    const template = document.getElementById(OPTION_INPUT_COLOR_TEMPLATE_ID);
+    const clone = template.content.cloneNode(true);
+
+    const colorInput = clone.querySelector('.color-input');
+    const label = clone.querySelector('.color-label');
+
+    // Set the label text
+    label.textContent = title;
+
+    // Set unique ID (generate from title if not provided)
+    const colorId = uniqueId || `${makeDomSafeKey(title)}-color`;
+    colorInput.id = colorId;
+
+    // Set initial color
+    colorInput.value = initialColor;
+
+    // Wire input event to call callback
+    colorInput.addEventListener("input", (event) => {
+        if (typeof onChange === "function") {
+            onChange(event.target.value);
+        }
+    });
+
+    // Append to parent
+    parentElement.appendChild(clone);
+
+    // Call the onChange callback with initial value after setup is complete
+    if (typeof onChange === "function") {
+        onChange(initialColor);
+    }
+
+    return colorInput;
+}
+
 // #endregion
 
 // #region Selected Object Transform Controls
@@ -401,6 +447,7 @@ function updateSelectedObjectControls(engine) {
 // #endregion
 
 // #region Transform Input
+
 function addTransformInput(
     transformName,
     transform,
@@ -557,31 +604,41 @@ function addTransformInput(
   
 // #endregion
 
-
-
 function updateToBrowserSize(engine) {
-    const bodyWidth = document.body.clientWidth;
+    const body = document.body;
 
-    isMobile = bodyWidth <= MOBILE_WIDTH_THRESHOLD;
+    isMobile = body.clientWidth <= MOBILE_WIDTH_THRESHOLD;
     const inspector = document.getElementById(INSPECTOR_PANEL_ID);
     const viewport = document.getElementById(VIEWPORT_PANEL_ID);
 
-    if (!isMobile)
-    {
-        // Inspector is a slim column to the left of the window from top to bottom (100% height)
-        inspector.style.width = INSPECTOR_PANEL_DESKTOP_WIDTH_PX + "px";
-        const viewportHeight = viewport.clientHeight;
+    let baseRenderWidth = null;
+    let baseRenderHeight = null;
 
-        // Calculate base size, then apply resolution scale
-        const baseWidth = bodyWidth - INSPECTOR_PANEL_DESKTOP_WIDTH_PX;
-        const baseHeight = viewportHeight;
-        engine.setScreenSize(new Vector2(
-            Math.floor(baseWidth * resolutionScale),
-            Math.floor(baseHeight * resolutionScale)
-        ));
-    }
+    if (isMobile) {
+        body.style.flexDirection = "column-reverse";
+      
+        inspector.style.width = "100%";
+        inspector.style.maxHeight = MOBILE_INSPECTOR_HEIGHT + "px";
+        inspector.style.overflowY = "auto";
+      
+        baseRenderWidth = body.clientWidth;
+        baseRenderHeight = body.clientHeight - MOBILE_INSPECTOR_HEIGHT;
+      } else {
+        body.style.flexDirection = "row";
+      
+        inspector.style.width = DESKTOP_INSPECTOR_WIDTH + "px";
+        inspector.style.maxHeight = viewport.clientHeight + "px";
+        inspector.style.overflowY = "auto";
+      
+        baseRenderWidth = body.clientWidth - DESKTOP_INSPECTOR_WIDTH;
+        baseRenderHeight = viewport.clientHeight;
+      }
 
-
+    engine.setScreenSize(new Vector2(
+        Math.floor(baseRenderWidth * resolutionScale),
+        Math.floor(baseRenderHeight * resolutionScale)
+    ));
+    
 }
 
 
@@ -607,12 +664,6 @@ function addOptionsToMeshSelect() {
     // Set the default selected mesh to a cube because it has the least vertices
     // This is in-case the user spams the create button as soon as the page loads
     meshSelectElement.selectedIndex = CUBE_MESH_PATH_INDEX;
-}
-
-function moveCamera(engine, pos) {
-    const transform = engine.camera.transform;
-    const diff = transform.position.getDifference(pos);
-    transform.move(diff);
 }
 
 async function init() {
@@ -682,6 +733,50 @@ async function init() {
         DEFAULT_RESOLUTION_SCALE
     );
 
+    addOptionColor(
+        "Background Color",
+        renderingOptionsPanel,
+        (color) => {
+            engine.renderer.setBackgroundColor(color);
+        },
+        "#000000" // black
+    );
+
+    addOptionColor(
+        "Unselected Object Color",
+        renderingOptionsPanel,
+        (color) => {
+            // Update all unselected objects
+            const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
+            for (let i = 0; i < sceneObjsSelectElement.options.length; i++) {
+                const id = parseInt(sceneObjsSelectElement.options[i].value, 10);
+                // Only update if not currently selected
+                if (id !== currentlySelectedSceneObjectId) {
+                    const sceneObject = engine.scene.getSceneObjectById(id);
+                    if (sceneObject) {
+                        sceneObject.color = color;
+                    }
+                }
+            }
+        },
+        UNSELECTED_SCENE_OBJ_COLOR // white
+    );
+
+    addOptionColor(
+        "Selected Object Color",
+        renderingOptionsPanel,
+        (color) => {
+            // Update the selected object immediately if there is one
+            if (currentlySelectedSceneObjectId !== null) {
+                const selectedObject = engine.scene.getSceneObjectById(currentlySelectedSceneObjectId);
+                if (selectedObject) {
+                    selectedObject.color = color;
+                }
+            }
+        },
+        SELECTED_SCENE_OBJ_COLOR // cyan
+    );
+
     // Create a scene object in the center of the screen
     await createSceneObject(engine, null, null, MONKEY_MESH_PATH_INDEX);
 
@@ -693,7 +788,6 @@ async function init() {
     updateSceneObjectSelectionColors(engine);
     updateSelectedObjectControls(engine);
 
-    engine.renderer.setBgColor
     engine.start();
 }
 
