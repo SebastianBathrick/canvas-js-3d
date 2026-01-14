@@ -10,7 +10,7 @@ export class Material {
      * Creates a new Material.
      * @param {string|null} edgeColor - Primary edge color (hex string, e.g., '#ff00ff').
      * @param {string|null} edgeGradientColor - End color for gradient edges (hex string).
-     * @param {string|null} faceColor - Fill color for faces (hex string). Only visible with depth sorting.
+     * @param {string|null} faceColor - Fill color for the associated mesh's faces (hex string). Only visible with depth sorting.
      */
     constructor(edgeColor = null, edgeGradientColor = null, faceColor = null) {
         // Store original colors for reset functionality (immutable)
