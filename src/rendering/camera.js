@@ -110,8 +110,8 @@ export class Camera {
             projectedFaces.push(new ProjectedFace(
                 screenPositions,
                 averageDepth,
-                sceneObject.material.color,
-                sceneObject.material.gradientColor,
+                sceneObject.material.edgeColor,
+                sceneObject.material.edgeGradientColor,
                 sceneObject.material.faceColor
             ));
         }

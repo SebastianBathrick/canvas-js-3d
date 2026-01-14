@@ -576,7 +576,7 @@ function updateSceneObjectSelectionColors(engine) {
     if (currentlySelectedSceneObjectId !== null) {
         const previousSceneObject = engine.scene.getSceneObjectById(currentlySelectedSceneObjectId);
         if (previousSceneObject) {
-            previousSceneObject.material.resetColor();
+            previousSceneObject.material.resetEdgeColor();
         }
     }
 
@@ -585,7 +585,7 @@ function updateSceneObjectSelectionColors(engine) {
         const selectedId = parseInt(sceneObjsSelectElement.value, 10);
         const sceneObject = engine.scene.getSceneObjectById(selectedId);
         if (sceneObject) {
-            sceneObject.material.setColor(selectedSceneObjectColor);
+            sceneObject.material.setEdgeColor(selectedSceneObjectColor);
             currentlySelectedSceneObjectId = selectedId;
         }
     } else {

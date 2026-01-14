@@ -15,7 +15,7 @@ export class SceneObject {
      * @param {string|null} gradientColor - End color for gradient edges (hex string).
      * @param {string|null} faceColor - Fill color for faces (hex string). Only visible with depth sorting.
      */
-    constructor(mesh, transform, color = null, gradientColor = null, faceColor = null) {
+    constructor(mesh, transform, material) {
         /** @type {Mesh} @private */
         this.#mesh = mesh;
         /** @type {Transform} @private */
@@ -23,7 +23,7 @@ export class SceneObject {
 
         // Mutable material property
         /** @type {Material} @private */
-        this._material = new Material(color, gradientColor, faceColor);
+        this._material = material;
     }
 
     /**
@@ -55,7 +55,10 @@ export class SceneObject {
      * @param {Material} value - The new material.
      */
     setMaterial(value) {
-        this._material = value;
+        if (value instanceof Material) 
+            this._material = value;
+        else 
+            throw new Error('Material must be an instance of Material');
     }
 
     /**

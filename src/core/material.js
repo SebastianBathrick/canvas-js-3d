@@ -2,30 +2,30 @@
  * Defines the visual appearance of a scene object with colors for edges and faces.
  */
 export class Material {
-    #originalColor;
-    #originalGradientColor;
+    #originalEdgeColor;
+    #originalEdgeGradientColor;
     #originalFaceColor;
 
     /**
      * Creates a new Material.
-     * @param {string|null} color - Primary edge color (hex string, e.g., '#ff00ff').
-     * @param {string|null} gradientColor - End color for gradient edges (hex string).
+     * @param {string|null} edgeColor - Primary edge color (hex string, e.g., '#ff00ff').
+     * @param {string|null} edgeGradientColor - End color for gradient edges (hex string).
      * @param {string|null} faceColor - Fill color for faces (hex string). Only visible with depth sorting.
      */
-    constructor(color = null, gradientColor = null, faceColor = null) {
+    constructor(edgeColor = null, edgeGradientColor = null, faceColor = null) {
         // Store original colors for reset functionality (immutable)
         /** @type {string|null} @private */
-        this.#originalColor = color;
+        this.#originalEdgeColor = edgeColor;
         /** @type {string|null} @private */
-        this.#originalGradientColor = gradientColor;
+        this.#originalEdgeGradientColor = edgeGradientColor;
         /** @type {string|null} @private */
         this.#originalFaceColor = faceColor;
 
         // Mutable color properties
         /** @type {string|null} Primary edge color @private */
-        this._color = color;
+        this._edgeColor = edgeColor;
         /** @type {string|null} End color for gradient edges @private */
-        this._gradientColor = gradientColor;
+        this._edgeGradientColor = edgeGradientColor;
         /** @type {string|null} Fill color for faces @private */
         this._faceColor = faceColor;
     }
@@ -34,16 +34,16 @@ export class Material {
      * Gets the original color from construction.
      * @returns {string|null} The original color (hex string) or null.
      */
-    get originalColor() {
-        return this.#originalColor;
+    get originalEdgeColor() {
+        return this.#originalEdgeColor;
     }
 
     /**
      * Gets the original gradient color from construction.
      * @returns {string|null} The original gradient color (hex string) or null.
      */
-    get originalGradientColor() {
-        return this.#originalGradientColor;
+    get originalEdgeGradientColor() {
+        return this.#originalEdgeGradientColor;
     }
 
     /**
@@ -58,32 +58,32 @@ export class Material {
      * Gets the primary edge color.
      * @returns {string|null} The edge color (hex string) or null.
      */
-    get color() {
-        return this._color;
+    get edgeColor() {
+        return this._edgeColor;
     }
 
     /**
      * Sets the primary edge color.
      * @param {string|null} value - The edge color (hex string) or null.
      */
-    setColor(value) {
-        this._color = value;
+    setEdgeColor(value) {
+        this._edgeColor = value;
     }
 
     /**
      * Gets the gradient end color for edges.
      * @returns {string|null} The gradient end color (hex string) or null.
      */
-    get gradientColor() {
-        return this._gradientColor;
+    get edgeGradientColor() {
+        return this._edgeGradientColor;
     }
 
     /**
      * Sets the gradient end color for edges.
      * @param {string|null} value - The gradient end color (hex string) or null.
      */
-    setGradientColor(value) {
-        this._gradientColor = value;
+    setEdgeGradientColor(value) {
+        this._edgeGradientColor = value;
     }
 
     /**
@@ -105,15 +105,15 @@ export class Material {
     /**
      * Resets the primary edge color to its original value from construction.
      */
-    resetColor() {
-        this._color = this.#originalColor;
+    resetEdgeColor() {
+        this._edgeColor = this.#originalEdgeColor;
     }
 
     /**
      * Resets the gradient color to its original value from construction.
      */
-    resetGradientColor() {
-        this._gradientColor = this.#originalGradientColor;
+    resetEdgeGradientColor() {
+        this._edgeGradientColor = this.#originalEdgeGradientColor;
     }
 
     /**
@@ -127,8 +127,8 @@ export class Material {
      * Resets all colors (edge, gradient, and face) to their original values from construction.
      */
     resetAllColors() {
-        this.resetColor();
-        this.resetGradientColor();
+        this.resetEdgeColor();
+        this.resetEdgeGradientColor();
         this.resetFaceColor();
     }
 }
