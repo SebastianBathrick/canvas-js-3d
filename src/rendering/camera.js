@@ -85,14 +85,26 @@ export class Camera {
             // Project vertices and calculate average depth
             let depthSum = 0;
             const screenPositions = [];
+            let isValid = true;
             
             for (const vert of faceVerts) {
                 const cameraSpacePos = this.worldToCameraSpace(vert);
                 depthSum += cameraSpacePos.z;
+
+                const normScreenPos = this.getNormalizedScreenPosition(cameraSpacePos);
+                if (normScreenPos === null) 
+                {
+                    isValid = false;
+                    break;
+                }
+
                 screenPositions.push(
-                    this.getScaledScreenPosition(this.getNormalizedScreenPosition(cameraSpacePos))
+                    this.getScaledScreenPosition(normScreenPos)
                 );
             }
+
+            if (!isValid)
+                continue;
             
             const averageDepth = depthSum / faceVerts.length;
             projectedFaces.push(new ProjectedFace(screenPositions, averageDepth));
@@ -140,6 +152,9 @@ export class Camera {
         * If > 0 the point is in front of the camera, if <= 0 the point is not visible, because the divisor 
         * would be zero. Thus it is in the same 3D position as the camera. As z increases the 3D point moves 
         * further away from the camera. */
+        const near = 1e-4;
+        if (scenePos.z <= near) 
+            return null;
 
         return new Vector2(
             (scenePos.x / scenePos.z) * this._focalLength / this._aspectRatio,
@@ -164,7 +179,12 @@ export class Camera {
     /** @private */
     getVertexScreenPos(scenePos) {
         const cameraSpacePos = this.worldToCameraSpace(scenePos);
-        return this.getScaledScreenPosition(this.getNormalizedScreenPosition(cameraSpacePos));
+        const normScreenPos = this.getNormalizedScreenPosition(cameraSpacePos);
+
+        if (normScreenPos === null) 
+            return null;
+
+        return this.getScaledScreenPosition(normScreenPos);
     }
 
 
