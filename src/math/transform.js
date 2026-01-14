@@ -18,15 +18,15 @@ export class Transform {
 
     /**
      * Translates the position by the given vector.
-     * @param {Vector3} translation - The translation to apply.
+     * @param {Vector3} movement - The translation to apply.
      */
-    translate(translation) {
-        this.position = this.position.getTranslated(translation);
+    move(movement) {
+        this.position = this.position.getTranslated(movement);
     }
 
     /**
      * Rotates around the X axis by the given angle.
-     * @param {number} angle - The angle to rotate by in radians.
+     * @param {number} angle - The angle to rotate by inas radians.
      */
     rotateX(angle) {
         this.rotation = this.rotation.getTranslated(new Vector3(angle, 0, 0));

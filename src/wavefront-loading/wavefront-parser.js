@@ -25,8 +25,8 @@ export class WavefrontParser {
      * @returns {{vertices: Vector3[], faceIndices: number[][]}} The parsed mesh data.
      */
     parse() {
-        while (!this.isAtEnd()) {
-            this.parseStatement();
+        while (!this._isAtEnd()) {
+            this._parseStatement();
         }
 
         return {
@@ -36,12 +36,12 @@ export class WavefrontParser {
     }
 
     /** @private */
-    parseStatement() {
-        const token = this.peek();
+    _parseStatement() {
+        const token = this._peek();
 
         // Skip newlines
         if (token.type === 'NEWLINE') {
-            this.advance();
+            this._advance();
             return;
         }
 
@@ -50,68 +50,68 @@ export class WavefrontParser {
             const keyword = token.value;
 
             if (keyword === 'v') {
-                this.advance(); // consume 'v'
-                this.parseVertex();
+                this._advance(); // consume 'v'
+                this._parseVertex();
             } else if (keyword === 'f') {
-                this.advance(); // consume 'f'
-                this.parseFace();
+                this._advance(); // consume 'f'
+                this._parseFace();
             } else {
                 // Unknown keyword - skip to end of line
-                this.skipToNextLine();
+                this._skipToNextLine();
             }
             return;
         }
 
         // Skip anything else
-        this.advance();
+        this._advance();
     }
 
     /** @private */
-    parseVertex() {
-        const x = this.consumeNumber();
-        const y = this.consumeNumber();
-        const z = this.consumeNumber();
+    _parseVertex() {
+        const x = this._consumeNumber();
+        const y = this._consumeNumber();
+        const z = this._consumeNumber();
 
         this._vertices.push(new Vector3(x, y, z));
-        this.skipToNextLine();
+        this._skipToNextLine();
     }
 
     /** @private */
-    parseFace() {
+    _parseFace() {
         const indices = [];
 
         // Consume all vertex indices until newline or EOF
-        while (!this.isAtEnd() && this.peek().type !== 'NEWLINE') {
-            if (this.peek().type === 'NUMBER') {
+        while (!this._isAtEnd() && this._peek().type !== 'NEWLINE') {
+            if (this._peek().type === 'NUMBER') {
                 // Get vertex index (1-indexed in OBJ, convert to 0-indexed)
-                const vertexIndex = this.consumeNumber() - 1;
+                const vertexIndex = this._consumeNumber() - 1;
                 indices.push(vertexIndex);
 
                 // Skip texture/normal indices (e.g., /2/3)
-                while (this.peek().type === 'SLASH') {
-                    this.advance(); // consume '/'
+                while (this._peek().type === 'SLASH') {
+                    this._advance(); // consume '/'
 
                     // Consume the index after slash if present
-                    if (this.peek().type === 'NUMBER')
-                        this.advance();
+                    if (this._peek().type === 'NUMBER')
+                        this._advance();
                 }
             } else {
-                this.advance();
+                this._advance();
             }
         }
 
         if (indices.length >= 3)
             this._faceIndices.push(indices);
 
-        this.skipToNextLine();
+        this._skipToNextLine();
     }
 
     /** @private */
-    consumeNumber() {
-        const token = this.peek();
+    _consumeNumber() {
+        const token = this._peek();
 
         if (token.type === 'NUMBER') {
-            this.advance();
+            this._advance();
             return token.value;
         }
 
@@ -120,30 +120,30 @@ export class WavefrontParser {
     }
 
     /** @private */
-    skipToNextLine() {
-        while (!this.isAtEnd() && this.peek().type !== 'NEWLINE')
-            this.advance();
+    _skipToNextLine() {
+        while (!this._isAtEnd() && this._peek().type !== 'NEWLINE')
+            this._advance();
 
         // Consume the newline
-        if (!this.isAtEnd() && this.peek().type === 'NEWLINE')
-            this.advance();
+        if (!this._isAtEnd() && this._peek().type === 'NEWLINE')
+            this._advance();
     }
 
     /** @private */
-    peek() {
+    _peek() {
         return this._tokens[this._current];
     }
 
     /** @private */
-    advance() {
-        if (!this.isAtEnd())
+    _advance() {
+        if (!this._isAtEnd())
             this._current++;
 
         return this._tokens[this._current - 1];
     }
 
     /** @private */
-    isAtEnd() {
-        return this._current >= this._tokens.length || this.peek().type === 'EOF';
+    _isAtEnd() {
+        return this._current >= this._tokens.length || this._peek().type === 'EOF';
     }
 }

@@ -193,7 +193,7 @@ export class Vector3 {
      * @param {Vector3} other - The vector to subtract.
      * @returns {Vector3} A new vector.
      */
-    getSubtracted(other) {
+    getDifference(other) {
         return new Vector3(this.x - other.x, this.y - other.y, this.z - other.z);
     }
 }

@@ -127,8 +127,8 @@ export class Camera {
         const v2 = this._worldToCameraSpace(faceVerts[2]);
         
         // Compute face normal using cross product of two edges
-        const edge1 = v1.getSubtracted(v0);
-        const edge2 = v2.getSubtracted(v0);
+        const edge1 = v1.getDifference(v0);
+        const edge2 = v2.getDifference(v0);
         const normal = edge1.getCross(edge2);
         
         // Face is back-facing if normal points away from camera (positive z in camera space)
