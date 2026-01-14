@@ -6,8 +6,8 @@ const VIEWPORT_PANEL_ID = "viewport-panel";
 const MOBILE_WIDTH_THRESHOLD = 768;
 const INSPECTOR_PANEL_DESKTOP_WIDTH_PX = 275;
 
-const POS_INC = 0.01;
-const ROT_INC = Math.PI / 4;
+const POS_INC = 0.5;
+const ROT_INC = .01;
 const SCALE_INC = 0.1;
 const VECTOR_INPUT_TEMPLATE_ID = "vector-input-template";
 const POS_PREFIX = "pos";
@@ -19,10 +19,13 @@ const SCALE_LABEL = "Scale";
 
 const CREATE_MAX_X = 5;
 const CREATE_MAX_Y = 5;
-const CREATE_MIN_Z = 10;
+const CREATE_MIN_Z = 7;
 const CREATE_MAX_Z = 20;
 
 const TRANSFORM_INPUTS_TEMPLATE_ID = "transform-input-template";
+
+// ID for the selected object's transform controls
+const SELECTED_OBJ_TRANSFORM_PANEL_ID = "selected-obj-transform-panel";
 
 // The select element where the user picks from a limited list of predefined meshes
 const CREATE_SCENE_OBJ_MESH_SELECT_ID = "create-scene-obj-mesh-select";
@@ -102,6 +105,7 @@ async function createSceneObject(engine) {
 
     updateClearButtonState(engine);
     updateRemoveButtonState();
+    updateSelectedObjectControls(engine);
 }
 
 function removeSceneObject(engine) {
@@ -116,6 +120,7 @@ function removeSceneObject(engine) {
 
     updateClearButtonState(engine);
     updateRemoveButtonState();
+    updateSelectedObjectControls(engine);
 }
 
 function clearSceneObjects(engine) {
@@ -129,6 +134,51 @@ function clearSceneObjects(engine) {
 
     updateClearButtonState(engine);
     updateRemoveButtonState();
+    updateSelectedObjectControls(engine);
+}
+
+// #endregion
+
+// #region Selected Object Transform Controls
+
+function updateSelectedObjectControls(engine) {
+    // Remove existing controls if they exist
+    const existingPanel = document.getElementById(SELECTED_OBJ_TRANSFORM_PANEL_ID);
+    if (existingPanel) {
+        existingPanel.remove();
+    }
+
+    // Get the selected scene object
+    const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
+    const selectedIndex = sceneObjsSelectElement.selectedIndex;
+
+    // If nothing is selected or no objects exist, return
+    if (selectedIndex === -1 || sceneObjsSelectElement.options.length === 0) {
+        return;
+    }
+
+    // Get the selected scene object by ID
+    const selectedId = parseInt(sceneObjsSelectElement.value, 10);
+    const sceneObject = engine.scene.getSceneObjectById(selectedId);
+
+    if (!sceneObject) {
+        return;
+    }
+
+    // Get the display name from the select option
+    const displayName = sceneObjsSelectElement.options[selectedIndex].text;
+
+    // Add transform controls for the selected object
+    // Insert after the camera controls (index 1)
+    addTransformInput(
+        displayName,
+        sceneObject.transform,
+        true,  // isPos
+        true,  // isRot
+        true,  // isScale
+        1,     // childIndex - insert after camera
+        SELECTED_OBJ_TRANSFORM_PANEL_ID  // panelId
+    );
 }
 
 // #endregion
@@ -136,18 +186,22 @@ function clearSceneObjects(engine) {
 // #region Transform Input
 function addTransformInput(
     transformName,
-    onChangePos,
-    onChangeRot,
-    onChangeScale,
+    transform,
     isPos = true,
     isRot = true,
     isScale = true,
-    childIndex = null
+    childIndex = null,
+    panelId = null
   ) {
     // The template contains a single div element with a header element child
     const template = document.getElementById(TRANSFORM_INPUTS_TEMPLATE_ID);
     const subpanel = template.content.cloneNode(true).firstElementChild;
     subpanel.firstElementChild.textContent = transformName;
+
+    // Set custom ID if provided
+    if (panelId) {
+      subpanel.id = panelId;
+    }
 
     // Use a unique prefix per panel to avoid duplicate IDs like "posX" etc.
     // Example: "Camera" => "camera", "My Obj" => "my-obj"
@@ -159,7 +213,12 @@ function addTransformInput(
         `${panelKey}-${POS_PREFIX}`,   // unique prefix
         POS_INC,
         POS_LABEL,
-        onChangePos
+        (pos) => {
+          transform.position.x = pos.x;
+          transform.position.y = pos.y;
+          transform.position.z = pos.z;
+        },
+        transform.position
       );
 
 
@@ -169,7 +228,12 @@ function addTransformInput(
         `${panelKey}-${ROT_PREFIX}`,
         ROT_INC,
         ROT_LABEL,
-        onChangeRot
+        (rot) => {
+          transform.rotation.x = rot.x;
+          transform.rotation.y = rot.y;
+          transform.rotation.z = rot.z;
+        },
+        transform.rotation
       );
 
 
@@ -179,7 +243,12 @@ function addTransformInput(
         `${panelKey}-${SCALE_PREFIX}`,
         SCALE_INC,
         SCALE_LABEL,
-        onChangeScale
+        (scale) => {
+          transform.scale.x = scale.x;
+          transform.scale.y = scale.y;
+          transform.scale.z = scale.z;
+        },
+        transform.scale
       );
 
 
@@ -199,24 +268,29 @@ function addTransformInput(
    * - prefix should be UNIQUE within the document (we build this from transformName + type).
    * - onChange is called whenever any component changes, passing the full Vector3.
    */
-  function addVectorInput(parentElement, prefix, step, labelText, onChange) {
+  function addVectorInput(parentElement, prefix, step, labelText, onChange, initialValue = null) {
     const template = document.getElementById(VECTOR_INPUT_TEMPLATE_ID);
     const clone = template.content.cloneNode(true);
-  
+
     const vectorLabel = clone.querySelector(".vector-label");
     const x = clone.querySelector(".x");
     const y = clone.querySelector(".y");
     const z = clone.querySelector(".z");
-  
+
     vectorLabel.textContent = labelText;
-  
+
     // Unique IDs (important if you add multiple transform panels)
     x.id = `${prefix}X`;
     y.id = `${prefix}Y`;
     z.id = `${prefix}Z`;
-  
-    // Step: avoid 0, it breaks number input stepping.
-    // If you truly want "no stepping", you can omit step entirely.
+
+    // Set initial values if provided
+    if (initialValue !== null) {
+      x.value = initialValue.x;
+      y.value = initialValue.y;
+      z.value = initialValue.z;
+    }
+
     if (typeof step === "number" && step > 0) {
       x.step = step;
       y.step = step;
@@ -226,23 +300,20 @@ function addTransformInput(
       y.removeAttribute("step");
       z.removeAttribute("step");
     }
-  
+
     // Wire change events if a callback was provided
     if (typeof onChange === "function") {
       const emit = () => {
         const v = readVector3FromInputs(x, y, z);
         onChange(v);
       };
-  
+
       // "input" fires immediately while typing; "change" fires on blur/enter.
       x.addEventListener("input", emit);
       y.addEventListener("input", emit);
       z.addEventListener("input", emit);
-  
-      // Optional: also emit once right away so the caller gets initial state
-      emit();
     }
-  
+
     parentElement.appendChild(clone);
   }
   
@@ -296,7 +367,10 @@ function initListeners(engine) {
     document.getElementById(CREATE_SCENE_OBJ_BTN_ID).addEventListener("click", () => createSceneObject(engine));
     document.getElementById(REMOVE_SCENE_OBJ_BTN_ID).addEventListener("click", () => removeSceneObject(engine));
     document.getElementById(CLEAR_SCENE_OBJS_BTN_ID).addEventListener("click", () => clearSceneObjects(engine));
-    document.getElementById(SCENE_OBJS_SELECT_ID).addEventListener("change", () => updateRemoveButtonState());
+    document.getElementById(SCENE_OBJS_SELECT_ID).addEventListener("change", () => {
+        updateRemoveButtonState();
+        updateSelectedObjectControls(engine);
+    });
     window.addEventListener("resize", () => updateToBrowserSize(engine));
 }
 
@@ -330,19 +404,7 @@ async function init() {
     // Add camera transform controls at the top of the inspector panel
     addTransformInput(
         "Camera",
-        (pos) => {
-            // Position callback
-            engine.camera.transform.position.x = pos.x;
-            engine.camera.transform.position.y = pos.y;
-            engine.camera.transform.position.z = pos.z;
-        },
-        (rot) => {
-            // Rotation callback
-            engine.camera.transform.rotation.x = rot.x;
-            engine.camera.transform.rotation.y = rot.y;
-            engine.camera.transform.rotation.z = rot.z;
-        },
-        null, // Scale callback (camera doesn't need scale)
+        engine.camera.transform,
         true, // isPos
         true, // isRot
         false, // isScale - disable scale for camera
@@ -356,6 +418,7 @@ async function init() {
     const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
     sceneObjsSelectElement.selectedIndex = 0;
     updateRemoveButtonState();
+    updateSelectedObjectControls(engine);
 
     engine.renderer.setBgColor
     engine.start();
