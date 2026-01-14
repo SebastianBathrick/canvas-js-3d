@@ -41,7 +41,7 @@ export class Renderer {
      * Sets the background color.
      * @param {string} color - The new background color (hex string or CSS color).
      */
-    setBgColor(color) {
+    setBackgroundColor(color) {
         this._backgroundColor = color;
     }
 
@@ -49,16 +49,16 @@ export class Renderer {
      * Gets the background gradient end color.
      * @returns {string|null} The gradient end color, or null if no gradient.
      */
-    getBgGradientColor() {
-        return this._bgGradientColor;
+    getBackgroundGradientColor() {
+        return this._backgroundGradientColor;
     }
 
     /**
      * Sets the background gradient end color. Set to null to disable gradient.
      * @param {string|null} color - The gradient end color, or null to disable.
      */
-    setBgGradientColor(color) {
-        this._bgGradientColor = color;
+    setBackgroundGradientColor(color) {
+        this._backgroundGradientColor = color;
     }
 
     /**
@@ -197,13 +197,13 @@ export class Renderer {
      * Clears the canvas with the background color or gradient.
      */
     clear() {
-        if (this._bgGradientColor) {
+        if (this._backgroundGradientColor) {
             const gradient = this._ctx.createLinearGradient(
                 0, 0,
                 0, this._canvas.height
             );
             gradient.addColorStop(0, this._backgroundColor);
-            gradient.addColorStop(1, this._bgGradientColor);
+            gradient.addColorStop(1, this._backgroundGradientColor);
             this._ctx.fillStyle = gradient;
         } else {
             this._ctx.fillStyle = this._backgroundColor;
@@ -217,7 +217,7 @@ export class Renderer {
      * @param {Vector2} endVector2 - The end position in screen coordinates.
      */
     renderEdge(startVector2, endVector2) {
-        this._ctx.strokeStyle = this._fgColor;
+        this._ctx.strokeStyle = this._foregroundColor;
         this._ctx.beginPath();
         this._ctx.moveTo(startVector2.x, startVector2.y);
         this._ctx.lineTo(endVector2.x, endVector2.y);
@@ -265,7 +265,7 @@ export class Renderer {
      * @param {Vector2} vector2 - The position in screen coordinates.
      */
     renderPoint(vector2) {
-        this._ctx.fillStyle = this._fgColor;
+        this._ctx.fillStyle = this._foregroundColor;
         this._ctx.fillRect(
             vector2.x - this._pointSize / 2,
             vector2.y - this._pointSize / 2,
