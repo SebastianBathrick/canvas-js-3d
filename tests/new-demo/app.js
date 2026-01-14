@@ -47,6 +47,11 @@ const MAX_FOV = 120;
 const MIN_FOV = 30;
 const FOV_STEP = 1;
 
+const DEFAULT_RESOLUTION_SCALE = 1.0;
+const MIN_RESOLUTION_SCALE = 0.25;
+const MAX_RESOLUTION_SCALE = 1.0;
+const RESOLUTION_SCALE_STEP = 0.05;
+
 const CUBE_MESH_PATH_INDEX = 1;
 const MONKEY_MESH_PATH_INDEX = 0; // Monkey
 const MESH_PATHS = {
@@ -567,8 +572,13 @@ function updateToBrowserSize(engine) {
         inspector.style.width = INSPECTOR_PANEL_DESKTOP_WIDTH_PX + "px";
         const viewportHeight = viewport.clientHeight;
 
-        // It won't be exact but the background color will cover the difference ()
-        engine.setScreenSize(new Vector2(bodyWidth - INSPECTOR_PANEL_DESKTOP_WIDTH_PX, viewportHeight));
+        // Calculate base size, then apply resolution scale
+        const baseWidth = bodyWidth - INSPECTOR_PANEL_DESKTOP_WIDTH_PX;
+        const baseHeight = viewportHeight;
+        engine.setScreenSize(new Vector2(
+            Math.floor(baseWidth * resolutionScale),
+            Math.floor(baseHeight * resolutionScale)
+        ));
     }
 
 
@@ -659,6 +669,19 @@ async function init() {
         DEFAULT_FOV
     );
 
+    addOptionSlider(
+        "Resolution Scale",
+        renderingOptionsPanel,
+        (value) => {
+            resolutionScale = value;
+            updateToBrowserSize(engine);
+        },
+        MIN_RESOLUTION_SCALE,
+        MAX_RESOLUTION_SCALE,
+        RESOLUTION_SCALE_STEP,
+        DEFAULT_RESOLUTION_SCALE
+    );
+
     // Create a scene object in the center of the screen
     await createSceneObject(engine, null, null, MONKEY_MESH_PATH_INDEX);
 
@@ -675,5 +698,6 @@ async function init() {
 }
 
 let isMobile = false;
+let resolutionScale = DEFAULT_RESOLUTION_SCALE;
 
 init();
