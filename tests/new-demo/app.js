@@ -39,6 +39,14 @@ const DEFAULT_CREATE_Z_ROT = .15;
 const CREATE_MIN_ROT = 0;
 const CREATE_MAX_ROT = Math.PI * 2 - .1;
 
+const DEFAULT_IS_DEPTH_SORTING = true;
+const DEFAULT_IS_BACK_FACE_CULLING = true;
+const DEFAULT_FOV = 60;
+
+const MAX_FOV = 120;
+const MIN_FOV = 30;
+const FOV_STEP = 1;
+
 const CUBE_MESH_PATH_INDEX = 1;
 const MONKEY_MESH_PATH_INDEX = 0; // Monkey
 const MESH_PATHS = {
@@ -238,6 +246,7 @@ function clearSceneObjects(engine) {
 // #region Option Checkbox Input
 
 const OPTION_INPUT_CHECKBOX_TEMPLATE_ID = "option-input-checkbox-template";
+const OPTION_INPUT_SLIDER_TEMPLATE_ID = "option-input-slider-template";
 
 /**
  * Creates a checkbox option input from the template and adds it to a parent element.
@@ -281,6 +290,63 @@ function addOptionCheckbox(title, parentElement, onChange, initialChecked = fals
     }
 
     return checkbox;
+}
+
+/**
+ * Creates a slider option input from the template and adds it to a parent element.
+ * @param {string} title - The label text to display for the slider
+ * @param {HTMLElement} parentElement - The element to append the slider to
+ * @param {function} onChange - Callback function that receives the slider value (number)
+ * @param {number} min - Minimum slider value (default: 0)
+ * @param {number} max - Maximum slider value (default: 100)
+ * @param {number} step - Step increment (default: 1)
+ * @param {number} initialValue - Initial slider value (default: min value)
+ * @param {string} uniqueId - Optional unique ID for the slider (auto-generated if not provided)
+ * @returns {HTMLInputElement} The created slider input element
+ */
+function addOptionSlider(title, parentElement, onChange, min = 0, max = 100, step = 1, initialValue = null, uniqueId = null) {
+    const template = document.getElementById(OPTION_INPUT_SLIDER_TEMPLATE_ID);
+    const clone = template.content.cloneNode(true);
+
+    const slider = clone.querySelector('.slider-input');
+    const label = clone.querySelector('.slider-label');
+    const valueDisplay = clone.querySelector('.slider-value');
+
+    // Set the label text
+    label.textContent = title;
+
+    // Set unique ID (generate from title if not provided)
+    const sliderId = uniqueId || `${makeDomSafeKey(title)}-slider`;
+    slider.id = sliderId;
+
+    // Set slider range and step
+    slider.min = min;
+    slider.max = max;
+    slider.step = step;
+
+    // Set initial value (default to min if not provided)
+    const startValue = initialValue !== null ? initialValue : min;
+    slider.value = startValue;
+    valueDisplay.textContent = startValue;
+
+    // Wire input event to update display and call callback
+    slider.addEventListener("input", (event) => {
+        const value = parseFloat(event.target.value);
+        valueDisplay.textContent = value;
+        if (typeof onChange === "function") {
+            onChange(value);
+        }
+    });
+
+    // Append to parent
+    parentElement.appendChild(clone);
+
+    // Call the onChange callback with initial value after setup is complete
+    if (typeof onChange === "function") {
+        onChange(startValue);
+    }
+
+    return slider;
 }
 
 // #endregion
@@ -579,6 +645,18 @@ async function init() {
             engine.camera.toggleBackFaceCulling(checked);
         },
         true // initially checked
+    );
+
+    addOptionSlider(
+        "Field of View",
+        renderingOptionsPanel,
+        (value) => {
+            engine.camera.setFov(value);
+        },
+        MIN_FOV,
+        MAX_FOV,
+        FOV_STEP,
+        DEFAULT_FOV
     );
 
     // Create a scene object in the center of the screen
