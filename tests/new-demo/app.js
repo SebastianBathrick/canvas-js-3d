@@ -31,6 +31,7 @@ const CREATE_SCENE_OBJ_MESH_SELECT_ID = "create-scene-obj-mesh-select";
 const SCENE_OBJS_SELECT_ID = "scene-objs-select";
 const CREATE_SCENE_OBJ_BTN_ID = "create-scene-obj-btn";
 const REMOVE_SCENE_OBJ_BTN_ID = "remove-scene-obj-btn";
+const CLEAR_SCENE_OBJS_BTN_ID = "clear-scene-objs-btn";
 const MESH_PATHS = {
     Monkey: "../../meshes/monkey.obj",
     Cube: "../../meshes/cube.obj",
@@ -40,9 +41,27 @@ const MESH_PATHS = {
     Torus: "../../meshes/torus.obj",
 };
 
+const DEFAULT_MESH_PATH_INDEX = 0;
+
 // #endregion
 
 // #region Add/Remove SceneObjects Functions
+
+const meshCache = new Map();
+
+function updateClearButtonState(engine) {
+    const clearButton = document.getElementById(CLEAR_SCENE_OBJS_BTN_ID);
+    const hasSceneObjects = engine.scene.getSceneObjects().length > 0;
+    clearButton.disabled = !hasSceneObjects;
+}
+
+function updateRemoveButtonState() {
+    const removeButton = document.getElementById(REMOVE_SCENE_OBJ_BTN_ID);
+    const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
+    const hasSelection = sceneObjsSelectElement.selectedIndex !== -1;
+    const hasSceneObjects = sceneObjsSelectElement.options.length > 0;
+    removeButton.disabled = !hasSelection || !hasSceneObjects;
+}
 
 async function createSceneObject(engine) {
     // The select element where the user picks from a limited list of predefined meshes
@@ -50,7 +69,14 @@ async function createSceneObject(engine) {
 
     const objFileUrl = meshSelectElement.value;
     const displayName = meshSelectElement.options[meshSelectElement.selectedIndex].text;
-    const mesh = await WavefrontMeshConverter.fromUrl(objFileUrl);
+
+    let mesh;
+    if (meshCache.has(objFileUrl)) {
+        mesh = meshCache.get(objFileUrl);
+    } else {
+        mesh = await WavefrontMeshConverter.fromUrl(objFileUrl);
+        meshCache.set(objFileUrl, mesh);
+    }
 
     let spawnPos = null;
     function randomInt(min, max) {
@@ -73,6 +99,9 @@ async function createSceneObject(engine) {
     // The select element that's used to display the list of current scene objects
     const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
     sceneObjsSelectElement.appendChild(new Option(displayName, id));
+
+    updateClearButtonState(engine);
+    updateRemoveButtonState();
 }
 
 function removeSceneObject(engine) {
@@ -84,16 +113,22 @@ function removeSceneObject(engine) {
     const sceneObject = engine.scene.getSceneObjectById(id);
     engine.scene.removeSceneObject(sceneObject);
     sceneObjsSelectElement.remove(selectedIndex);
+
+    updateClearButtonState(engine);
+    updateRemoveButtonState();
 }
 
 function clearSceneObjects(engine) {
-    const sceneObjects = [...engine.scene.getSceneObjects()];
+    const sceneObjects = engine.scene.getSceneObjects();
     for (const sceneObject of sceneObjects) {
         engine.scene.removeSceneObject(sceneObject);
     }
 
     const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
     sceneObjsSelectElement.innerHTML = '';
+
+    updateClearButtonState(engine);
+    updateRemoveButtonState();
 }
 
 // #endregion
@@ -106,17 +141,18 @@ function addTransformInput(
     onChangeScale,
     isPos = true,
     isRot = true,
-    isScale = true
+    isScale = true,
+    childIndex = null
   ) {
     // The template contains a single div element with a header element child
     const template = document.getElementById(TRANSFORM_INPUTS_TEMPLATE_ID);
     const subpanel = template.content.cloneNode(true).firstElementChild;
     subpanel.firstElementChild.textContent = transformName;
-  
+
     // Use a unique prefix per panel to avoid duplicate IDs like "posX" etc.
     // Example: "Camera" => "camera", "My Obj" => "my-obj"
     const panelKey = makeDomSafeKey(transformName);
-  
+
     if (isPos)
       addVectorInput(
         subpanel,
@@ -125,8 +161,8 @@ function addTransformInput(
         POS_LABEL,
         onChangePos
       );
-    
-  
+
+
     if (isRot)
       addVectorInput(
         subpanel,
@@ -135,8 +171,8 @@ function addTransformInput(
         ROT_LABEL,
         onChangeRot
       );
-    
-  
+
+
     if (isScale)
       addVectorInput(
         subpanel,
@@ -145,9 +181,17 @@ function addTransformInput(
         SCALE_LABEL,
         onChangeScale
       );
-    
-  
-    document.getElementById(INSPECTOR_PANEL_ID).appendChild(subpanel);
+
+
+    const inspectorPanel = document.getElementById(INSPECTOR_PANEL_ID);
+
+    // If childIndex is specified and valid, insert at that position
+    if (childIndex !== null && childIndex >= 0 && childIndex < inspectorPanel.children.length) {
+      inspectorPanel.insertBefore(subpanel, inspectorPanel.children[childIndex]);
+    } else {
+      // Otherwise append to the end
+      inspectorPanel.appendChild(subpanel);
+    }
   }
   
   /**
@@ -251,7 +295,8 @@ function updateToBrowserSize(engine) {
 function initListeners(engine) {
     document.getElementById(CREATE_SCENE_OBJ_BTN_ID).addEventListener("click", () => createSceneObject(engine));
     document.getElementById(REMOVE_SCENE_OBJ_BTN_ID).addEventListener("click", () => removeSceneObject(engine));
-    document.getElementById("clear-scene-objs-btn").addEventListener("click", () => clearSceneObjects(engine));
+    document.getElementById(CLEAR_SCENE_OBJS_BTN_ID).addEventListener("click", () => clearSceneObjects(engine));
+    document.getElementById(SCENE_OBJS_SELECT_ID).addEventListener("change", () => updateRemoveButtonState());
     window.addEventListener("resize", () => updateToBrowserSize(engine));
 }
 
@@ -262,7 +307,7 @@ function addOptionsToMeshSelect() {
     for (const [key, value] of Object.entries(MESH_PATHS)) {
         meshSelectElement.appendChild(new Option(key, value));
     }
-    meshSelectElement.selectedIndex = 0;
+    meshSelectElement.selectedIndex = DEFAULT_MESH_PATH_INDEX;
 }
 
 function moveCamera(engine, pos) {
@@ -271,15 +316,47 @@ function moveCamera(engine, pos) {
     transform.move(diff);
 }
 
-function init() {
+async function init() {
     addOptionsToMeshSelect();
-    
+
     const engine = new Engine(document.getElementById("canvas"), "cyan", "black");
     //engine.renderer.setBackgroundColor(BODY_BACKGROUND_COLOR);
     updateToBrowserSize(engine);
 
     initListeners(engine);
-    
+    updateClearButtonState(engine);
+    updateRemoveButtonState();
+
+    // Add camera transform controls at the top of the inspector panel
+    addTransformInput(
+        "Camera",
+        (pos) => {
+            // Position callback
+            engine.camera.transform.position.x = pos.x;
+            engine.camera.transform.position.y = pos.y;
+            engine.camera.transform.position.z = pos.z;
+        },
+        (rot) => {
+            // Rotation callback
+            engine.camera.transform.rotation.x = rot.x;
+            engine.camera.transform.rotation.y = rot.y;
+            engine.camera.transform.rotation.z = rot.z;
+        },
+        null, // Scale callback (camera doesn't need scale)
+        true, // isPos
+        true, // isRot
+        false, // isScale - disable scale for camera
+        0 // childIndex - insert at the top
+    );
+
+    // Create a scene object in the center of the screen
+    await createSceneObject(engine);
+
+    // Select the scene object
+    const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
+    sceneObjsSelectElement.selectedIndex = 0;
+    updateRemoveButtonState();
+
     engine.renderer.setBgColor
     engine.start();
 }

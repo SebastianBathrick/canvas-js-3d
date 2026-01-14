@@ -2,7 +2,10 @@
   --level-1-background-color: #1e1e1e;
   --level-2-background-color: #252526;
   --level-3-background-color: #2d2d30;
-  --level-4-background-color: #3e3e42;
+  --level-4-background-color: #3e3e4291;
+
+  --disabled-background-color: #3e3e42;
+  --disabled-text-color: #555555;
 
   --extra-large-distance: 20px;
   --large-distance: 15px;
@@ -67,6 +70,11 @@ button {
   padding-bottom: var(--selectable-padding-top-bottom);
   padding-left: var(--selectable-padding-left-right);
   padding-right: var(--selectable-padding-left-right);
+}
+
+button:disabled {
+  background-color: var(--disabled-background-color);
+  color: var(--disabled-text-color);
 }
 
 input {
