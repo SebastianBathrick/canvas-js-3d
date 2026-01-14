@@ -9,7 +9,7 @@
 
   --extra-large-distance: 20px;
   --large-distance: 15px;
-  --mid-distance: 8px;
+  --mid-distance: 11px;
   --small-distance: 5px;
 
   
@@ -22,8 +22,8 @@
   --inner-padding-top-bottom: 2px;
   --inner-padding-left-right: 2px;
   
-  --selectable-padding-top-bottom: 4.5px;
-  --selectable-padding-left-right: 8px;
+  --selectable-padding-top-bottom: 6px;
+  --selectable-padding-left-right: 12px;
   --selectable-text-color: #dfdfdf;
 
 }
