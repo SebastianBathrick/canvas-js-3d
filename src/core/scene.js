@@ -56,7 +56,7 @@ export class Scene {
      * @returns {SceneObject[]} Array of scene objects.
      */
     getSceneObjects() {
-        return this._sceneObjects;
+        return [...this._sceneObjects];
     }
 
     /**
