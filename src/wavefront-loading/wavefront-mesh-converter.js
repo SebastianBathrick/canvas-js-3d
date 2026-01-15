@@ -1,7 +1,7 @@
-import { WavefrontFileLoader } from './wavefront-file-loader.js';
-import { WavefrontLexer } from './wavefront-lexer.js';
-import { WavefrontParser } from './wavefront-parser.js';
-import { Mesh } from '../core/mesh.js';
+import {WavefrontFileLoader} from './wavefront-file-loader.js';
+import {WavefrontLexer} from './wavefront-lexer.js';
+import {WavefrontParser} from './wavefront-parser.js';
+import {Mesh} from '../core/mesh.js';
 
 /**
  * High-level API for loading OBJ files and converting them to Mesh objects.
@@ -47,7 +47,7 @@ export class WavefrontMeshConverter {
         const tokens = lexer.lexTokens();
 
         const parser = new WavefrontParser(tokens);
-        const { vertices, faceIndices } = parser.parse();
+        const {vertices, faceIndices} = parser.parse();
 
         return new Mesh(vertices, faceIndices);
     }

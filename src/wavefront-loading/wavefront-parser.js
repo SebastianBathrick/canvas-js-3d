@@ -1,4 +1,4 @@
-import { Vector3 } from '../math/vector3.js';
+import {Vector3} from '../math/vector3.js';
 
 /**
  * Parses OBJ tokens into vertices and face indices.

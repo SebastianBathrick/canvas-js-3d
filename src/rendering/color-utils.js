@@ -10,12 +10,12 @@ export class ColorUtils {
     static hexToRgb(hex) {
         // Remove # if present
         hex = hex.replace(/^#/, '');
-        
+
         // Handle shorthand (e.g., 'f0f' -> 'ff00ff')
         if (hex.length === 3) {
             hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
         }
-        
+
         const num = parseInt(hex, 16);
         return {
             r: (num >> 16) & 255,
@@ -49,10 +49,10 @@ export class ColorUtils {
     static interpolate(color1, color2, t) {
         const c1 = ColorUtils.hexToRgb(color1);
         const c2 = ColorUtils.hexToRgb(color2);
-        
+
         // Clamp t to [0, 1]
         t = Math.max(0, Math.min(1, t));
-        
+
         return ColorUtils.rgbToHex(
             c1.r + (c2.r - c1.r) * t,
             c1.g + (c2.g - c1.g) * t,

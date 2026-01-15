@@ -1,4 +1,4 @@
-import { Engine, Mesh, SceneObject, Transform, Vector3, Vector2, WavefrontMeshConverter } from '../src/index.js';
+import {Engine, Mesh, SceneObject, Transform, Vector3, Vector2, WavefrontMeshConverter} from '../src/index.js';
 
 // ============================================================================
 // Canvas & Engine Setup
@@ -322,7 +322,7 @@ function testVector3() {
     if (assert(Vector3.zero().isZero() && !v.isZero(), 'isZero correctly identifies zero vectors')) passed++;
 
     log(`Vector3: ${passed}/${total} passed`, passed === total ? 'pass' : 'fail');
-    return { passed, total };
+    return {passed, total};
 }
 
 // Transform Tests
@@ -386,7 +386,7 @@ function testTransform() {
     if (assert(verts[0].x === 2 && verts[0].y === 3 && verts[0].z === 4, 'SceneObject applies non-uniform scale')) passed++;
 
     log(`Transform: ${passed}/${total} passed`, passed === total ? 'pass' : 'fail');
-    return { passed, total };
+    return {passed, total};
 }
 
 // Camera Tests
@@ -446,7 +446,7 @@ function testCamera() {
     if (assert(engine.camera.isBackFacing(frontFace) === false, 'Face with normal pointing toward camera is front-facing')) passed++;
 
     log(`Camera: ${passed}/${total} passed`, passed === total ? 'pass' : 'fail');
-    return { passed, total };
+    return {passed, total};
 }
 
 // Run all tests
@@ -504,7 +504,7 @@ engine.onUpdate = (dt) => {
     }
 
     if (!sceneObject) return;
-    
+
     // Auto-rotation
     const speed = parseFloat(controls.autoRotate.value);
     if (speed > 0) {

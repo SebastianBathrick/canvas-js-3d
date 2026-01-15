@@ -1,4 +1,4 @@
-import { Material } from './material.js';
+import {Material} from './material.js';
 
 /**
  * An object with a position, rotation, scale, and mesh in the scene.
@@ -11,11 +11,9 @@ export class SceneObject {
      * Creates a new SceneObject.
      * @param {Mesh} mesh - The mesh geometry.
      * @param {Transform} transform - The position, rotation, and scale.
-     * @param {string|null} color - Primary edge color (hex string, e.g., '#ff00ff').
-     * @param {string|null} gradientColor - End color for gradient edges (hex string).
-     * @param {string|null} faceColor - Fill color for faces (hex string). Only visible with depth sorting.
+     * @param {Material|null} material - The material to be applied to the mesh when rendering.
      */
-    constructor(mesh, transform, color = null, gradientColor = null, faceColor = null) {
+    constructor(mesh, transform, material) {
         /** @type {Mesh} @private */
         this.#mesh = mesh;
         /** @type {Transform} @private */
@@ -23,7 +21,7 @@ export class SceneObject {
 
         // Mutable material property
         /** @type {Material} @private */
-        this._material = new Material(color, gradientColor, faceColor);
+        this._material = material;
     }
 
     /**
@@ -55,7 +53,10 @@ export class SceneObject {
      * @param {Material} value - The new material.
      */
     setMaterial(value) {
-        this._material = value;
+        if (value instanceof Material)
+            this._material = value;
+        else
+            throw new Error('Material must be an instance of Material');
     }
 
     /**
@@ -66,10 +67,10 @@ export class SceneObject {
     getSceneVertices() {
         return this.#mesh.getVertices().map(v =>
             v.getScaledByVector(this.#transform.scale)
-             .getRotatedX(this.#transform.rotation.x)
-             .getRotatedY(this.#transform.rotation.y)
-             .getRotatedZ(this.#transform.rotation.z)
-             .getTranslated(this.#transform.position)
+                .getRotatedX(this.#transform.rotation.x)
+                .getRotatedY(this.#transform.rotation.y)
+                .getRotatedZ(this.#transform.rotation.z)
+                .getTranslated(this.#transform.position)
         );
     }
 }

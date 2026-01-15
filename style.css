@@ -161,9 +161,17 @@ button.danger:hover {
     font-size: 12px;
 }
 
-.xyz-controls .axis-label.x { color: #f66; }
-.xyz-controls .axis-label.y { color: #6f6; }
-.xyz-controls .axis-label.z { color: #66f; }
+.xyz-controls .axis-label.x {
+    color: #f66;
+}
+
+.xyz-controls .axis-label.y {
+    color: #6f6;
+}
+
+.xyz-controls .axis-label.z {
+    color: #66f;
+}
 
 .checkbox-row {
     display: flex;

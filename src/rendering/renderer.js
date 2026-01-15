@@ -5,24 +5,22 @@ export class Renderer {
     /**
      * Creates a new Renderer.
      * @param {HTMLCanvasElement} canvas - The canvas element to render to.
-     * @param {string} foregroundColor - The foreground/stroke color (e.g., 'green', '#00ff00').
-     * @param {string} backgroundColor - The background/clear color (e.g., 'black', '#000000').
      */
-    constructor(canvas, foregroundColor, backgroundColor) {
+    constructor(canvas) {
         /** @type {HTMLCanvasElement} */
         this._canvas = canvas;
         /** @type {CanvasRenderingContext2D} */
         this._ctx = canvas.getContext('2d');
         /** @type {string} */
-        this._foregroundColor = foregroundColor;
-        /** @type {string} */
-        this._backgroundColor = backgroundColor;
+        this._backgroundColor = '#000000';
         /** @type {string|null} */
         this._backgroundGradientColor = null;
+        /** @type {string} */
+        this._debugTextColor = '#ffffff';
         /** @type {number} */
         this._pointSize = 20;
         /** @type {{enabled: boolean, blur: number, color: string|null}} */
-        this._bloom = { enabled: false, blur: 15, color: null };
+        this._bloom = {enabled: false, blur: 15, color: null};
         /** @type {HTMLCanvasElement|null} */
         this._bloomCanvas = null;
         /** @type {CanvasRenderingContext2D|null} */
@@ -62,6 +60,22 @@ export class Renderer {
     }
 
     /**
+     * Gets the debug text color (used for FPS counter).
+     * @returns {string} The debug text color.
+     */
+    getDebugTextColor() {
+        return this._debugTextColor;
+    }
+
+    /**
+     * Sets the debug text color (used for FPS counter).
+     * @param {string} color - The new debug text color.
+     */
+    setDebugTextColor(color) {
+        this._debugTextColor = color;
+    }
+
+    /**
      * Gets the point size for renderPoint.
      * @returns {number} The point size in pixels.
      */
@@ -92,7 +106,7 @@ export class Renderer {
      * @returns {{enabled: boolean, blur: number, color: string|null}} Bloom settings.
      */
     getBloom() {
-        return { ...this._bloom };
+        return {...this._bloom};
     }
 
     /**
@@ -214,7 +228,7 @@ export class Renderer {
      * @param {Vector2} endVector2 - The end position in screen coordinates.
      */
     renderEdge(startVector2, endVector2) {
-        this._ctx.strokeStyle = this._foregroundColor;
+        this._ctx.strokeStyle = this._debugTextColor;
         this._ctx.beginPath();
         this._ctx.moveTo(startVector2.x, startVector2.y);
         this._ctx.lineTo(endVector2.x, endVector2.y);
@@ -262,7 +276,7 @@ export class Renderer {
      * @param {Vector2} vector2 - The position in screen coordinates.
      */
     renderPoint(vector2) {
-        this._ctx.fillStyle = this._foregroundColor;
+        this._ctx.fillStyle = this._debugTextColor;
         this._ctx.fillRect(
             vector2.x - this._pointSize / 2,
             vector2.y - this._pointSize / 2,
@@ -290,5 +304,22 @@ export class Renderer {
 
         this._ctx.closePath();
         this._ctx.fill();
+    }
+
+    /**
+     * Renders an FPS counter at the top-right corner of the canvas.
+     * @param {number} fps - The current frames per second value.
+     */
+    renderFPS(fps) {
+        const text = `${Math.round(fps)} FPS`;
+        const padding = 10;
+
+        this._ctx.save();
+        this._ctx.font = '14px monospace';
+        this._ctx.textAlign = 'right';
+        this._ctx.textBaseline = 'top';
+        this._ctx.fillStyle = this._debugTextColor;
+        this._ctx.fillText(text, this._canvas.width - padding, padding);
+        this._ctx.restore();
     }
 }

@@ -28,7 +28,7 @@ export class WavefrontLexer {
             this._lexToken();
         }
 
-        this._tokens.push({ type: 'EOF', value: null });
+        this._tokens.push({type: 'EOF', value: null});
         return this._tokens;
     }
 
@@ -42,7 +42,7 @@ export class WavefrontLexer {
 
         // Newline
         if (c === '\n') {
-            this._tokens.push({ type: 'NEWLINE', value: '\n' });
+            this._tokens.push({type: 'NEWLINE', value: '\n'});
             return;
         }
 
@@ -55,7 +55,7 @@ export class WavefrontLexer {
 
         // Slash (for face format like 1/2/3)
         if (c === '/') {
-            this._tokens.push({ type: 'SLASH', value: '/' });
+            this._tokens.push({type: 'SLASH', value: '/'});
             return;
         }
 
@@ -98,7 +98,7 @@ export class WavefrontLexer {
         }
 
         const value = parseFloat(this._source.substring(this._start, this._current));
-        this._tokens.push({ type: 'NUMBER', value: value });
+        this._tokens.push({type: 'NUMBER', value: value});
     }
 
     /** @private */
@@ -107,7 +107,7 @@ export class WavefrontLexer {
             this._advance();
 
         const value = this._source.substring(this._start, this._current);
-        this._tokens.push({ type: 'KEYWORD', value: value });
+        this._tokens.push({type: 'KEYWORD', value: value});
     }
 
     /** @private */

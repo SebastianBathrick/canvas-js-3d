@@ -6,6 +6,7 @@ export class Vector3 {
     #x;
     #y;
     #z;
+
     /**
      * Creates a new Vector3.
      * @param {number} x - The x component.
@@ -62,7 +63,7 @@ export class Vector3 {
     }
 
     /**
-     * Returns a new left direction vector (-1, 0, 0).
+     * Returns a new left-direction vector (-1, 0, 0).
      * @returns {Vector3} A new left direction vector.
      */
     static left() {
@@ -70,7 +71,7 @@ export class Vector3 {
     }
 
     /**
-     * Returns a new right direction vector (1, 0, 0).
+     * Returns a new right-direction vector (1, 0, 0).
      * @returns {Vector3} A new right direction vector.
      */
     static right() {
@@ -206,7 +207,7 @@ export class Vector3 {
     }
 
     /**
-     * Computes the cross product with another vector.
+     * Computes the cross-product with another vector.
      * @param {Vector3} other - The other vector.
      * @returns {Vector3} A new vector perpendicular to both inputs.
      */

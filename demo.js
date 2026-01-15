@@ -1,4 +1,4 @@
-import { Vector3, Transform, SceneObject, Engine, WavefrontMeshConverter } from './src/index.js';
+import {Vector3, Transform, SceneObject, Engine, WavefrontMeshConverter} from './src/index.js';
 
 const canvas = document.getElementById('canvas');
 
@@ -6,7 +6,7 @@ const canvas = document.getElementById('canvas');
 function calculateCanvasSize() {
     const isMobile = window.innerWidth <= 768;
     const padding = 20;
-    
+
     if (isMobile) {
         // Mobile: canvas takes full width, partial height
         const availableWidth = window.innerWidth - padding;

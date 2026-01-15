@@ -1,4 +1,4 @@
-import { Vector3 } from './vector3.js';
+import {Vector3} from './vector3.js';
 
 /**
  * Represents the position, rotation, and scale of an object in 3D space.

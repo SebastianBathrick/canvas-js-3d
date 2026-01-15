@@ -26,8 +26,8 @@
     "node": ">=16"
   },
   "author": {
-  "name": "Sebastian Bathrick",
-  "email": "sebastianbathrick@gmail.com"
-},
+    "name": "Sebastian Bathrick",
+    "email": "sebastianbathrick@gmail.com"
+  },
   "license": "MIT"
 }

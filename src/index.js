@@ -4,27 +4,27 @@
  */
 
 // Core math
-export { Vector2 } from './math/vector2.js';
-export { Vector3 } from './math/vector3.js';
-export { Transform } from './math/transform.js';
+export {Vector2} from './math/vector2.js';
+export {Vector3} from './math/vector3.js';
+export {Transform} from './math/transform.js';
 
 // Scene components
-export { Mesh } from './core/mesh.js';
-export { Scene } from './core/scene.js';
-export { SceneObject } from './core/sceneObject.js';
-export { Material } from './core/material.js';
+export {Mesh} from './core/mesh.js';
+export {Scene} from './core/scene.js';
+export {SceneObject} from './core/sceneObject.js';
+export {Material} from './core/material.js';
 
 // Rendering
-export { Camera } from './rendering/camera.js';
-export { ProjectedFace } from './rendering/projected-face.js';
-export { Renderer } from './rendering/renderer.js';
-export { ColorUtils } from './rendering/color-utils.js';
+export {Camera} from './rendering/camera.js';
+export {ProjectedFace} from './rendering/projected-face.js';
+export {Renderer} from './rendering/renderer.js';
+export {ColorUtils} from './rendering/color-utils.js';
 
 // Engine
-export { Engine } from './core/engine.js';
+export {Engine} from './core/engine.js';
 
 // OBJ loading
-export { WavefrontMeshConverter } from './wavefront-loading/wavefront-mesh-converter.js';
-export { WavefrontFileLoader } from './wavefront-loading/wavefront-file-loader.js';
-export { WavefrontLexer } from './wavefront-loading/wavefront-lexer.js';
-export { WavefrontParser } from './wavefront-loading/wavefront-parser.js';
+export {WavefrontMeshConverter} from './wavefront-loading/wavefront-mesh-converter.js';
+export {WavefrontFileLoader} from './wavefront-loading/wavefront-file-loader.js';
+export {WavefrontLexer} from './wavefront-loading/wavefront-lexer.js';
+export {WavefrontParser} from './wavefront-loading/wavefront-parser.js';
