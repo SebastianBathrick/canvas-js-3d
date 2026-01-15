@@ -105,11 +105,8 @@ export class Camera {
             const faceVertices = face.map(idx => sceneVertices[idx]);
 
             // Back-face culling: skip faces pointing away from the camera
-            if (this._isBackFaceCulling && faceVertices.length >= 3) {
-                if (this._isBackFacing(faceVertices)) {
-                    continue;
-                }
-            }
+            if (this._isBackFaceCulling && faceVertices.length >= 3 && this._isBackFacing(faceVertices))
+                continue;
 
             // Project vertices and calculate average depth
             let depthSum = 0;

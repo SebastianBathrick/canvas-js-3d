@@ -173,7 +173,9 @@ export class Renderer {
      * Clears the bloom canvas for a new frame.
      */
     clearBloomCanvas() {
-        if (!this._bloom.enabled) return;
+        if (!this._bloom.enabled)
+            return;
+
         this._initBloomCanvas();
         this._bloomCtx.clearRect(0, 0, this._bloomCanvas.width, this._bloomCanvas.height);
     }
@@ -183,7 +185,8 @@ export class Renderer {
      * Applies blur to bloom canvas and composites onto main canvas.
      */
     compositeBloom() {
-        if (!this._bloom.enabled || !this._bloomCanvas) return;
+        if (!this._bloom.enabled || !this._bloomCanvas)
+            return;
 
         // Apply blur filter and draw to main canvas with additive blending
         this.#ctx.save();
@@ -259,9 +262,9 @@ export class Renderer {
         this.#ctx.beginPath();
         this.#ctx.moveTo(positions[0].x, positions[0].y);
 
-        for (let i = 1; i < positions.length; i++) {
+        for (let i = 1; i < positions.length; i++)
             this.#ctx.lineTo(positions[i].x, positions[i].y);
-        }
+
 
         this.#ctx.closePath();
         this.#ctx.fill();
