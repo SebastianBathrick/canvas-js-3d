@@ -14,13 +14,10 @@ export class SceneObject {
      * @param {Material|null} material - The material to be applied to the mesh when rendering.
      */
     constructor(mesh, transform, material) {
-        /** @type {Mesh} @private */
         this.#mesh = mesh;
-        /** @type {Transform} @private */
         this.#transform = transform;
 
         // Mutable material property
-        /** @type {Material} @private */
         this._material = material;
     }
 
@@ -65,7 +62,7 @@ export class SceneObject {
      * @returns {Vector3[]} Array of transformed vertex positions.
      */
     getSceneVertices() {
-        return this.#mesh.getVertices().map(v =>
+        return this.#mesh.vertices.map(v =>
             v.getScaledByVector(this.#transform.scale)
                 .getRotatedX(this.#transform.rotation.x)
                 .getRotatedY(this.#transform.rotation.y)

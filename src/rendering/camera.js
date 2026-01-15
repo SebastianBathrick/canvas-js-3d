@@ -72,7 +72,7 @@ export class Camera {
         const projectedFaces = [];
 
         // Map vertices to their associated face indices
-        for (const face of sceneObject.mesh.getFaceIndices()) {
+        for (const face of sceneObject.mesh.faceIndices) {
             const faceVerts = face.map(idx => sceneVerts[idx]);
 
             // Back-face culling: skip faces pointing away from camera

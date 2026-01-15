@@ -2,18 +2,16 @@
  * A container for scene objects in a 3D scene.
  */
 export class Scene {
-    /**
+    #sceneObjects = [];
+    _nextId = 1;
+    #idToObject = new Map();
+    #objectToId = new Map();
+
+    /**`
      * Creates a new Scene.
      */
     constructor() {
-        /** @type {SceneObject[]} */
-        this._sceneObjects = [];
-        /** @type {number} */
-        this._nextId = 1;
-        /** @type {Map<number, SceneObject>} */
-        this._idToObject = new Map();
-        /** @type {Map<SceneObject, number>} */
-        this._objectToId = new Map();
+
     }
 
     /**
@@ -23,14 +21,14 @@ export class Scene {
      * @throws {Error} If the scene object is already in the scene.
      */
     addSceneObject(sceneObject) {
-        if (this._objectToId.has(sceneObject)) {
+        if (this.#objectToId.has(sceneObject)) {
             throw new Error('Scene object is already in the scene');
         }
 
         const id = this._nextId++;
-        this._sceneObjects.push(sceneObject);
-        this._idToObject.set(id, sceneObject);
-        this._objectToId.set(sceneObject, id);
+        this.#sceneObjects.push(sceneObject);
+        this.#idToObject.set(id, sceneObject);
+        this.#objectToId.set(sceneObject, id);
         return id;
     }
 
@@ -39,14 +37,14 @@ export class Scene {
      * @param {SceneObject} sceneObject - The object to remove.
      */
     removeSceneObject(sceneObject) {
-        const idx = this._sceneObjects.indexOf(sceneObject);
+        const idx = this.#sceneObjects.indexOf(sceneObject);
 
         if (idx !== -1) {
-            this._sceneObjects.splice(idx, 1);
-            const id = this._objectToId.get(sceneObject);
+            this.#sceneObjects.splice(idx, 1);
+            const id = this.#objectToId.get(sceneObject);
             if (id !== undefined) {
-                this._idToObject.delete(id);
-                this._objectToId.delete(sceneObject);
+                this.#idToObject.delete(id);
+                this.#objectToId.delete(sceneObject);
             }
         }
     }
@@ -55,8 +53,8 @@ export class Scene {
      * Gets all scene objects in the scene.
      * @returns {SceneObject[]} Array of scene objects.
      */
-    getSceneObjects() {
-        return [...this._sceneObjects];
+    get sceneObjects() {
+        return [...this.#sceneObjects];
     }
 
     /**
@@ -65,6 +63,6 @@ export class Scene {
      * @returns {SceneObject|undefined} The scene object, or undefined if not found.
      */
     getSceneObjectById(id) {
-        return this._idToObject.get(id);
+        return this.#idToObject.get(id);
     }
 }

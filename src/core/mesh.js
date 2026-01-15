@@ -2,6 +2,9 @@
  * Represents a 3D mesh with vertices and face index definitions.
  */
 export class Mesh {
+    #vertices;
+    #faceIndices;
+
     /**
      * Creates a new Mesh.
      * @param {Vector3[]} vertices - Array of vertex positions.
@@ -9,24 +12,24 @@ export class Mesh {
      */
     constructor(vertices, faceIndices) {
         /** @type {Vector3[]} */
-        this._vertices = vertices;
+        this.#vertices = vertices;
         /** @type {number[][]} */
-        this._faceIndices = faceIndices;
+        this.#faceIndices = faceIndices;
     }
 
     /**
      * Gets the vertices of the mesh.
      * @returns {Vector3[]} The vertex array.
      */
-    getVertices() {
-        return this._vertices;
+    get vertices() {
+        return this.#vertices;
     }
 
     /**
      * Gets the face indices of the mesh.
      * @returns {number[][]} Array of faces, each containing vertex indices.
      */
-    getFaceIndices() {
-        return this._faceIndices;
+    get faceIndices() {
+        return this.#faceIndices;
     }
 }

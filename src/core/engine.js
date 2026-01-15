@@ -9,49 +9,36 @@ import {Scene} from './scene.js';
  * The main engine that manages the render loop, camera, and scene.
  */
 export class Engine {
-    /** @type {Renderer} */
     #renderer;
-    /** @type {Camera} */
     #camera;
+    scene = new Scene();
+    _isDepthSorting = false;
+    _isRunning = false;
+    _lastFrameTime = 0;
+    _fps = 0;
+    _isFrameRateCounter = false;
+    _onUpdate = null;
+    _defaultEdgeColor = '#ffffff';
+    _depthFog = {
+        enabled: false,
+        color: '#000000',
+        near: 5,
+        far: 50
+    }
 
     /**
-     * Creates a new Engine.
+     * Creates a new Engine instance.
      * @param {HTMLCanvasElement} canvas - The canvas element to render to.
-     * @param {number} [fov=60] - The field of view in degrees.
+     * @param {string} foregroundColor - The default edge color.
+     * @param {string} backgroundColor - The background color.
      */
-    constructor(canvas, fov = 60) {
+    constructor(canvas, foregroundColor, backgroundColor) {
         this.#renderer = new Renderer(canvas);
-        this.#camera = new Camera(new Vector2(canvas.width, canvas.height), fov);
-        /** @type {Scene} */
-        this.scene = new Scene();
-        /** @type {boolean} */
-        this._depthSorting = false;
-        /** @type {boolean} */
-        this._running = false;
-        /** @type {number|null} */
-        this._lastFrameTime = null;
-        /** @type {number} */
-        this._fps = 0;
-        /** @type {boolean} @private */
-        this._showFPS = false;
-        /**
-         * Callback invoked each frame with delta time.
-         * @type {((deltaTime: number) => void)|null}
-         */
-        this.onUpdate = null;
-        /** @type {string} Default edge color for faces without explicit color */
-        this._defaultEdgeColor = '#ffffff';
-        /**
-         * Depth fog configuration.
-         * @type {{enabled: boolean, color: string, near: number, far: number}}
-         */
-        this._depthFog = {
-            enabled: false,
-            color: '#000000',
-            near: 5,
-            far: 50
-        };
+        this.#camera = new Camera(new Vector2(canvas.width, canvas.height));
+        this._defaultEdgeColor = foregroundColor;
     }
+
+    // region Getters
 
     /**
      * Gets the camera instance.
@@ -62,21 +49,69 @@ export class Engine {
     }
 
     /**
-     * Gets whether depth sorting is enabled.
-     * @returns {boolean} True if depth sorting is enabled.
+     * Gets the current depth fog configuration.
+     * @returns {{enabled: boolean, color: string, near: number, far: number}} The fog settings.
      */
-    isDepthSorting() {
-        return this._depthSorting;
+    get depthFog() {
+        return {...this._depthFog};
+    }
+
+    /**
+     * Gets the background color.
+     * @returns {string} The background color.
+     */
+    get backgroundColor() {
+        return this.#renderer.getBackgroundColor();
+    }
+
+    /**
+     * Gets the background gradient end color.
+     * @returns {string|null} The gradient end color, or null if no gradient.
+     */
+    get backgroundGradientColor() {
+        return this.#renderer.getBackgroundGradientColor();
+    }
+
+    /**
+     * Gets the debug text color (used for FPS counter).
+     * @returns {string} The debug text color.
+     */
+    get debugTextColor() {
+        return this.#renderer.getDebugTextColor();
+    }
+
+    /**
+     * Gets the default edge color for faces without explicit color.
+     * @returns {string} The default edge color.
+     */
+    get defaultEdgeColor() {
+        return this._defaultEdgeColor;
+    }
+
+    /**
+     * Gets the current bloom configuration.
+     * @returns {{enabled: boolean, blur: number, color: string|null}} Bloom settings.
+     */
+    get bloom() {
+        return this.#renderer.getBloom();
+    }
+
+    // endregion
+
+    // region Setters
+
+    set onUpdate(callback) {
+        this._onUpdate = callback;
     }
 
     /**
      * Toggles depth sorting on or off.
      * When enabled, faces are sorted back-to-front and filled with background color
      * to create the illusion of solid objects (painter's algorithm).
-     * @param {boolean} [enabled] - If provided, sets the state directly. Otherwise flips the current state.
+     * @param {boolean} [enabled] - If provided, sets the state directly. Otherwise, flips the current state.
      */
-    toggleDepthSorting(enabled) {
-        this._depthSorting = enabled !== undefined ? enabled : !this._depthSorting;
+    set isDepthSorting(enabled) {
+        this._isDepthSorting = enabled !== undefined ? enabled : !this._isDepthSorting;
     }
 
     /**
@@ -84,7 +119,7 @@ export class Engine {
      * When enabled, objects fade toward the fog color based on their distance from the camera.
      * @param {{enabled?: boolean, color?: string, near?: number, far?: number}} options - Fog configuration.
      */
-    setDepthFog(options) {
+    set depthFog(options) {
         if (options.enabled !== undefined)
             this._depthFog.enabled = options.enabled;
 
@@ -99,74 +134,34 @@ export class Engine {
     }
 
     /**
-     * Gets the current depth fog configuration.
-     * @returns {{enabled: boolean, color: string, near: number, far: number}} The fog settings.
-     */
-    getDepthFog() {
-        return {...this._depthFog};
-    }
-
-    /**
-     * Gets the background color.
-     * @returns {string} The background color.
-     */
-    getBackgroundColor() {
-        return this.#renderer.getBackgroundColor();
-    }
-
-    /**
      * Sets the background color.
      * @param {string} color - The background color (hex string or CSS color).
      */
-    setBackgroundColor(color) {
+    set backgroundColor(color) {
         this.#renderer.setBackgroundColor(color);
-    }
-
-    /**
-     * Gets the background gradient end color.
-     * @returns {string|null} The gradient end color, or null if no gradient.
-     */
-    getBackgroundGradientColor() {
-        return this.#renderer.getBackgroundGradientColor();
     }
 
     /**
      * Sets the background gradient end color. Set to null to disable gradient.
      * @param {string|null} color - The gradient end color, or null to disable.
      */
-    setBackgroundGradientColor(color) {
+    set backgroundGradientColor(color) {
         this.#renderer.setBackgroundGradientColor(color);
-    }
-
-    /**
-     * Gets the debug text color (used for FPS counter).
-     * @returns {string} The debug text color.
-     */
-    getDebugTextColor() {
-        return this.#renderer.getDebugTextColor();
     }
 
     /**
      * Sets the debug text color (used for FPS counter).
      * @param {string} color - The debug text color.
      */
-    setDebugTextColor(color) {
+    set debugTextColor(color) {
         this.#renderer.setDebugTextColor(color);
-    }
-
-    /**
-     * Gets the default edge color for faces without explicit color.
-     * @returns {string} The default edge color.
-     */
-    getDefaultEdgeColor() {
-        return this._defaultEdgeColor;
     }
 
     /**
      * Sets the default edge color for faces without explicit color.
      * @param {string} color - The default edge color.
      */
-    setDefaultEdgeColor(color) {
+    set defaultEdgeColor(color) {
         this._defaultEdgeColor = color;
     }
 
@@ -174,8 +169,8 @@ export class Engine {
      * Enables or disables the FPS counter display.
      * @param {boolean} enabled - Whether to show the FPS counter.
      */
-    toggleFPS(enabled) {
-        this._showFPS = enabled;
+    set isFrameRateCounter(enabled) {
+        this._isFrameRateCounter = enabled;
     }
 
     /**
@@ -186,30 +181,39 @@ export class Engine {
      *   - blur: Blur radius in pixels (default 15)
      *   - color: Glow color, or null to use edge color (default null)
      */
-    setBloom(options) {
+    set bloom(options) {
         this.#renderer.setBloom(options);
-    }
-
-    /**
-     * Gets the current bloom configuration.
-     * @returns {{enabled: boolean, blur: number, color: string|null}} Bloom settings.
-     */
-    getBloom() {
-        return this.#renderer.getBloom();
     }
 
     /**
      * Sets the screen size.
      * @param {Vector2} newScreenSize - The new screen size.
      */
-    setScreenSize(newScreenSize) {
+    set screenSize(newScreenSize) {
         this.#renderer.setScreenSize(newScreenSize);
         this.#camera.setScreenSize(newScreenSize);
     }
 
+    // endregion
+
+    /**
+     * Starts the render loop.
+     */
+    start() {
+        this._isRunning = true;
+        this._frameUpdate();
+    }
+
+    /**
+     * Stops the render loop.
+     */
+    stop() {
+        this._isRunning = false;
+    }
+
     /** @private */
     _frameUpdate() {
-        if (!this._running)
+        if (!this._isRunning)
             return;
 
         const now = performance.now();
@@ -217,15 +221,14 @@ export class Engine {
         this._lastFrameTime = now;
         this._fps = deltaTime > 0 ? 1 / deltaTime : 0;
 
-        if (this.onUpdate)
-            this.onUpdate(deltaTime);
+        if (this._onUpdate)
+            this._onUpdate(deltaTime);
 
         this.#renderer.clear();
         this._renderAllObjects();
 
-        if (this._showFPS) {
+        if (this._isFrameRateCounter)
             this.#renderer.renderFPS(this._fps);
-        }
 
         requestAnimationFrame(() => this._frameUpdate());
     }
@@ -235,21 +238,21 @@ export class Engine {
         // Collect all projected faces from all objects
         const allFaces = [];
 
-        for (const obj of this.scene.getSceneObjects()) {
+        for (const obj of this.scene.sceneObjects) {
             const projectedFaces = this.#camera.projectSceneObject(obj);
             allFaces.push(...projectedFaces);
         }
 
         // Sort if depth sorting is enabled (back-to-front)
-        if (this._depthSorting) {
+        if (this._isDepthSorting)
             allFaces.sort(ProjectedFace.compareByDepth);
-        }
+
 
         // Clear bloom canvas at start of frame
         const bloomEnabled = this.#renderer.isBloomEnabled();
-        if (bloomEnabled) {
+        if (bloomEnabled)
             this.#renderer.clearBloomCanvas();
-        }
+
 
         // Render each face
         for (const face of allFaces) {
@@ -267,60 +270,49 @@ export class Engine {
                     this._depthFog.near,
                     this._depthFog.far
                 );
+
                 edgeColor = ColorUtils.applyFog(edgeColor, this._depthFog.color, fogAmount);
-                if (gradientEndColor) {
+
+                if (gradientEndColor)
                     gradientEndColor = ColorUtils.applyFog(gradientEndColor, this._depthFog.color, fogAmount);
-                }
-                if (fillColor) {
-                    fillColor = ColorUtils.applyFog(fillColor, this._depthFog.color, fogAmount);
-                }
+
+                if (!fillColor)
+                    continue;
+
+                fillColor = ColorUtils.applyFog(fillColor, this._depthFog.color, fogAmount);
             }
 
             // Fill face to occlude faces behind (depth sorting) or render face color
-            if (this._depthSorting) {
+            if (this._isDepthSorting)
                 this.#renderer.fillFace(positions, fillColor || this.#renderer.getBackgroundColor());
-            }
 
-            // Draw edges to main canvas
+            // Draw edges to main-canvas
             for (let i = 0; i < positions.length; i++) {
                 const startPos = positions[i];
                 const endPos = positions[(i + 1) % positions.length];
 
-                if (gradientEndColor) {
+                if (gradientEndColor)
                     this.#renderer.renderEdgeGradient(startPos, endPos, edgeColor, gradientEndColor);
-                } else {
+                else
                     this.#renderer.renderEdgeWithColor(startPos, endPos, edgeColor);
-                }
 
                 // Also draw to bloom canvas if enabled
-                if (bloomEnabled) {
-                    if (gradientEndColor) {
-                        this.#renderer.renderEdgeGradientToBloom(startPos, endPos, edgeColor, gradientEndColor);
-                    } else {
-                        this.#renderer.renderEdgeToBloom(startPos, endPos, edgeColor);
-                    }
-                }
+                if (!bloomEnabled)
+                    continue;
+
+                if (gradientEndColor)
+                    this.#renderer.renderEdgeGradientToBloom(startPos, endPos, edgeColor, gradientEndColor);
+                else
+                    this.#renderer.renderEdgeToBloom(startPos, endPos, edgeColor);
             }
         }
 
-        // Composite bloom at end of frame
+        // Composite bloom at end-of-frame
         if (bloomEnabled) {
             this.#renderer.compositeBloom();
         }
     }
 
-    /**
-     * Starts the render loop.
-     */
-    start() {
-        this._running = true;
-        this._frameUpdate();
-    }
 
-    /**
-     * Stops the render loop.
-     */
-    stop() {
-        this._running = false;
-    }
+
 }
