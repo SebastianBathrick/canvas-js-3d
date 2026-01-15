@@ -68,7 +68,7 @@ export class WavefrontLexer {
         // Keyword/identifier
         if (this._isAlpha(c)) {
             this._lexKeyword();
-            return;
+
         }
     }
 

@@ -250,12 +250,10 @@ export class Engine {
         if (this._isDepthSorting)
             allFaces.sort(ProjectedFace.compareByDepth);
 
-
         // Clear bloom canvas at start of frame
         const bloomEnabled = this.#renderer.isBloomEnabled();
         if (bloomEnabled)
             this.#renderer.clearBloomCanvas();
-
 
         // Render each face
         for (const face of allFaces) {
