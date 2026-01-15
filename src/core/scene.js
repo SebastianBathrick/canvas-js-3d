@@ -15,6 +15,14 @@ export class Scene {
     }
 
     /**
+     * Gets all scene objects in the scene.
+     * @returns {SceneObject[]} Array of scene objects.
+     */
+    get sceneObjects() {
+        return [...this.#sceneObjects];
+    }
+
+    /**
      * Adds a scene object to the scene.
      * @param {SceneObject} sceneObject - The object to add.
      * @returns {number} The unique ID assigned to the scene object.
@@ -47,14 +55,6 @@ export class Scene {
                 this.#objectToId.delete(sceneObject);
             }
         }
-    }
-
-    /**
-     * Gets all scene objects in the scene.
-     * @returns {SceneObject[]} Array of scene objects.
-     */
-    get sceneObjects() {
-        return [...this.#sceneObjects];
     }
 
     /**

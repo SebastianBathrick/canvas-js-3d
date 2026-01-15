@@ -49,11 +49,8 @@ export class SceneObject {
      * Sets the material.
      * @param {Material} value - The new material.
      */
-    setMaterial(value) {
-        if (value instanceof Material)
-            this._material = value;
-        else
-            throw new Error('Material must be an instance of Material');
+    set material(value) {
+        this._material = value;
     }
 
     /**
@@ -61,7 +58,7 @@ export class SceneObject {
      * Applies transformations in order: scale → rotate (X, Y, Z) → translate.
      * @returns {Vector3[]} Array of transformed vertex positions.
      */
-    getSceneVertices() {
+    getTransformedVertices() {
         return this.#mesh.vertices.map(v =>
             v.getScaledByVector(this.#transform.scale)
                 .getRotatedX(this.#transform.rotation.x)

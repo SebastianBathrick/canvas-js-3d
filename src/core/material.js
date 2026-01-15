@@ -2,12 +2,18 @@
  * Defines the visual appearance of a scene object with colors for edges and faces.
  */
 export class Material {
+    // region Fields
+
     #originalEdgeColor;
     #originalEdgeGradientColor;
     #originalFaceColor;
     _edgeColor;
     _edgeGradientColor;
     _faceColor;
+
+    // endregion
+
+    // region Constructor
 
     /**
      * Creates a new Material.
@@ -27,7 +33,9 @@ export class Material {
         this._faceColor = faceColor;
     }
 
-    // region Getters
+    // endregion
+
+    // region Getter Properties
 
     /**
      * Gets the original color from construction.
@@ -79,7 +87,7 @@ export class Material {
 
     // endregion
 
-    // region Setters
+    // region Setter Properties
 
     /**
      * Sets the primary edge color.
@@ -107,7 +115,7 @@ export class Material {
 
     // endregion
 
-    // region Reset
+    // region Reset Methods
 
     /**
      * Resets the primary edge color to its original value from construction.

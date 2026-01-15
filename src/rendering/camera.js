@@ -7,6 +7,19 @@ import {ProjectedFace} from './projected-face.js';
  * Projects 3D scene coordinates to 2D screen coordinates.
  */
 export class Camera {
+    // region Fields
+
+    _screenSize;
+    _aspectRatio;
+    #transform;
+    _isBackFaceCulling;
+    _fov;
+    _focalLength;
+
+    // endregion
+
+    // region Constructor
+
     /**
      * Creates a new Camera.
      * @param {Vector2} screenSize - The canvas dimensions (width, height).
@@ -18,28 +31,40 @@ export class Camera {
         /** @type {number} */
         this._aspectRatio = screenSize.x / screenSize.y;
         /** @type {Transform} */
-        this.transform = new Transform(Vector3.zero(), Vector3.zero(), Vector3.one());
+        this.#transform = new Transform(Vector3.zero(), Vector3.zero(), Vector3.one());
         /** @type {boolean} */
-        this._backFaceCulling = false;
+        this._isBackFaceCulling = false;
         this.setFov(fov);
+    }
+
+    // endregion
+
+    // region Getter and Setter Properties
+
+    get transform() {
+        return this.#transform;
     }
 
     /**
      * Gets whether back-face culling is enabled.
      * @returns {boolean} True if back-face culling is enabled.
      */
-    isBackFaceCulling() {
-        return this._backFaceCulling;
+    get isBackFaceCulling() {
+        return this._isBackFaceCulling;
     }
 
     /**
      * Toggles back-face culling on or off.
      * When enabled, faces pointing away from the camera are not rendered.
-     * @param {boolean} [enabled] - If provided, sets the state directly. Otherwise flips the current state.
+     * @param {boolean} [enabled] - Sets state directly.
      */
-    toggleBackFaceCulling(enabled) {
-        this._backFaceCulling = enabled !== undefined ? enabled : !this._backFaceCulling;
+    set isBackFaceCulling(enabled) {
+        this._isBackFaceCulling = enabled;
     }
+
+    // endregion
+
+    // region Setter Methods
 
     /**
      * Sets the field of view.
@@ -62,22 +87,26 @@ export class Camera {
         this._aspectRatio = newScreenSize.x / newScreenSize.y;
     }
 
+    // endregion
+
+    // region Public Methods
+
     /**
      * Projects all faces of a scene object to screen coordinates.
      * @param {SceneObject} sceneObject - The scene object to project.
      * @returns {ProjectedFace[]} Array of projected faces with screen positions and depth.
      */
     projectSceneObject(sceneObject) {
-        const sceneVerts = sceneObject.getSceneVertices();
+        const sceneVertices = sceneObject.getTransformedVertices();
         const projectedFaces = [];
 
         // Map vertices to their associated face indices
         for (const face of sceneObject.mesh.faceIndices) {
-            const faceVerts = face.map(idx => sceneVerts[idx]);
+            const faceVertices = face.map(idx => sceneVertices[idx]);
 
-            // Back-face culling: skip faces pointing away from camera
-            if (this._backFaceCulling && faceVerts.length >= 3) {
-                if (this._isBackFacing(faceVerts)) {
+            // Back-face culling: skip faces pointing away from the camera
+            if (this._isBackFaceCulling && faceVertices.length >= 3) {
+                if (this._isBackFacing(faceVertices)) {
                     continue;
                 }
             }
@@ -87,7 +116,7 @@ export class Camera {
             const screenPositions = [];
             let isValid = true;
 
-            for (const vert of faceVerts) {
+            for (const vert of faceVertices) {
                 const cameraSpacePos = this._worldToCameraSpace(vert);
                 depthSum += cameraSpacePos.z;
 
@@ -105,7 +134,7 @@ export class Camera {
             if (!isValid)
                 continue;
 
-            const averageDepth = depthSum / faceVerts.length;
+            const averageDepth = depthSum / faceVertices.length;
             projectedFaces.push(new ProjectedFace(
                 screenPositions,
                 averageDepth,
@@ -118,15 +147,19 @@ export class Camera {
         return projectedFaces;
     }
 
+    // endregion
+
+    // region Helper Methods
+
     // TODO: Optimize to NOT use Vector3 helper functions
     /** @private */
-    _isBackFacing(faceVerts) {
+    _isBackFacing(faceVertices) {
         // Transform vertices to camera space
-        const v0 = this._worldToCameraSpace(faceVerts[0]);
-        const v1 = this._worldToCameraSpace(faceVerts[1]);
-        const v2 = this._worldToCameraSpace(faceVerts[2]);
+        const v0 = this._worldToCameraSpace(faceVertices[0]);
+        const v1 = this._worldToCameraSpace(faceVertices[1]);
+        const v2 = this._worldToCameraSpace(faceVertices[2]);
 
-        // Compute face normal using cross product of two edges
+        // Compute face normal using cross-product of two edges
         const edge1 = v1.getDifference(v0);
         const edge2 = v2.getDifference(v0);
         const normal = edge1.getCross(edge2);
@@ -156,7 +189,7 @@ export class Camera {
     _getNormalizedScreenPosition(scenePos) {
         /* 
         * If > 0 the point is in front of the camera, if <= 0 the point is not visible, because the divisor 
-        * would be zero. Thus it is in the same 3D position as the camera. As z increases the 3D point moves 
+        * would be zero. Thus, it is in the same 3D position as the camera. As z increases the 3D point moves
         * further away from the camera. */
         const near = 1e-4;
         if (scenePos.z <= near)
@@ -172,13 +205,15 @@ export class Camera {
     _worldToCameraSpace(worldPos) {
         // First translate by negative camera position
         const translated = worldPos.getTranslated(
-            this.transform.position.getScaled(-1)
+            this.#transform.position.getScaled(-1)
         );
 
         // Then rotate by negative camera rotation (in reverse order: Z, Y, X)
         return translated
-            .getRotatedZ(-this.transform.rotation.z)
-            .getRotatedY(-this.transform.rotation.y)
-            .getRotatedX(-this.transform.rotation.x);
+            .getRotatedZ(-this.#transform.rotation.z)
+            .getRotatedY(-this.#transform.rotation.y)
+            .getRotatedX(-this.#transform.rotation.x);
     }
+
+    // endregion
 }

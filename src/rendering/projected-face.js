@@ -2,6 +2,12 @@
  * Represents a face that has been projected to screen space.
  */
 export class ProjectedFace {
+    screenPositions;
+    depth;
+    color;
+    gradientColor;
+    faceColor;
+
     /**
      * Creates a new ProjectedFace.
      * @param {Vector2[]} screenPositions - The projected vertex positions in screen coordinates.
@@ -11,15 +17,10 @@ export class ProjectedFace {
      * @param {string|null} faceColor - Fill color for the face (hex string).
      */
     constructor(screenPositions, depth, color = null, gradientColor = null, faceColor = null) {
-        /** @type {Vector2[]} */
         this.screenPositions = screenPositions;
-        /** @type {number} */
         this.depth = depth;
-        /** @type {string|null} */
         this.color = color;
-        /** @type {string|null} */
         this.gradientColor = gradientColor;
-        /** @type {string|null} */
         this.faceColor = faceColor;
     }
 

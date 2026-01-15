@@ -2,92 +2,101 @@
  * Handles drawing wireframe graphics to a Canvas 2D context.
  */
 export class Renderer {
+    #canvas;
+    #ctx;
+    _backgroundColor = '#000000';
+    _backgroundGradientColor;
+    _debugTextColor = '#ffffff';
+    _pointSize = 20;
+    _bloom = {enabled: false, blur: 15, color: null};
+    _bloomCanvas;
+    _bloomCtx;
+
     /**
      * Creates a new Renderer.
      * @param {HTMLCanvasElement} canvas - The canvas element to render to.
      */
     constructor(canvas) {
         /** @type {HTMLCanvasElement} */
-        this._canvas = canvas;
-        /** @type {CanvasRenderingContext2D} */
-        this._ctx = canvas.getContext('2d');
-        /** @type {string} */
-        this._backgroundColor = '#000000';
-        /** @type {string|null} */
-        this._backgroundGradientColor = null;
-        /** @type {string} */
-        this._debugTextColor = '#ffffff';
-        /** @type {number} */
-        this._pointSize = 20;
-        /** @type {{enabled: boolean, blur: number, color: string|null}} */
-        this._bloom = {enabled: false, blur: 15, color: null};
-        /** @type {HTMLCanvasElement|null} */
-        this._bloomCanvas = null;
-        /** @type {CanvasRenderingContext2D|null} */
-        this._bloomCtx = null;
+        this.#canvas = canvas;
+        this.#ctx = canvas.getContext('2d');
     }
+
+    // region Getter Properties
 
     /**
      * Gets the background color.
      * @returns {string} The background color.
      */
-    getBackgroundColor() {
+    get backgroundColor() {
         return this._backgroundColor;
-    }
-
-    /**
-     * Sets the background color.
-     * @param {string} color - The new background color (hex string or CSS color).
-     */
-    setBackgroundColor(color) {
-        this._backgroundColor = color;
     }
 
     /**
      * Gets the background gradient end color.
      * @returns {string|null} The gradient end color, or null if no gradient.
      */
-    getBackgroundGradientColor() {
+    get backgroundGradientColor() {
         return this._backgroundGradientColor;
-    }
-
-    /**
-     * Sets the background gradient end color. Set to null to disable gradient.
-     * @param {string|null} color - The gradient end color, or null to disable.
-     */
-    setBackgroundGradientColor(color) {
-        this._backgroundGradientColor = color;
     }
 
     /**
      * Gets the debug text color (used for FPS counter).
      * @returns {string} The debug text color.
      */
-    getDebugTextColor() {
+    get debugTextColor() {
         return this._debugTextColor;
-    }
-
-    /**
-     * Sets the debug text color (used for FPS counter).
-     * @param {string} color - The new debug text color.
-     */
-    setDebugTextColor(color) {
-        this._debugTextColor = color;
     }
 
     /**
      * Gets the point size for renderPoint.
      * @returns {number} The point size in pixels.
      */
-    getPointSize() {
+    get pointSize() {
         return this._pointSize;
+    }
+
+    /**
+     * Gets the current bloom configuration.
+     * @returns {{enabled: boolean, blur: number, color: string|null}} Bloom settings.
+     */
+    get bloom() {
+        return {...this._bloom};
+    }
+
+    // endregion
+
+    // region Setter Properties
+
+    /**
+     * Sets the background color.
+     * @param {string} color - The new background color (hex string or CSS color).
+     */
+    set backgroundColor(color) {
+        this._backgroundColor = color;
+    }
+
+    /**
+     * Sets the background gradient end color. Set to null to disable gradient.
+     * @param {string|null} color - The gradient end color, or null to disable.
+     */
+    set backgroundGradientColor(color) {
+        this._backgroundGradientColor = color;
+    }
+
+    /**
+     * Sets the debug text color (used for FPS counter).
+     * @param {string} color - The new debug text color.
+     */
+    set debugTextColor(color) {
+        this._debugTextColor = color;
     }
 
     /**
      * Sets the point size for renderPoint.
      * @param {number} size - The new point size in pixels.
      */
-    setPointSize(size) {
+    set pointSize(size) {
         this._pointSize = size;
     }
 
@@ -95,19 +104,13 @@ export class Renderer {
      * Configures global bloom effect.
      * @param {{enabled?: boolean, blur?: number, color?: string|null}} options - Bloom settings.
      */
-    setBloom(options) {
-        if (options.enabled !== undefined) this._bloom.enabled = options.enabled;
-        if (options.blur !== undefined) this._bloom.blur = options.blur;
-        if (options.color !== undefined) this._bloom.color = options.color;
+    set bloom(options) {
+        this._bloom = {...options};
     }
 
-    /**
-     * Gets the current bloom configuration.
-     * @returns {{enabled: boolean, blur: number, color: string|null}} Bloom settings.
-     */
-    getBloom() {
-        return {...this._bloom};
-    }
+    // endregion
+
+    // region Bloom Methods
 
     /**
      * Checks if bloom is currently enabled.
@@ -115,28 +118,6 @@ export class Renderer {
      */
     isBloomEnabled() {
         return this._bloom.enabled;
-    }
-
-    /** @private */
-    _initBloomCanvas() {
-        if (!this._bloomCanvas) {
-            this._bloomCanvas = document.createElement('canvas');
-            this._bloomCtx = this._bloomCanvas.getContext('2d');
-        }
-        if (this._bloomCanvas.width !== this._canvas.width ||
-            this._bloomCanvas.height !== this._canvas.height) {
-            this._bloomCanvas.width = this._canvas.width;
-            this._bloomCanvas.height = this._canvas.height;
-        }
-    }
-
-    /**
-     * Clears the bloom canvas for a new frame.
-     */
-    clearBloomCanvas() {
-        if (!this._bloom.enabled) return;
-        this._initBloomCanvas();
-        this._bloomCtx.clearRect(0, 0, this._bloomCanvas.width, this._bloomCanvas.height);
     }
 
     /**
@@ -181,59 +162,45 @@ export class Renderer {
     }
 
     /**
+     * Clears the bloom canvas for a new frame.
+     */
+    clearBloomCanvas() {
+        if (!this._bloom.enabled) return;
+        this._initBloomCanvas();
+        this._bloomCtx.clearRect(0, 0, this._bloomCanvas.width, this._bloomCanvas.height);
+    }
+
+
+    /**
      * Applies blur to bloom canvas and composites onto main canvas.
      */
     compositeBloom() {
         if (!this._bloom.enabled || !this._bloomCanvas) return;
 
         // Apply blur filter and draw to main canvas with additive blending
-        this._ctx.save();
-        this._ctx.filter = `blur(${this._bloom.blur}px)`;
-        this._ctx.globalCompositeOperation = 'lighter';
-        this._ctx.drawImage(this._bloomCanvas, 0, 0);
-        this._ctx.restore();
+        this.#ctx.save();
+        this.#ctx.filter = `blur(${this._bloom.blur}px)`;
+        this.#ctx.globalCompositeOperation = 'lighter';
+        this.#ctx.drawImage(this._bloomCanvas, 0, 0);
+        this.#ctx.restore();
     }
 
-    /**
-     * Sets the screen size.
-     * @param {Vector2} newScreenSize - The new screen size.
-     */
-    setScreenSize(newScreenSize) {
-        this._canvas.width = newScreenSize.x;
-        this._canvas.height = newScreenSize.y;
-        // Bloom canvas will be resized on next clearBloomCanvas call
-    }
-
-    /**
-     * Clears the canvas with the background color or gradient.
-     */
-    clear() {
-        if (this._backgroundGradientColor) {
-            const gradient = this._ctx.createLinearGradient(
-                0, 0,
-                0, this._canvas.height
-            );
-            gradient.addColorStop(0, this._backgroundColor);
-            gradient.addColorStop(1, this._backgroundGradientColor);
-            this._ctx.fillStyle = gradient;
-        } else {
-            this._ctx.fillStyle = this._backgroundColor;
+    /** @private */
+    _initBloomCanvas() {
+        if (!this._bloomCanvas) {
+            this._bloomCanvas = document.createElement('canvas');
+            this._bloomCtx = this._bloomCanvas.getContext('2d');
         }
-        this._ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
+        if (this._bloomCanvas.width !== this.#canvas.width ||
+            this._bloomCanvas.height !== this.#canvas.height) {
+            this._bloomCanvas.width = this.#canvas.width;
+            this._bloomCanvas.height = this.#canvas.height;
+        }
     }
 
-    /**
-     * Renders a line between two screen positions.
-     * @param {Vector2} startVector2 - The start position in screen coordinates.
-     * @param {Vector2} endVector2 - The end position in screen coordinates.
-     */
-    renderEdge(startVector2, endVector2) {
-        this._ctx.strokeStyle = this._debugTextColor;
-        this._ctx.beginPath();
-        this._ctx.moveTo(startVector2.x, startVector2.y);
-        this._ctx.lineTo(endVector2.x, endVector2.y);
-        this._ctx.stroke();
-    }
+    // endregion
+
+    // region Render Methods
 
     /**
      * Renders a line between two screen positions with a specific color.
@@ -242,11 +209,11 @@ export class Renderer {
      * @param {string} color - The stroke color (hex string or CSS color).
      */
     renderEdgeWithColor(startVector2, endVector2, color) {
-        this._ctx.strokeStyle = color;
-        this._ctx.beginPath();
-        this._ctx.moveTo(startVector2.x, startVector2.y);
-        this._ctx.lineTo(endVector2.x, endVector2.y);
-        this._ctx.stroke();
+        this.#ctx.strokeStyle = color;
+        this.#ctx.beginPath();
+        this.#ctx.moveTo(startVector2.x, startVector2.y);
+        this.#ctx.lineTo(endVector2.x, endVector2.y);
+        this.#ctx.stroke();
     }
 
     /**
@@ -257,32 +224,18 @@ export class Renderer {
      * @param {string} endColor - The color at the end of the edge.
      */
     renderEdgeGradient(startVector2, endVector2, startColor, endColor) {
-        const gradient = this._ctx.createLinearGradient(
+        const gradient = this.#ctx.createLinearGradient(
             startVector2.x, startVector2.y,
             endVector2.x, endVector2.y
         );
         gradient.addColorStop(0, startColor);
         gradient.addColorStop(1, endColor);
 
-        this._ctx.strokeStyle = gradient;
-        this._ctx.beginPath();
-        this._ctx.moveTo(startVector2.x, startVector2.y);
-        this._ctx.lineTo(endVector2.x, endVector2.y);
-        this._ctx.stroke();
-    }
-
-    /**
-     * Renders a point as a square at the given screen position.
-     * @param {Vector2} vector2 - The position in screen coordinates.
-     */
-    renderPoint(vector2) {
-        this._ctx.fillStyle = this._debugTextColor;
-        this._ctx.fillRect(
-            vector2.x - this._pointSize / 2,
-            vector2.y - this._pointSize / 2,
-            this._pointSize,
-            this._pointSize
-        );
+        this.#ctx.strokeStyle = gradient;
+        this.#ctx.beginPath();
+        this.#ctx.moveTo(startVector2.x, startVector2.y);
+        this.#ctx.lineTo(endVector2.x, endVector2.y);
+        this.#ctx.stroke();
     }
 
     /**
@@ -294,32 +247,86 @@ export class Renderer {
         if (positions.length < 3)
             return;
 
-        this._ctx.fillStyle = color;
-        this._ctx.beginPath();
-        this._ctx.moveTo(positions[0].x, positions[0].y);
+        this.#ctx.fillStyle = color;
+        this.#ctx.beginPath();
+        this.#ctx.moveTo(positions[0].x, positions[0].y);
 
         for (let i = 1; i < positions.length; i++) {
-            this._ctx.lineTo(positions[i].x, positions[i].y);
+            this.#ctx.lineTo(positions[i].x, positions[i].y);
         }
 
-        this._ctx.closePath();
-        this._ctx.fill();
+        this.#ctx.closePath();
+        this.#ctx.fill();
     }
 
+
     /**
-     * Renders an FPS counter at the top-right corner of the canvas.
+     * Renders an FPS counter in the top right corner of the canvas.
      * @param {number} fps - The current frames per second value.
+     * @param {string} [font] - The font to use for the text. Default is '14px monospace'.
+     * @param {string} horizontalAlign - The horizontal alignment of the text. Default is 'right'.
+     * @param {string} verticalAlign - The vertical alignment of the text. Default is 'top'.
      */
-    renderFPS(fps) {
+    renderFPS(fps, font = '14px monospace', horizontalAlign = 'right', verticalAlign = 'top') {
         const text = `${Math.round(fps)} FPS`;
         const padding = 10;
 
-        this._ctx.save();
-        this._ctx.font = '14px monospace';
-        this._ctx.textAlign = 'right';
-        this._ctx.textBaseline = 'top';
-        this._ctx.fillStyle = this._debugTextColor;
-        this._ctx.fillText(text, this._canvas.width - padding, padding);
-        this._ctx.restore();
+        this.#ctx.save();
+        this.#ctx.font = font;
+        this.#ctx.textAlign = horizontalAlign;
+        this.#ctx.textBaseline = verticalAlign;
+        this.#ctx.fillStyle = this._debugTextColor;
+        this.#ctx.fillText(text, this.#canvas.width - padding, padding);
+        this.#ctx.restore();
     }
+
+
+    // TODO: Add a way for the client to enable, disable, and pick the color of points
+    /**
+     * Renders a point as a square at the given screen position.
+     * @param {Vector2} vector2 - The position in screen coordinates.
+     */
+    renderPoint(vector2) {
+        this.#ctx.fillStyle = this._debugTextColor;
+        this.#ctx.fillRect(
+            vector2.x - this._pointSize / 2,
+            vector2.y - this._pointSize / 2,
+            this._pointSize,
+            this._pointSize
+        );
+    }
+
+    // endregion
+
+    // region Utility Methods
+
+    /**
+     * Sets the screen size.
+     * @param {Vector2} newScreenSize - The new screen size.
+     */
+    setScreenSize(newScreenSize) {
+        this.#canvas.width = newScreenSize.x;
+        this.#canvas.height = newScreenSize.y;
+        // Bloom canvas will be resized on next clearBloomCanvas call
+    }
+
+    /**
+     * Clears the canvas with the background color or gradient.
+     */
+    clear() {
+        if (this._backgroundGradientColor) {
+            const gradient = this.#ctx.createLinearGradient(
+                0, 0,
+                0, this.#canvas.height
+            );
+            gradient.addColorStop(0, this._backgroundColor);
+            gradient.addColorStop(1, this._backgroundGradientColor);
+            this.#ctx.fillStyle = gradient;
+        } else {
+            this.#ctx.fillStyle = this._backgroundColor;
+        }
+        this.#ctx.fillRect(0, 0, this.#canvas.width, this.#canvas.height);
+    }
+
+    // endregion
 }

@@ -9,6 +9,8 @@ import {Scene} from './scene.js';
  * The main engine that manages the render loop, camera, and scene.
  */
 export class Engine {
+    // region Fields
+
     #renderer;
     #camera;
     scene = new Scene();
@@ -17,7 +19,7 @@ export class Engine {
     _lastFrameTime = 0;
     _fps = 0;
     _isFrameRateCounter = false;
-    _onUpdate = null;
+    _onFrameUpdate = null;
     _defaultEdgeColor = '#ffffff';
     _depthFog = {
         enabled: false,
@@ -26,19 +28,24 @@ export class Engine {
         far: 50
     }
 
+    // endregion
+
+    // region Constructor
+
     /**
      * Creates a new Engine instance.
      * @param {HTMLCanvasElement} canvas - The canvas element to render to.
-     * @param {string} foregroundColor - The default edge color.
-     * @param {string} backgroundColor - The background color.
+     * @param {string} defaultEdgeColor - The default edge color.
      */
-    constructor(canvas, foregroundColor, backgroundColor) {
+    constructor(canvas, defaultEdgeColor) {
         this.#renderer = new Renderer(canvas);
         this.#camera = new Camera(new Vector2(canvas.width, canvas.height));
-        this._defaultEdgeColor = foregroundColor;
+        this._defaultEdgeColor = defaultEdgeColor;
     }
 
-    // region Getters
+    // endregion
+
+    // region Getter Properties
 
     /**
      * Gets the camera instance.
@@ -61,7 +68,7 @@ export class Engine {
      * @returns {string} The background color.
      */
     get backgroundColor() {
-        return this.#renderer.getBackgroundColor();
+        return this.#renderer.backgroundColor;
     }
 
     /**
@@ -69,7 +76,7 @@ export class Engine {
      * @returns {string|null} The gradient end color, or null if no gradient.
      */
     get backgroundGradientColor() {
-        return this.#renderer.getBackgroundGradientColor();
+        return this.#renderer.backgroundColor;
     }
 
     /**
@@ -77,7 +84,7 @@ export class Engine {
      * @returns {string} The debug text color.
      */
     get debugTextColor() {
-        return this.#renderer.getDebugTextColor();
+        return this.#renderer.debugTextColor;
     }
 
     /**
@@ -93,25 +100,25 @@ export class Engine {
      * @returns {{enabled: boolean, blur: number, color: string|null}} Bloom settings.
      */
     get bloom() {
-        return this.#renderer.getBloom();
+        return this.#renderer.bloom;
     }
 
     // endregion
 
-    // region Setters
+    // region Setter Properties
 
-    set onUpdate(callback) {
-        this._onUpdate = callback;
+    set onFrameUpdate(callback) {
+        this._onFrameUpdate = callback;
     }
 
     /**
      * Toggles depth sorting on or off.
      * When enabled, faces are sorted back-to-front and filled with background color
      * to create the illusion of solid objects (painter's algorithm).
-     * @param {boolean} [enabled] - If provided, sets the state directly. Otherwise, flips the current state.
+     * @param {boolean} [enabled] - Sets the state directly.
      */
     set isDepthSorting(enabled) {
-        this._isDepthSorting = enabled !== undefined ? enabled : !this._isDepthSorting;
+        this._isDepthSorting = enabled;
     }
 
     /**
@@ -120,17 +127,7 @@ export class Engine {
      * @param {{enabled?: boolean, color?: string, near?: number, far?: number}} options - Fog configuration.
      */
     set depthFog(options) {
-        if (options.enabled !== undefined)
-            this._depthFog.enabled = options.enabled;
-
-        if (options.color !== undefined)
-            this._depthFog.color = options.color;
-
-        if (options.near !== undefined)
-            this._depthFog.near = options.near;
-
-        if (options.far !== undefined)
-            this._depthFog.far = options.far;
+        this._depthFog = {...this._depthFog, ...options};
     }
 
     /**
@@ -138,7 +135,7 @@ export class Engine {
      * @param {string} color - The background color (hex string or CSS color).
      */
     set backgroundColor(color) {
-        this.#renderer.setBackgroundColor(color);
+        this.#renderer.backgroundColor = color;
     }
 
     /**
@@ -146,7 +143,7 @@ export class Engine {
      * @param {string|null} color - The gradient end color, or null to disable.
      */
     set backgroundGradientColor(color) {
-        this.#renderer.setBackgroundGradientColor(color);
+        this.#renderer.backgroundColor = color;
     }
 
     /**
@@ -154,7 +151,7 @@ export class Engine {
      * @param {string} color - The debug text color.
      */
     set debugTextColor(color) {
-        this.#renderer.setDebugTextColor(color);
+        this.#renderer.debugTextColor = color;
     }
 
     /**
@@ -182,7 +179,7 @@ export class Engine {
      *   - color: Glow color, or null to use edge color (default null)
      */
     set bloom(options) {
-        this.#renderer.setBloom(options);
+        this.#renderer.bloom = options;
     }
 
     /**
@@ -195,6 +192,8 @@ export class Engine {
     }
 
     // endregion
+
+    // region Start/Stop Methods
 
     /**
      * Starts the render loop.
@@ -211,6 +210,10 @@ export class Engine {
         this._isRunning = false;
     }
 
+    // endregion
+
+    // region Frame Update Methods
+
     /** @private */
     _frameUpdate() {
         if (!this._isRunning)
@@ -221,8 +224,8 @@ export class Engine {
         this._lastFrameTime = now;
         this._fps = deltaTime > 0 ? 1 / deltaTime : 0;
 
-        if (this._onUpdate)
-            this._onUpdate(deltaTime);
+        if (this._onFrameUpdate)
+            this._onFrameUpdate(deltaTime);
 
         this.#renderer.clear();
         this._renderAllObjects();
@@ -284,7 +287,7 @@ export class Engine {
 
             // Fill face to occlude faces behind (depth sorting) or render face color
             if (this._isDepthSorting)
-                this.#renderer.fillFace(positions, fillColor || this.#renderer.getBackgroundColor());
+                this.#renderer.fillFace(positions, fillColor || this.#renderer.backgroundColor);
 
             // Draw edges to main-canvas
             for (let i = 0; i < positions.length; i++) {
@@ -313,6 +316,5 @@ export class Engine {
         }
     }
 
-
-
+    // endregion
 }

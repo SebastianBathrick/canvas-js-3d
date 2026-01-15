@@ -3,9 +3,15 @@
  * Completely immutable - all methods return new instances.
  */
 export class Vector3 {
+    // region Fields
+
     #x;
     #y;
     #z;
+
+    // endregion
+
+    // region Constructor
 
     /**
      * Creates a new Vector3.
@@ -22,9 +28,13 @@ export class Vector3 {
         this.#z = z;
     }
 
+    // endregion
+
+    // region Getter Properties
+
     /**
      * Gets the x component.
-     * @returns {number} The x component.
+     * @returns {number} The x coordinate.
      */
     get x() {
         return this.#x;
@@ -46,53 +56,9 @@ export class Vector3 {
         return this.#z;
     }
 
-    /**
-     * Returns a new zero vector (0, 0, 0).
-     * @returns {Vector3} A new zero vector.
-     */
-    static zero() {
-        return new Vector3(0, 0, 0);
-    }
+    // endregion
 
-    /**
-     * Returns a new one vector (1, 1, 1).
-     * @returns {Vector3} A new one vector.
-     */
-    static one() {
-        return new Vector3(1, 1, 1);
-    }
-
-    /**
-     * Returns a new left-direction vector (-1, 0, 0).
-     * @returns {Vector3} A new left direction vector.
-     */
-    static left() {
-        return new Vector3(-1, 0, 0);
-    }
-
-    /**
-     * Returns a new right-direction vector (1, 0, 0).
-     * @returns {Vector3} A new right direction vector.
-     */
-    static right() {
-        return new Vector3(1, 0, 0);
-    }
-
-    /**
-     * Returns a new up direction vector (0, 1, 0).
-     * @returns {Vector3} A new up direction vector.
-     */
-    static up() {
-        return new Vector3(0, 1, 0);
-    }
-
-    /**
-     * Returns a new down direction vector (0, -1, 0).
-     * @returns {Vector3} A new down direction vector.
-     */
-    static down() {
-        return new Vector3(0, -1, 0);
-    }
+    // region Vector3 Operation Methods
 
     /**
      * Returns a new vector translated by the given direction.
@@ -101,6 +67,18 @@ export class Vector3 {
      */
     getTranslated(dir) {
         return new Vector3(this.#x + dir.#x, this.#y + dir.#y, this.#z + dir.#z);
+    }
+
+    /**
+     * Returns a new vector rotated around all axes (XYZ rotation).
+     * @param {Vector3} rotation - The rotation angles in radians (x, y, z).
+     * @returns {Vector3} A new rotated vector.
+     */
+    getRotated(rotation)
+    {
+        return this.getRotatedX(rotation.x)
+            .getRotatedY(rotation.y)
+            .getRotatedZ(rotation.z);
     }
 
     /**
@@ -169,13 +147,7 @@ export class Vector3 {
         return new Vector3(this.#x * scale.x, this.#y * scale.y, this.#z * scale.z);
     }
 
-    /**
-     * Checks if all components are zero.
-     * @returns {boolean} True if the vector is zero.
-     */
-    isZero() {
-        return this.#x === 0 && this.#y === 0 && this.#z === 0;
-    }
+
 
     /**
      * Gets a unit vector pointing in the same direction.
@@ -227,4 +199,71 @@ export class Vector3 {
     getDifference(other) {
         return new Vector3(this.#x - other.#x, this.#y - other.#y, this.#z - other.#z);
     }
+
+    // endregion
+
+    // region Utility Methods
+
+    /**
+     * Checks if all components are zero.
+     * @returns {boolean} True if the vector is zero.
+     */
+    isZero() {
+        return this.#x === 0 && this.#y === 0 && this.#z === 0;
+    }
+
+    // endregion
+
+    // region Static Directional Vectors
+
+    /**
+     * Returns a new zero vector (0, 0, 0).
+     * @returns {Vector3} A new zero vector.
+     */
+    static zero() {
+        return new Vector3(0, 0, 0);
+    }
+
+
+    /**
+     * Returns a new one vector (1, 1, 1).
+     * @returns {Vector3} A new one vector.
+     */
+    static one() {
+        return new Vector3(1, 1, 1);
+    }
+
+    /**
+     * Returns a new left-direction vector (-1, 0, 0).
+     * @returns {Vector3} A new left direction vector.
+     */
+    static left() {
+        return new Vector3(-1, 0, 0);
+    }
+
+    /**
+     * Returns a new right-direction vector (1, 0, 0).
+     * @returns {Vector3} A new right direction vector.
+     */
+    static right() {
+        return new Vector3(1, 0, 0);
+    }
+
+    /**
+     * Returns a new up direction vector (0, 1, 0).
+     * @returns {Vector3} A new up direction vector.
+     */
+    static up() {
+        return new Vector3(0, 1, 0);
+    }
+
+    /**
+     * Returns a new down direction vector (0, -1, 0).
+     * @returns {Vector3} A new down direction vector.
+     */
+    static down() {
+        return new Vector3(0, -1, 0);
+    }
+
+    // endregion
 }
