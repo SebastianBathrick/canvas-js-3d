@@ -382,7 +382,7 @@ function testTransform() {
     total++;
     const mesh = new Mesh([new Vector3(1, 1, 1)], []);
     const obj = new SceneObject(mesh, new Transform(Vector3.zero(), Vector3.zero(), new Vector3(2, 3, 4)));
-    const verts = obj.getSceneVertices();
+    const verts = obj.getTransformedVertices();
     if (assert(verts[0].x === 2 && verts[0].y === 3 && verts[0].z === 4, 'SceneObject applies non-uniform scale')) passed++;
 
     log(`Transform: ${passed}/${total} passed`, passed === total ? 'pass' : 'fail');
@@ -493,7 +493,7 @@ const fpsCounter = document.getElementById('fpsCounter');
 let frameCount = 0;
 let fpsTime = 0;
 
-engine.onUpdate = (dt) => {
+engine._onFrameUpdate = (dt) => {
     // Update FPS counter
     frameCount++;
     fpsTime += dt;

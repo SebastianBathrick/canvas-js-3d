@@ -67,7 +67,7 @@ const MESH_PATHS = {
     Torus: "../../meshes/torus.obj",
 };
 
-const DEFAULT_SELECTED_SCENE_OBJ_COLOR = "cyan";
+const DEFAULT_SELECTED_SCENE_OBJ_COLOR = "green";
 
 // #endregion
 
@@ -116,8 +116,8 @@ async function createSceneObject(engine, posOverride = null, rotOverride = null,
         meshCache.set(objFileUrl, mesh);
     }
 
-    let spawnPos = null;
-    let spawnRot = null;
+    let spawnPos;
+    let spawnRot ;
 
     function randomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -126,7 +126,7 @@ async function createSceneObject(engine, posOverride = null, rotOverride = null,
     // Use posOverride if provided, otherwise use default logic
     if (posOverride !== null) {
         spawnPos = posOverride;
-    } else if (engine.scene.getSceneObjects().length > 0) {
+    } else if (engine.scene.sceneObjects.length > 0) {
         spawnPos = new Vector3(
             randomInt(-CREATE_MAX_X, CREATE_MAX_X),
             randomInt(-CREATE_MAX_Y, CREATE_MAX_Y),
@@ -139,7 +139,7 @@ async function createSceneObject(engine, posOverride = null, rotOverride = null,
     // Use rotOverride if provided, otherwise use default logic
     if (rotOverride !== null) {
         spawnRot = rotOverride;
-    } else if (engine.scene.getSceneObjects().length > 0) {
+    } else if (engine.scene.sceneObjects.length > 0) {
         spawnRot = new Vector3(
             randomInt(CREATE_MIN_ROT, CREATE_MAX_ROT),
             randomInt(CREATE_MIN_ROT, CREATE_MAX_ROT),
@@ -149,9 +149,8 @@ async function createSceneObject(engine, posOverride = null, rotOverride = null,
         spawnRot = new Vector3(0, DEFAULT_CREATE_Y_ROT, DEFAULT_CREATE_Z_ROT);
     }
 
-    const sceneObject = new SceneObject(mesh, new Transform(spawnPos, spawnRot, Vector3.one()));
+    const sceneObject = new SceneObject(mesh, new Transform(spawnPos, spawnRot, Vector3.one()), new Material(SCENE_OBJ_DEFAULT_EDGE_COLOR));
     const id = engine.scene.addSceneObject(sceneObject);
-    sceneObject.setMaterial(new Material(SCENE_OBJ_DEFAULT_EDGE_COLOR));
 
     // The select element that's used to display the list of current scene objects
     const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
@@ -194,7 +193,7 @@ function removeSceneObject(engine) {
 }
 
 function clearSceneObjects(engine) {
-    const sceneObjects = engine.scene.getSceneObjects();
+    const sceneObjects = engine.scene.sceneObjects;
     for (const sceneObject of sceneObjects) {
         engine.scene.removeSceneObject(sceneObject);
     }
@@ -218,7 +217,7 @@ function clearSceneObjects(engine) {
  * @param {HTMLElement} parentElement - The element to append the checkbox to
  * @param {function} onChange - Callback function that receives the checkbox checked state (boolean)
  * @param {boolean} initialChecked - Initial checked state (default: false)
- * @param {string} uniqueId - Optional unique ID for the checkbox (auto-generated if not provided)
+ * @param {null} uniqueId - Optional unique ID for the checkbox (auto-generated if not provided)
  * @returns {HTMLInputElement} The created checkbox input element
  */
 function addOptionCheckbox(title, parentElement, onChange, initialChecked = false, uniqueId = null) {
@@ -232,8 +231,7 @@ function addOptionCheckbox(title, parentElement, onChange, initialChecked = fals
     label.textContent = title;
 
     // Set unique ID (generate from title if not provided)
-    const checkboxId = uniqueId || `${makeDomSafeKey(title)}-checkbox`;
-    checkbox.id = checkboxId;
+    checkbox.id = uniqueId || `${makeDomSafeKey(title)}-checkbox`;
 
     // Set initial checked state
     checkbox.checked = initialChecked;
@@ -248,7 +246,7 @@ function addOptionCheckbox(title, parentElement, onChange, initialChecked = fals
     // Append to parent
     parentElement.appendChild(clone);
 
-    // Call the onChange callback with initial value after setup is complete
+    // Call the onChange callback with initial-value after setup is complete
     if (typeof onChange === "function") {
         onChange(initialChecked);
     }
@@ -264,8 +262,8 @@ function addOptionCheckbox(title, parentElement, onChange, initialChecked = fals
  * @param {number} min - Minimum slider value (default: 0)
  * @param {number} max - Maximum slider value (default: 100)
  * @param {number} step - Step increment (default: 1)
- * @param {number} initialValue - Initial slider value (default: min value)
- * @param {string} uniqueId - Optional unique ID for the slider (auto-generated if not provided)
+ * @param {null} initialValue - Initial slider value (default: min value)
+ * @param {null} uniqueId - Optional unique ID for the slider (auto-generated if not provided)
  * @returns {HTMLInputElement} The created slider input element
  */
 function addOptionSlider(title, parentElement, onChange, min = 0, max = 100, step = 1, initialValue = null, uniqueId = null) {
@@ -280,15 +278,14 @@ function addOptionSlider(title, parentElement, onChange, min = 0, max = 100, ste
     label.textContent = title;
 
     // Set unique ID (generate from title if not provided)
-    const sliderId = uniqueId || `${makeDomSafeKey(title)}-slider`;
-    slider.id = sliderId;
+    slider.id = uniqueId || `${makeDomSafeKey(title)}-slider`;
 
     // Set slider range and step
     slider.min = min;
     slider.max = max;
     slider.step = step;
 
-    // Set initial value (default to min if not provided)
+    // Set initial-value (default to min if not provided)
     const startValue = initialValue !== null ? initialValue : min;
     slider.value = startValue;
     valueDisplay.textContent = startValue;
@@ -319,7 +316,7 @@ function addOptionSlider(title, parentElement, onChange, min = 0, max = 100, ste
  * @param {HTMLElement} parentElement - The element to append the color picker to
  * @param {function} onChange - Callback function that receives the color value (string, hex format like "#ff0000")
  * @param {string} initialColor - Initial color value in hex format (default: "#000000")
- * @param {string} uniqueId - Optional unique ID for the color picker (auto-generated if not provided)
+ * @param {null} uniqueId - Optional unique ID for the color picker (auto-generated if not provided)
  * @returns {HTMLInputElement} The created color input element
  */
 function addOptionColor(title, parentElement, onChange, initialColor = "#000000", uniqueId = null) {
@@ -333,8 +330,7 @@ function addOptionColor(title, parentElement, onChange, initialColor = "#000000"
     label.textContent = title;
 
     // Set unique ID (generate from title if not provided)
-    const colorId = uniqueId || `${makeDomSafeKey(title)}-color`;
-    colorInput.id = colorId;
+    colorInput.id = uniqueId || `${makeDomSafeKey(title)}-color`;
 
     // Set initial color
     colorInput.value = initialColor;
@@ -361,10 +357,11 @@ function addOptionColor(title, parentElement, onChange, initialColor = "#000000"
  * Creates a gradient color picker input from the template and adds it to a parent element.
  * @param {string} title - The label text to display for the gradient picker
  * @param {HTMLElement} parentElement - The element to append the gradient picker to
- * @param {function} onChange - Callback function that receives an object with startColor and endColor (e.g., {startColor: "#ff0000", endColor: "#0000ff"})
+ * @param {function} onChange - Callback function that receives an object with startColor and endColor (e.g.,
+ *     {startColor: "#ff0000", endColor: "#0000ff"})
  * @param {string} initialStartColor - Initial start color value in hex format (default: "#000000")
  * @param {string} initialEndColor - Initial end color value in hex format (default: "#ffffff")
- * @param {string} uniqueId - Optional unique ID prefix for the gradient picker inputs (auto-generated if not provided)
+ * @param {null} uniqueId - Optional unique ID prefix for the gradient picker inputs (auto-generated if not provided)
  * @returns {Object} Object containing {startInput, endInput} - the created color input elements
  */
 function addOptionGradient(title, parentElement, onChange, initialStartColor = "#000000", initialEndColor = "#ffffff", uniqueId = null) {
@@ -420,13 +417,15 @@ function addOptionGradient(title, parentElement, onChange, initialStartColor = "
  * When checked, displays gradient start/end color pickers.
  * @param {string} title - The label text to display for the picker
  * @param {HTMLElement} parentElement - The element to append the picker to
- * @param {function} onChange - Callback function that receives an object: {isGradient: boolean, color?: string, startColor?: string, endColor?: string}
+ * @param {function} onChange - Callback function that receives an object: {isGradient: boolean, color?: string,
+ *     startColor?: string, endColor?: string}
  * @param {boolean} initialIsGradient - Whether gradient mode is initially enabled (default: false)
  * @param {string} initialColor - Initial single color value in hex format (default: "#ffffff")
  * @param {string} initialStartColor - Initial gradient start color in hex format (default: "#000000")
  * @param {string} initialEndColor - Initial gradient end color in hex format (default: "#ffffff")
- * @param {string} uniqueId - Optional unique ID prefix for the inputs (auto-generated if not provided)
- * @returns {Object} Object containing {checkbox, singleColorInput, startColorInput, endColorInput, singleColorContainer, gradientColorsContainer}
+ * @param {null} uniqueId - Optional unique ID prefix for the inputs (auto-generated if not provided)
+ * @returns {Object} Object containing {checkbox, singleColorInput, startColorInput, endColorInput,
+ *     singleColorContainer, gradientColorsContainer}
  */
 function addOptionColorOrGradient(
     title,
@@ -586,7 +585,7 @@ function updateSceneObjectSelectionColors(engine) {
         const selectedId = parseInt(sceneObjsSelectElement.value, 10);
         const sceneObject = engine.scene.getSceneObjectById(selectedId);
         if (sceneObject) {
-            sceneObject.material.setEdgeColor(selectedSceneObjectColor);
+            sceneObject.material.edgeColor = selectedSceneObjectColor;
             currentlySelectedSceneObjectId = selectedId;
         }
     } else {
@@ -596,7 +595,7 @@ function updateSceneObjectSelectionColors(engine) {
 
 function updateClearButtonState(engine) {
     const clearButton = document.getElementById(CLEAR_SCENE_OBJS_BTN_ID);
-    const hasSceneObjects = engine.scene.getSceneObjects().length > 0;
+    const hasSceneObjects = engine.scene.sceneObjects.length > 0;
     clearButton.disabled = !hasSceneObjects;
 }
 
@@ -769,7 +768,7 @@ function updateToBrowserSize(engine) {
     const inspector = document.getElementById(INSPECTOR_PANEL_ID);
     const viewport = document.getElementById(VIEWPORT_PANEL_ID);
 
-    let baseRenderWidth = null;
+    let baseRenderWidth;
     let baseRenderHeight = null;
 
     if (isMobile) {
@@ -792,10 +791,10 @@ function updateToBrowserSize(engine) {
         baseRenderHeight = viewport.clientHeight;
     }
 
-    engine.setScreenSize(new Vector2(
+    engine.screenSize = new Vector2(
         Math.floor(baseRenderWidth * resolutionScale),
         Math.floor(baseRenderHeight * resolutionScale)
-    ));
+    );
 
 }
 
@@ -824,7 +823,8 @@ function addOptionsToMeshSelect() {
 async function init() {
     addOptionsToMeshSelect();
 
-    const engine = new Engine(document.getElementById("canvas"), "cyan", "black");
+    const engine = new Engine(document.getElementById("canvas"));
+
     //engine.renderer.setBackgroundColor(BODY_BACKGROUND_COLOR);
     updateToBrowserSize(engine);
 
@@ -833,7 +833,7 @@ async function init() {
     updateRemoveButtonState();
 
 
-    engine.toggleFPS(true);
+    engine.isFrameRateCounter = true;
 
     // Add camera transform controls at the top of the inspector panel
     addTransformInput(
@@ -852,7 +852,7 @@ async function init() {
         "Depth Sorting",
         renderingOptionsPanel,
         (checked) => {
-            engine.toggleDepthSorting(checked);
+            engine.isDepthSorting = checked;
         },
         true // initially checked
     );
@@ -861,7 +861,7 @@ async function init() {
         "Back Face Culling",
         renderingOptionsPanel,
         (checked) => {
-            engine.camera.toggleBackFaceCulling(checked);
+            engine.camera.isBackFaceCulling = checked;
         },
         true // initially checked
     );
@@ -900,7 +900,7 @@ async function init() {
             if (currentlySelectedSceneObjectId !== null) {
                 const selectedObject = engine.scene.getSceneObjectById(currentlySelectedSceneObjectId);
                 if (selectedObject) {
-                    selectedObject.material.setColor(color);
+                    selectedObject.material.edgeColor = color;
                 }
             }
         },
@@ -921,7 +921,7 @@ async function init() {
     engine.start();
 }
 
-import {Engine, SceneObject, Transform, Vector3, WavefrontMeshConverter, Vector2, Material} from 'canvas-js-3d';
+import {Engine, Material, SceneObject, Transform, Vector2, Vector3, WavefrontMeshConverter} from 'canvas-js-3d';
 
 let isMobile = false;
 let resolutionScale = DEFAULT_RESOLUTION_SCALE;
