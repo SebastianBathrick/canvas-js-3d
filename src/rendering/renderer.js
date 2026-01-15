@@ -2,6 +2,8 @@
  * Handles drawing wireframe graphics to a Canvas 2D context.
  */
 export class Renderer {
+    // region Fields
+
     #canvas;
     #ctx;
     _backgroundColor = '#000000';
@@ -12,6 +14,10 @@ export class Renderer {
     _bloomCanvas;
     _bloomCtx;
 
+    // endregion
+
+    // region Constructor
+
     /**
      * Creates a new Renderer.
      * @param {HTMLCanvasElement} canvas - The canvas element to render to.
@@ -21,6 +27,8 @@ export class Renderer {
         this.#canvas = canvas;
         this.#ctx = canvas.getContext('2d');
     }
+
+    // endregion
 
     // region Getter Properties
 
