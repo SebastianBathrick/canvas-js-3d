@@ -1,23 +1,14 @@
 # canvas-js-3d
 
-A lightweight, dependency‑free 3D wireframe + flat‑shaded renderer built on the HTML Canvas API.
+canvas-js-3d is a **lightweight**, **dependency-free 3D graphics JavaScript library** built on the HTML **Canvas API** and designed to run in web browsers. It makes it easy to **load Wavefront OBJ files** and render external 3D models directly to the canvas, without using WebGL, Three.js, or any other third-party libraries. The entire codebase is **written in pure, vanilla JavaScript.**
 
-Great for learning, 3D webpage GUIs, small browser games (especially with synthwave/arcade visuals), and experimentation.
+Great for learning, 3D web page visuals, small browser games (especially with synthwave/arcade visuals), and experimentation.
 
-### Live Demo: [https://sebastianbathrick.github.io/canvas-js-3d/](https://sebastianbathrick.github.io/canvas-js-3d/)
-</br>
+# Web Demo
+### Link to demo: [https://sebastianbathrick.github.io/canvas-js-3d/](https://sebastianbathrick.github.io/canvas-js-3d/)
 
-# What This Library Is (and Isn’t)
-
-### canvas-js-3d is a small 3D library that:
-* Projects real 3D geometry to a 2D canvas
-* Renders edges, filled faces, or both
-* Loads Wavefront OBJ meshes
-
-### It intentionally:
-* Uses no WebGL
-* Is not for rendering highly detailed visuals
-* Has no dependencies
+### YouTube Video
+[![IMAGE ALT TEXT HERE](./.github/images/video-thumbnail.png)](https://www.youtube.com/watch?v=045gfHN4Zrc)
 
 # Features
 
@@ -82,23 +73,23 @@ const engine = new Engine(canvas);
 
 // Define the geometry of a cube (or load a .obj file via WavefrontMeshConverter)
 const vertices = [
-new Vector3(-1, -1, -1),  // 0: back-bottom-left
-new Vector3( 1, -1, -1),  // 1: back-bottom-right
-new Vector3( 1,  1, -1),  // 2: back-top-right
-new Vector3(-1,  1, -1),  // 3: back-top-left
-new Vector3(-1, -1,  1),  // 4: front-bottom-left
-new Vector3( 1, -1,  1),  // 5: front-bottom-right
-new Vector3( 1,  1,  1),  // 6: front-top-right
-new Vector3(-1,  1,  1)  // 7: front-top-left
+    new Vector3(-1, -1, -1),  // 0: back-bottom-left
+    new Vector3( 1, -1, -1),  // 1: back-bottom-right
+    new Vector3( 1,  1, -1),  // 2: back-top-right
+    new Vector3(-1,  1, -1),  // 3: back-top-left
+    new Vector3(-1, -1,  1),  // 4: front-bottom-left
+    new Vector3( 1, -1,  1),  // 5: front-bottom-right
+    new Vector3( 1,  1,  1),  // 6: front-top-right
+    new Vector3(-1,  1,  1)  // 7: front-top-left
 ];
 
 const faces = [
-[1, 0, 3, 2],  // back
-[4, 5, 6, 7],  // front
-[0, 4, 7, 3],  // left
-[1, 2, 6, 5],  // right
-[3, 7, 6, 2],  // top
-[0, 1, 5, 4],  // bottom
+    [1, 0, 3, 2],  // back
+    [4, 5, 6, 7],  // front
+    [0, 4, 7, 3],  // left
+    [1, 2, 6, 5],  // right
+    [3, 7, 6, 2],  // top
+    [0, 1, 5, 4],  // bottom
 ];
 
 const mesh = new Mesh(vertices, faces);
@@ -114,7 +105,8 @@ const cubeSceneObj = new SceneObject(
         '#ffffff', // Edge color
         null, // Optional gradient color (ex. '#0000ff' for blue)
         '#333333' // Optional face color (null for wireframe)
-));
+    )
+);
 
 // Smoothly rotate the cube (gets called each frame)
 engine.onFrameUpdate = (deltaTime) => {
@@ -213,13 +205,13 @@ engine.isFrameRateCounter = true;
 engine.debugTextColor = '#ffffff';
 ```
 
-### Screen Resize Handling (Pixels)
+### Screen Resize Handling
 ```javascript
 import { Vector2 } from 'canvas-js-3d';
 
 engine.screenSize = new Vector2(
-    500,
-    500
+    500, // Width 500px
+    500 // Height 500px
 );
 ```
 
@@ -239,12 +231,17 @@ engine.scene.addSceneObject(obj);
 ```
 
 #### Supported File Sources:
-* WavefrontMeshConverter.fromUrl(url)
-* WavefrontMeshConverter.fromFile(file)
-* WavefrontMeshConverter.fromFileDialog()
-* WavefrontMeshConverter.fromText(objString)
+* `WavefrontMeshConverter.fromUrl(url);`
+* `WavefrontMeshConverter.fromFile(file);`
+* `WavefrontMeshConverter.fromFileDialog();`
+* `WavefrontMeshConverter.fromText(objString);`
 
 Only vertex positions and face indices are parsed. Normals and UVs are ignored.
+
+### Stop Engine
+```javascript
+engine.stop();
+```
 
 # Directory Structure
 ```
