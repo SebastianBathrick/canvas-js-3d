@@ -10,7 +10,7 @@ export class Renderer {
     #backgroundGradientColor = null;
     #debugTextColor = '#ffffff';
     #pointSize = 20;
-    #bloom = {enabled: false, blur: 15, color: null};
+    #bloom = {enabled: false, blur: 5, color: null};
     #bloomCanvas;
     #bloomCtx;
 

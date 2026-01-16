@@ -14,7 +14,7 @@ export class Engine {
     #renderer;
     #camera;
     scene = new Scene();
-    #isDepthSorting = false;
+    #isDepthSorting = true;
     #isRunning = false;
     #lastFrameTime = 0;
     #fps = 0;
@@ -114,7 +114,7 @@ export class Engine {
     }
 
     /**
-     * Toggles depth sorting on or off.
+     * Toggles depth sorting on or off (on by default).
      * When enabled, faces are sorted back-to-front and filled with background color
      * to create the illusion of solid objects (painter's algorithm).
      * @param {boolean} [enabled] - Sets the state directly.
@@ -124,7 +124,7 @@ export class Engine {
     }
 
     /**
-     * Configures depth fog effect.
+     * Configures depth fog effect (off by default, near=5, far=50, color #000000).
      * When enabled, objects fade toward the fog color based on their distance from the camera.
      * @param {{enabled?: boolean, color?: string, near?: number, far?: number}} options - Fog configuration.
      */
@@ -133,7 +133,7 @@ export class Engine {
     }
 
     /**
-     * Sets the background color.
+     * Sets the background color (black by default).
      * @param {string} color - The background color (hex string or CSS color).
      */
     set backgroundColor(color) {
@@ -141,7 +141,7 @@ export class Engine {
     }
 
     /**
-     * Sets the background gradient end color. Set to null to disable gradient.
+     * Sets the background gradient end color. Set to null to disable gradient (null by default).
      * @param {string|null} color - The gradient end color, or null to disable.
      */
     set backgroundGradientColor(color) {
@@ -149,7 +149,7 @@ export class Engine {
     }
 
     /**
-     * Sets the debug text color (used for FPS counter).
+     * Sets the debug text color (used for FPS counter and is white by default).
      * @param {string} color - The debug text color.
      */
     set debugTextColor(color) {
@@ -157,7 +157,7 @@ export class Engine {
     }
 
     /**
-     * Sets the default edge color for faces without explicit color.
+     * Sets the default edge color for faces without explicit color (green by default).
      * @param {string} color - The default edge color.
      */
     set defaultEdgeColor(color) {
@@ -165,7 +165,7 @@ export class Engine {
     }
 
     /**
-     * Enables or disables the FPS counter display.
+     * Enables or disables the FPS counter display (off by default).
      * @param {boolean} enabled - Whether to show the FPS counter.
      */
     set isFrameRateCounter(enabled) {
@@ -173,7 +173,7 @@ export class Engine {
     }
 
     /**
-     * Configures global bloom effect.
+     * Configures global bloom effect (off by default, blur radius 5, glow color same as edges).
      * When enabled, edges glow with a soft blur effect.
      * @param {{enabled?: boolean, blur?: number, color?: string|null}} options - Bloom settings.
      *   - enabled: Whether bloom is active (default false)
@@ -185,7 +185,8 @@ export class Engine {
     }
 
     /**
-     * Sets the screen size.
+     * Sets the screen size (determined by canvas size at initialization).
+     * This can be called while/before/after the engine is running.
      * @param {Vector2} newScreenSize - The new screen size.
      */
     set screenSize(newScreenSize) {
