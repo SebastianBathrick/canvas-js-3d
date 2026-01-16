@@ -89,37 +89,6 @@
     </div>
 </template>
 
-<template id="settings-input-color-or-gradient-template">
-    <div class="sub-panel-item">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <h4 class="color-or-gradient-label">Color/Gradient Label</h4>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" class="gradient-toggle-checkbox">
-                <span style="font-size: 12px;">Gradient</span>
-            </div>
-        </div>
-
-        <!-- Single color input (shown when gradient is disabled) -->
-        <div class="single-color-container"
-             style="display: flex; justify-content: flex-end; align-items: center; width: 100%; margin-top: 8px;">
-            <input type="color" class="single-color-input" value="#ffffff">
-        </div>
-
-        <!-- Gradient inputs (shown when gradient is enabled) -->
-        <div class="gradient-colors-container"
-             style="display: none; justify-content: space-between; align-items: center; width: 100%; margin-top: 8px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 12px;">Start</span>
-                <input type="color" class="gradient-start-color-input" value="#000000">
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 12px;">End</span>
-                <input type="color" class="gradient-end-color-input" value="#ffffff">
-            </div>
-        </div>
-    </div>
-</template>
-
 <div class="panel" id="inspector-panel">
     <div class="sub-panel">
         <h3>Scene Objects</h3>
