@@ -8,6 +8,8 @@ import {Mesh} from '../core/mesh.js';
  * Orchestrates the file loading, lexing, and parsing pipeline.
  */
 export class WavefrontMeshConverter {
+    // region Static Loading Methods
+
     /**
      * Loads an OBJ file from a URL and converts it to a Mesh.
      * @param {string} url - The URL to fetch the OBJ file from.
@@ -37,6 +39,10 @@ export class WavefrontMeshConverter {
         return this.fromText(text);
     }
 
+    // endregion
+
+    // region Static Conversion Methods
+
     /**
      * Converts OBJ text content directly to a Mesh.
      * @param {string} text - The OBJ file content as a string.
@@ -51,4 +57,6 @@ export class WavefrontMeshConverter {
 
         return new Mesh(vertices, faceIndices);
     }
+
+    // endregion
 }

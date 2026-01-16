@@ -5,43 +5,58 @@ import {Vector3} from '../math/vector3.js';
  * Handles 'v' (vertex) and 'f' (face) keywords, ignoring texture coords and normals.
  */
 export class WavefrontParser {
+    // region Fields
+
+    #tokens;
+    #current;
+    #vertices;
+    #faceIndices;
+
+    // endregion
+
+    // region Constructor
+
     /**
      * Creates a new WavefrontParser.
      * @param {Array<{type: string, value: *}>} tokens - The tokens from WavefrontLexer.
      */
     constructor(tokens) {
-        /** @type {Array<{type: string, value: *}>} */
-        this._tokens = tokens;
-        /** @type {number} */
-        this._current = 0;
-        /** @type {Vector3[]} */
-        this._vertices = [];
-        /** @type {number[][]} */
-        this._faceIndices = [];
+        this.#tokens = tokens;
+        this.#current = 0;
+        this.#vertices = [];
+        this.#faceIndices = [];
     }
+
+    // endregion
+
+    // region Public Methods
 
     /**
      * Parses all tokens and returns the extracted mesh data.
      * @returns {{vertices: Vector3[], faceIndices: number[][]}} The parsed mesh data.
      */
     parse() {
-        while (!this._isAtEnd()) {
-            this._parseStatement();
+        while (!this.#isAtEnd()) {
+            this.#parseStatement();
         }
 
         return {
-            vertices: this._vertices,
-            faceIndices: this._faceIndices
+            vertices: this.#vertices,
+            faceIndices: this.#faceIndices
         };
     }
 
+    // endregion
+
+    // region Private Parsing Methods
+
     /** @private */
-    _parseStatement() {
-        const token = this._peek();
+    #parseStatement() {
+        const token = this.#peek();
 
         // Skip newlines
         if (token.type === 'NEWLINE') {
-            this._advance();
+            this.#advance();
             return;
         }
 
@@ -50,68 +65,72 @@ export class WavefrontParser {
             const keyword = token.value;
 
             if (keyword === 'v') {
-                this._advance(); // consume 'v'
-                this._parseVertex();
+                this.#advance(); // consume 'v'
+                this.#parseVertex();
             } else if (keyword === 'f') {
-                this._advance(); // consume 'f'
-                this._parseFace();
+                this.#advance(); // consume 'f'
+                this.#parseFace();
             } else {
                 // Unknown keyword - skip to end of line
-                this._skipToNextLine();
+                this.#skipToNextLine();
             }
             return;
         }
 
         // Skip anything else
-        this._advance();
+        this.#advance();
     }
 
     /** @private */
-    _parseVertex() {
-        const x = this._consumeNumber();
-        const y = this._consumeNumber();
-        const z = this._consumeNumber();
+    #parseVertex() {
+        const x = this.#consumeNumber();
+        const y = this.#consumeNumber();
+        const z = this.#consumeNumber();
 
-        this._vertices.push(new Vector3(x, y, z));
-        this._skipToNextLine();
+        this.#vertices.push(new Vector3(x, y, z));
+        this.#skipToNextLine();
     }
 
     /** @private */
-    _parseFace() {
+    #parseFace() {
         const indices = [];
 
         // Consume all vertex indices until newline or EOF
-        while (!this._isAtEnd() && this._peek().type !== 'NEWLINE') {
-            if (this._peek().type === 'NUMBER') {
+        while (!this.#isAtEnd() && this.#peek().type !== 'NEWLINE') {
+            if (this.#peek().type === 'NUMBER') {
                 // Get vertex index (1-indexed in OBJ, convert to 0-indexed)
-                const vertexIndex = this._consumeNumber() - 1;
+                const vertexIndex = this.#consumeNumber() - 1;
                 indices.push(vertexIndex);
 
                 // Skip texture/normal indices (e.g., /2/3)
-                while (this._peek().type === 'SLASH') {
-                    this._advance(); // consume '/'
+                while (this.#peek().type === 'SLASH') {
+                    this.#advance(); // consume '/'
 
                     // Consume the index after slash if present
-                    if (this._peek().type === 'NUMBER')
-                        this._advance();
+                    if (this.#peek().type === 'NUMBER')
+                        this.#advance();
                 }
             } else {
-                this._advance();
+                this.#advance();
             }
         }
 
         if (indices.length >= 3)
-            this._faceIndices.push(indices);
+            this.#faceIndices.push(indices);
 
-        this._skipToNextLine();
+        this.#skipToNextLine();
     }
 
+    // endregion
+
+    // region Private Helper Methods
+
     /** @private */
-    _consumeNumber() {
-        const token = this._peek();
+    #consumeNumber() {
+        const token = this.#peek();
 
         if (token.type === 'NUMBER') {
-            this._advance();
+            this.#advance();
             return token.value;
         }
 
@@ -120,30 +139,32 @@ export class WavefrontParser {
     }
 
     /** @private */
-    _skipToNextLine() {
-        while (!this._isAtEnd() && this._peek().type !== 'NEWLINE')
-            this._advance();
+    #skipToNextLine() {
+        while (!this.#isAtEnd() && this.#peek().type !== 'NEWLINE')
+            this.#advance();
 
         // Consume the newline
-        if (!this._isAtEnd() && this._peek().type === 'NEWLINE')
-            this._advance();
+        if (!this.#isAtEnd() && this.#peek().type === 'NEWLINE')
+            this.#advance();
     }
 
     /** @private */
-    _peek() {
-        return this._tokens[this._current];
+    #peek() {
+        return this.#tokens[this.#current];
     }
 
     /** @private */
-    _advance() {
-        if (!this._isAtEnd())
-            this._current++;
+    #advance() {
+        if (!this.#isAtEnd())
+            this.#current++;
 
-        return this._tokens[this._current - 1];
+        return this.#tokens[this.#current - 1];
     }
 
     /** @private */
-    _isAtEnd() {
-        return this._current >= this._tokens.length || this._peek().type === 'EOF';
+    #isAtEnd() {
+        return this.#current >= this.#tokens.length || this.#peek().type === 'EOF';
     }
+
+    // endregion
 }

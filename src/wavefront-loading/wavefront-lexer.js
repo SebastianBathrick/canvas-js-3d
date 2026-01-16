@@ -3,38 +3,53 @@
  * Produces tokens of type: KEYWORD, NUMBER, SLASH, NEWLINE, EOF.
  */
 export class WavefrontLexer {
+    // region Fields
+
+    #source;
+    #tokens;
+    #start;
+    #current;
+
+    // endregion
+
+    // region Constructor
+
     /**
      * Creates a new WavefrontLexer.
      * @param {string} source - The OBJ file content to tokenize.
      */
     constructor(source) {
-        /** @type {string} */
-        this._source = source;
-        /** @type {Array<{type: string, value: *}>} */
-        this._tokens = [];
-        /** @type {number} */
-        this._start = 0;
-        /** @type {number} */
-        this._current = 0;
+        this.#source = source;
+        this.#tokens = [];
+        this.#start = 0;
+        this.#current = 0;
     }
+
+    // endregion
+
+    // region Public Methods
 
     /**
      * Tokenizes all content and returns the token array.
      * @returns {Array<{type: string, value: *}>} Array of token objects.
      */
     lexTokens() {
-        while (!this._isAtEnd()) {
-            this._start = this._current;
-            this._lexToken();
+        while (!this.#isAtEnd()) {
+            this.#start = this.#current;
+            this.#lexToken();
         }
 
-        this._tokens.push({type: 'EOF', value: null});
-        return this._tokens;
+        this.#tokens.push({type: 'EOF', value: null});
+        return this.#tokens;
     }
 
+    // endregion
+
+    // region Private Lexing Methods
+
     /** @private */
-    _lexToken() {
-        const c = this._advance();
+    #lexToken() {
+        const c = this.#advance();
 
         // Skip whitespace (except newlines)
         if (c === ' ' || c === '\t' || c === '\r')
@@ -42,112 +57,117 @@ export class WavefrontLexer {
 
         // Newline
         if (c === '\n') {
-            this._tokens.push({type: 'NEWLINE', value: '\n'});
+            this.#tokens.push({type: 'NEWLINE', value: '\n'});
             return;
         }
 
         // Comment - skip to end of line
         if (c === '#') {
-            while (this._peek() !== '\n' && !this._isAtEnd())
-                this._advance();
+            while (this.#peek() !== '\n' && !this.#isAtEnd())
+                this.#advance();
             return;
         }
 
         // Slash (for face format like 1/2/3)
         if (c === '/') {
-            this._tokens.push({type: 'SLASH', value: '/'});
+            this.#tokens.push({type: 'SLASH', value: '/'});
             return;
         }
 
         // Number (including negative)
-        if (this._isDigit(c) || (c === '-' && this._isDigit(this._peek()))) {
-            this._lexNumber();
+        if (this.#isDigit(c) || (c === '-' && this.#isDigit(this.#peek()))) {
+            this.#lexNumber();
             return;
         }
 
         // Keyword/identifier
-        if (this._isAlpha(c)) {
-            this._lexKeyword();
-
+        if (this.#isAlpha(c)) {
+            this.#lexKeyword();
         }
     }
 
     /** @private */
-    _lexNumber() {
+    #lexNumber() {
         // Consume digits before decimal
-        while (this._isDigit(this._peek()))
-            this._advance();
+        while (this.#isDigit(this.#peek()))
+            this.#advance();
 
         // Look for decimal part
-        if (this._peek() === '.' && this._isDigit(this._peekNext())) {
-            this._advance(); // consume '.'
+        if (this.#peek() === '.' && this.#isDigit(this.#peekNext())) {
+            this.#advance(); // consume '.'
 
-            while (this._isDigit(this._peek()))
-                this._advance();
+            while (this.#isDigit(this.#peek()))
+                this.#advance();
         }
 
         // Handle scientific notation (e.g., 1.5e-10)
-        if (this._peek() === 'e' || this._peek() === 'E') {
-            this._advance(); // consume 'e'
+        if (this.#peek() === 'e' || this.#peek() === 'E') {
+            this.#advance(); // consume 'e'
 
-            if (this._peek() === '+' || this._peek() === '-')
-                this._advance(); // consume sign
+            if (this.#peek() === '+' || this.#peek() === '-')
+                this.#advance(); // consume sign
 
-            while (this._isDigit(this._peek()))
-                this._advance();
+            while (this.#isDigit(this.#peek()))
+                this.#advance();
         }
 
-        const value = parseFloat(this._source.substring(this._start, this._current));
-        this._tokens.push({type: 'NUMBER', value: value});
+        const value = parseFloat(this.#source.substring(this.#start, this.#current));
+        this.#tokens.push({type: 'NUMBER', value: value});
     }
 
     /** @private */
-    _lexKeyword() {
-        while (this._isAlphaNumeric(this._peek()))
-            this._advance();
+    #lexKeyword() {
+        while (this.#isAlphaNumeric(this.#peek()))
+            this.#advance();
 
-        const value = this._source.substring(this._start, this._current);
-        this._tokens.push({type: 'KEYWORD', value: value});
+        const value = this.#source.substring(this.#start, this.#current);
+        this.#tokens.push({type: 'KEYWORD', value: value});
+    }
+
+    // endregion
+
+    // region Private Helper Methods
+
+    /** @private */
+    #advance() {
+        return this.#source.charAt(this.#current++);
     }
 
     /** @private */
-    _advance() {
-        return this._source.charAt(this._current++);
-    }
-
-    /** @private */
-    _peek() {
-        if (this._isAtEnd())
+    #peek() {
+        if (this.#isAtEnd())
             return '\0';
 
-        return this._source.charAt(this._current);
+        return this.#source.charAt(this.#current);
     }
 
     /** @private */
-    _peekNext() {
-        if (this._current + 1 >= this._source.length)
+    #peekNext() {
+        if (this.#current + 1 >= this.#source.length)
             return '\0';
 
-        return this._source.charAt(this._current + 1);
+        return this.#source.charAt(this.#current + 1);
     }
 
     /** @private */
-    _isAtEnd() {
-        return this._current >= this._source.length;
+    #isAtEnd() {
+        return this.#current >= this.#source.length;
     }
 
     /** @private */
-    _isDigit(c) {
+    #isDigit(c) {
         return c >= '0' && c <= '9';
     }
 
     /** @private */
-    _isAlpha(c) {
+    #isAlpha(c) {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_';
     }
 
     /** @private */
-    _isAlphaNumeric(c) {
-        return this._isAlpha(c) || this._isDigit(c);
+    #isAlphaNumeric(c) {
+        return this.#isAlpha(c) || this.#isDigit(c);
     }
+
+    // endregion
 }
