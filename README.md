@@ -171,7 +171,7 @@ engine.backgroundGradientColor = '#1a1a2e';
 engine.defaultEdgeColor = '#00ff00';
 ```
 
-#### Materials: Edges, Gradients, Faces
+### Materials: Edges, Gradients, Faces
 ```javascript
 // Edges only
 cubeSceneObj.material = new Material('#ffffff');
@@ -236,7 +236,7 @@ const obj = new SceneObject(
 engine.scene.addSceneObject(obj);
 ```
 
-Supported:
+#### Supported File Sources:
 * WavefrontMeshConverter.fromUrl(url)
 * WavefrontMeshConverter.fromFile(file)
 * WavefrontMeshConverter.fromFileDialog()
