@@ -1,6 +1,0 @@
-Before going to main branch:
-- Add hard object cap (and/or just remove torus + monkey after start OR vert limit)
-- Change "color"+"gradientColor" to "edgeColor"+"edgeGradientColor"
-- Ability to change edge color, gradient color, and face color per scene object
-- Add bloom slider + toggle
-- Add fog toggle + near/far sliders
