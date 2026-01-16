@@ -1,6 +1,6 @@
 {
   "name": "canvas-js-3d",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "A lightweight, dependency‑free 3D wireframe + flat‑shaded renderer built on the HTML Canvas API.",
   "type": "module",
   "main": "src/index.js",
