@@ -33,7 +33,7 @@ export class Camera {
         /** @type {Transform} */
         this.#transform = new Transform(Vector3.zero(), Vector3.zero(), Vector3.one());
         /** @type {boolean} */
-        this.#isBackFaceCulling = false;
+        this.#isBackFaceCulling = true;
         this.setFov(fov);
     }
 
