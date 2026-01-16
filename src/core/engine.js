@@ -74,7 +74,7 @@ export class Engine {
      * @returns {string|null} The gradient end color, or null if no gradient.
      */
     get backgroundGradientColor() {
-        return this.#renderer.backgroundColor;
+        return this.#renderer.backgroundGradientColor;
     }
 
     /**
@@ -99,6 +99,10 @@ export class Engine {
      */
     get bloom() {
         return this.#renderer.bloom;
+    }
+
+    get isBackgroundGradient() {
+        return this.#renderer.isBackgroundGradient;
     }
 
     // endregion
@@ -141,7 +145,7 @@ export class Engine {
      * @param {string|null} color - The gradient end color, or null to disable.
      */
     set backgroundGradientColor(color) {
-        this.#renderer.backgroundColor = color;
+        this.#renderer.backgroundGradientColor = color;
     }
 
     /**
@@ -275,10 +279,8 @@ export class Engine {
                 if (gradientEndColor)
                     gradientEndColor = ColorUtils.applyFog(gradientEndColor, this._depthFog.color, fogAmount);
 
-                if (!fillColor)
-                    continue;
-
-                fillColor = ColorUtils.applyFog(fillColor, this._depthFog.color, fogAmount);
+                if (fillColor)
+                    fillColor = ColorUtils.applyFog(fillColor, this._depthFog.color, fogAmount);
             }
 
             // Fill face to occlude faces behind (depth sorting) or render face color

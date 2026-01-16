@@ -7,7 +7,7 @@ export class Renderer {
     #canvas;
     #ctx;
     _backgroundColor = '#000000';
-    _backgroundGradientColor;
+    _backgroundGradientColor = null;
     _debugTextColor = '#ffffff';
     _pointSize = 20;
     _bloom = {enabled: false, blur: 15, color: null};
@@ -38,6 +38,10 @@ export class Renderer {
      */
     get backgroundColor() {
         return this._backgroundColor;
+    }
+
+    get isBackgroundGradient() {
+        return this._backgroundGradientColor !== null;
     }
 
     /**

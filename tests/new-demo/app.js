@@ -1,5 +1,8 @@
 // region Constants
 const SCENE_OBJ_DEFAULT_EDGE_COLOR = "#ffffff";
+const SCENE_OBJ_DEFAULT_FACE_COLOR = "#2E2E2E";
+const DEFAULT_BACKGROUND_COLOR = "#000000";
+const DEFAULT_BACKGROUND_GRADIENT_COLOR = "#1a1a2e";
 const SELECTED_OBJ_TRANSFORM_PANEL_ID = "selected-obj-transform-panel";
 const DEFAULT_SELECTED_OBJ_ROTATE_SPEED = 0.1;
 const SELECTED_OBJ_MIN_ROTATE_SPEED = 0.05;
@@ -567,8 +570,8 @@ function updateSelectedObjectControls(engine) {
         SELECTED_OBJ_TRANSFORM_PANEL_ID  // panelId
     );
 
-    const isGradient = sceneObject.material.isGradient;
-
+    // Edge color/gradient controls (create pickers first to get references, then reorder DOM)
+    const isGradient = sceneObject.material.isEdgeGradient;
 
     const colorSettings = addSettingsColor(
         "Edge Color",
@@ -576,7 +579,8 @@ function updateSelectedObjectControls(engine) {
         (color) => {
             sceneObject.material = new Material(color, null, sceneObject.material.faceColor);
         },
-        sceneObject.material.originalEdgeColor || "#ffffff");
+        sceneObject.material.originalEdgeColor || SCENE_OBJ_DEFAULT_EDGE_COLOR
+    );
 
     const gradientSettings = addSettingsGradient(
         "Edge Gradient",
@@ -584,33 +588,73 @@ function updateSelectedObjectControls(engine) {
         (gradient) => {
             sceneObject.material = new Material(gradient.startColor, gradient.endColor, sceneObject.material.faceColor);
         },
-        sceneObject.material.originalEdgeColor || "#ffffff",
-        sceneObject.material.originalEdgeGradientColor || "#ffffff"
-    )
+        sceneObject.material.originalEdgeColor || SCENE_OBJ_DEFAULT_EDGE_COLOR,
+        sceneObject.material.originalEdgeGradientColor || SCENE_OBJ_DEFAULT_EDGE_COLOR
+    );
 
     createSettingsCheckbox(
         "Use Edge Gradient",
         controlSubpanel,
-        (isGradient) => {
-            if (isGradient) {
-                sceneObject.material = new Material(sceneObject.material.edgeColor, SCENE_OBJ_DEFAULT_EDGE_COLOR, sceneObject.material.faceColor);
+        (useGradient) => {
+            if (useGradient) {
+                const startColor = gradientSettings.querySelector('.gradient-start-input').value;
+                const endColor = gradientSettings.querySelector('.gradient-end-input').value;
+                sceneObject.material = new Material(startColor, endColor, sceneObject.material.faceColor);
                 colorSettings.style.display = 'none';
                 gradientSettings.style.display = 'flex';
-
-                // Set the color picker for gradient settings to the edge color
-                gradientSettings.querySelector('.gradient-start-input').value = sceneObject.material.originalEdgeColor;
-                gradientSettings.querySelector('.gradient-end-input').value = sceneObject.material.originalEdgeGradientColor;
             }
             else {
-                sceneObject.material = new Material(sceneObject.material.edgeColor, null, sceneObject.material.faceColor);
+                const color = colorSettings.querySelector('.color-input').value;
+                sceneObject.material = new Material(color, null, sceneObject.material.faceColor);
                 colorSettings.style.display = 'flex';
                 gradientSettings.style.display = 'none';
             }
         },
         isGradient
-        );
+    );
 
+    // Reorder DOM: move checkbox before color pickers
+    const edgeGradientCheckbox = controlSubpanel.lastElementChild;
+    controlSubpanel.insertBefore(edgeGradientCheckbox, colorSettings);
 
+    // Face color controls
+    const isFaceColor = sceneObject.material.isFaceColor;
+
+    const faceColorSettings = addSettingsColor(
+        "Face Color",
+        controlSubpanel,
+        (color) => {
+            const currentEdgeColor = sceneObject.material.edgeColor;
+            const currentEdgeGradientColor = sceneObject.material.edgeGradientColor;
+            sceneObject.material = new Material(currentEdgeColor, currentEdgeGradientColor, color);
+        },
+        sceneObject.material.originalFaceColor || SCENE_OBJ_DEFAULT_FACE_COLOR
+    );
+
+    createSettingsCheckbox(
+        "Use Face Color",
+        controlSubpanel,
+        (useFaceColor) => {
+            if (useFaceColor) {
+                const currentEdgeColor = sceneObject.material.edgeColor;
+                const currentEdgeGradientColor = sceneObject.material.edgeGradientColor;
+                const faceColor = faceColorSettings.querySelector('.color-input').value;
+                sceneObject.material = new Material(currentEdgeColor, currentEdgeGradientColor, faceColor);
+                faceColorSettings.style.display = 'flex';
+            }
+            else {
+                const currentEdgeColor = sceneObject.material.edgeColor;
+                const currentEdgeGradientColor = sceneObject.material.edgeGradientColor;
+                sceneObject.material = new Material(currentEdgeColor, currentEdgeGradientColor, null);
+                faceColorSettings.style.display = 'none';
+            }
+        },
+        isFaceColor
+    );
+
+    // Reorder DOM: move checkbox before face color picker
+    const faceColorCheckbox = controlSubpanel.lastElementChild;
+    controlSubpanel.insertBefore(faceColorCheckbox, faceColorSettings);
 }
 
 function updateInspectorClearButtonState(engine) {
@@ -876,7 +920,57 @@ function initInspector(engine) {
         SELECTED_OBJ_MIN_ROTATE_SPEED,
         SELECTED_OBJ_MAX_ROTATE_SPEED,
         SELECTED_OBJ_ROTATE_SPEED_SLIDER_INC
-    )
+    );
+
+    // Background color/gradient controls (create pickers first to get references, then reorder DOM)
+    const isBackgroundGradient = engine.isBackgroundGradient;
+
+    const bgColorSettings = addSettingsColor(
+        "Background Color",
+        renderingOptionsPanel,
+        (color) => {
+            engine.backgroundColor = color;
+        },
+        engine.backgroundColor || DEFAULT_BACKGROUND_COLOR
+    );
+
+    const bgGradientSettings = addSettingsGradient(
+        "Background Gradient",
+        renderingOptionsPanel,
+        (gradient) => {
+            engine.backgroundColor = gradient.startColor;
+            engine.backgroundGradientColor = gradient.endColor;
+        },
+        engine.backgroundColor || DEFAULT_BACKGROUND_COLOR,
+        engine.backgroundGradientColor || DEFAULT_BACKGROUND_GRADIENT_COLOR
+    );
+
+    createSettingsCheckbox(
+        "Use Background Gradient",
+        renderingOptionsPanel,
+        (useGradient) => {
+            if (useGradient) {
+                const startColor = bgGradientSettings.querySelector('.gradient-start-input').value;
+                const endColor = bgGradientSettings.querySelector('.gradient-end-input').value;
+                engine.backgroundColor = startColor;
+                engine.backgroundGradientColor = endColor;
+                bgColorSettings.style.display = 'none';
+                bgGradientSettings.style.display = 'flex';
+            }
+            else {
+                const color = bgColorSettings.querySelector('.color-input').value;
+                engine.backgroundColor = color;
+                engine.backgroundGradientColor = null;
+                bgColorSettings.style.display = 'flex';
+                bgGradientSettings.style.display = 'none';
+            }
+        },
+        isBackgroundGradient
+    );
+
+    // Reorder DOM: move checkbox before color pickers
+    const bgGradientCheckbox = renderingOptionsPanel.lastElementChild;
+    renderingOptionsPanel.insertBefore(bgGradientCheckbox, bgColorSettings);
 }
 
 function addOptionsToMeshSelect() {

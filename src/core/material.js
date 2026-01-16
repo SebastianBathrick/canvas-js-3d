@@ -38,8 +38,20 @@ export class Material {
 
     // region Getter Properties
 
-    get isGradient() {
+    /**
+     * Gets whether the material has an edge color.
+     * @returns {boolean} True if the material has an edge color.
+     */
+    get isEdgeGradient() {
         return this._edgeGradientColor !== null;
+    }
+
+    /**
+     * Gets whether the material has a face color.
+     * @returns {boolean} True if the material has a face color.
+     */
+    get isFaceColor() {
+        return this._faceColor !== null;
     }
 
     /**

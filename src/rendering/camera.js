@@ -97,15 +97,19 @@ export class Camera {
      * @returns {ProjectedFace[]} Array of projected faces with screen positions and depth.
      */
     projectSceneObject(sceneObject) {
-        const sceneVertices = sceneObject.getTransformedVertices();
+        const worldVertices = sceneObject.getTransformedVertices();
+
+        // Transform all vertices to camera space once (avoids duplicate transforms)
+        const cameraSpaceVertices = worldVertices.map(v => this._worldToCameraSpace(v));
+
         const projectedFaces = [];
 
         // Map vertices to their associated face indices
         for (const face of sceneObject.mesh.faceIndices) {
-            const faceVertices = face.map(idx => sceneVertices[idx]);
+            const faceCameraVertices = face.map(idx => cameraSpaceVertices[idx]);
 
             // Back-face culling: skip faces pointing away from the camera
-            if (this._isBackFaceCulling && faceVertices.length >= 3 && this._isBackFacing(faceVertices))
+            if (this._isBackFaceCulling && faceCameraVertices.length >= 3 && this._isBackFacing(faceCameraVertices))
                 continue;
 
             // Project vertices and calculate average depth
@@ -113,8 +117,7 @@ export class Camera {
             const screenPositions = [];
             let isValid = true;
 
-            for (const vert of faceVertices) {
-                const cameraSpacePos = this._worldToCameraSpace(vert);
+            for (const cameraSpacePos of faceCameraVertices) {
                 depthSum += cameraSpacePos.z;
 
                 const normScreenPos = this._getNormalizedScreenPosition(cameraSpacePos);
@@ -131,7 +134,7 @@ export class Camera {
             if (!isValid)
                 continue;
 
-            const averageDepth = depthSum / faceVertices.length;
+            const averageDepth = depthSum / faceCameraVertices.length;
             projectedFaces.push(new ProjectedFace(
                 screenPositions,
                 averageDepth,
@@ -148,21 +151,26 @@ export class Camera {
 
     // region Helper Methods
 
-    // TODO: Optimize to NOT use Vector3 helper functions
-    /** @private */
-    _isBackFacing(faceVertices) {
-        // Transform vertices to camera space
-        const v0 = this._worldToCameraSpace(faceVertices[0]);
-        const v1 = this._worldToCameraSpace(faceVertices[1]);
-        const v2 = this._worldToCameraSpace(faceVertices[2]);
+    /**
+     * Determines if a face is back-facing relative to the camera.
+     * Uses the first 3 vertices to compute the face normal (assumes planar faces).
+     * @param {Vector3[]} cameraSpaceVertices - Face vertices already in camera space.
+     * @returns {boolean} True if the face is back-facing and should be culled.
+     * @private
+     */
+    _isBackFacing(cameraSpaceVertices) {
+        const v0 = cameraSpaceVertices[0];
+        const v1 = cameraSpaceVertices[1];
+        const v2 = cameraSpaceVertices[2];
 
         // Compute face normal using cross-product of two edges
         const edge1 = v1.getDifference(v0);
         const edge2 = v2.getDifference(v0);
         const normal = edge1.getCross(edge2);
 
-        // Face is back-facing if normal points away from camera (positive z in camera space)
-        // We use v0 as the view vector since camera is at origin in camera space
+        // In camera space, camera is at origin. The view direction from v0 to camera is -v0.
+        // Front-facing: normal · (-v0) > 0, meaning normal · v0 < 0
+        // Back-facing: normal · v0 > 0
         return normal.getDot(v0) > 0;
     }
 
