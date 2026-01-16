@@ -102,11 +102,11 @@ const MESH_PATHS = {
  */
 
 const MESH_PATHS = {
-    Cube: "../../meshes/cube.obj",
-    Cone: "../../meshes/cone.obj",
-    Sphere: "../../meshes/sphere.obj",
-    "Ico Sphere": "../../meshes/ico-sphere.obj",
-    Torus: "../../meshes/torus.obj",
+    Cube: "./meshes/cube.obj",
+    Cone: "./meshes/cone.obj",
+    Sphere: "./meshes/sphere.obj",
+    "Ico Sphere": "./meshes/ico-sphere.obj",
+    Torus: "./meshes/torus.obj",
 };
 
 // endregion
