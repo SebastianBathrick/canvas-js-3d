@@ -1,9 +1,15 @@
 {
   "name": "canvas-js-3d",
-  "version": "0.2.0",
-  "description": "Canvas JS 3D is a lightweight 3D graphics library that uses the Canvas API.",
+  "version": "0.2.12",
+  "description": "A lightweight, dependency‑free 3D wireframe + flat‑shaded renderer built on the HTML Canvas API.",
   "type": "module",
   "main": "src/index.js",
+
+  "homepage": "https://github.com/SebastianBathrick/canvas-js-3d#readme",
+  "bugs": {
+    "url": "https://github.com/SebastianBathrick/canvas-js-3d/issues"
+  },
+
   "exports": {
     ".": "./src/index.js",
     "./wavefront-loading": "./src/wavefront-loading/index.js"
@@ -22,6 +28,10 @@
     "obj",
     "wavefront"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SebastianBathrick/canvas-js-3d.git"
+  },
   "engines": {
     "node": ">=16"
   },
