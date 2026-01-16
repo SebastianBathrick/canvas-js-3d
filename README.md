@@ -8,7 +8,6 @@ Great for learning, 3D web page visuals, small browser games (especially with sy
 # Demo
 ### Demo Link: [https://sebastianbathrick.github.io/canvas-js-3d/](https://sebastianbathrick.github.io/canvas-js-3d/)
 
-### Video Showcase:
 [![IMAGE ALT TEXT HERE](./.github/images/video-thumbnail.png)](https://www.youtube.com/watch?v=045gfHN4Zrc)
 
 # Features
