@@ -6,6 +6,7 @@ import {Material} from './material.js';
 export class SceneObject {
     #mesh;
     #transform;
+    #material;
 
     /**
      * Creates a new SceneObject.
@@ -18,7 +19,7 @@ export class SceneObject {
         this.#transform = transform;
 
         // Mutable material property
-        this._material = material;
+        this.#material = material;
     }
 
     /**
@@ -42,7 +43,7 @@ export class SceneObject {
      * @returns {Material} The material.
      */
     get material() {
-        return this._material;
+        return this.#material;
     }
 
     /**
@@ -50,7 +51,7 @@ export class SceneObject {
      * @param {Material} value - The new material.
      */
     set material(value) {
-        this._material = value;
+        this.#material = value;
     }
 
     /**

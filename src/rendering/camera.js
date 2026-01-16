@@ -9,12 +9,12 @@ import {ProjectedFace} from './projected-face.js';
 export class Camera {
     // region Fields
 
-    _screenSize;
-    _aspectRatio;
+    #screenSize;
+    #aspectRatio;
     #transform;
-    _isBackFaceCulling;
-    _fov;
-    _focalLength;
+    #isBackFaceCulling;
+    #fov;
+    #focalLength;
 
     // endregion
 
@@ -27,13 +27,13 @@ export class Camera {
      */
     constructor(screenSize, fov = 60) {
         /** @type {Vector2} */
-        this._screenSize = screenSize;
+        this.#screenSize = screenSize;
         /** @type {number} */
-        this._aspectRatio = screenSize.x / screenSize.y;
+        this.#aspectRatio = screenSize.x / screenSize.y;
         /** @type {Transform} */
         this.#transform = new Transform(Vector3.zero(), Vector3.zero(), Vector3.one());
         /** @type {boolean} */
-        this._isBackFaceCulling = false;
+        this.#isBackFaceCulling = false;
         this.setFov(fov);
     }
 
@@ -50,7 +50,7 @@ export class Camera {
      * @returns {boolean} True if back-face culling is enabled.
      */
     get isBackFaceCulling() {
-        return this._isBackFaceCulling;
+        return this.#isBackFaceCulling;
     }
 
     /**
@@ -59,7 +59,7 @@ export class Camera {
      * @param {boolean} [enabled] - Sets state directly.
      */
     set isBackFaceCulling(enabled) {
-        this._isBackFaceCulling = enabled;
+        this.#isBackFaceCulling = enabled;
     }
 
     // endregion
@@ -72,10 +72,10 @@ export class Camera {
      */
     setFov(fov) {
         /** @type {number} */
-        this._fov = fov;
+        this.#fov = fov;
         const fovRadians = (fov * Math.PI) / 180;
         /** @type {number} */
-        this._focalLength = 1 / Math.tan(fovRadians / 2);
+        this.#focalLength = 1 / Math.tan(fovRadians / 2);
     }
 
     /**
@@ -83,8 +83,8 @@ export class Camera {
      * @param {Vector2} newScreenSize - The new screen size.
      */
     setScreenSize(newScreenSize) {
-        this._screenSize = newScreenSize;
-        this._aspectRatio = newScreenSize.x / newScreenSize.y;
+        this.#screenSize = newScreenSize;
+        this.#aspectRatio = newScreenSize.x / newScreenSize.y;
     }
 
     // endregion
@@ -100,7 +100,7 @@ export class Camera {
         const worldVertices = sceneObject.getTransformedVertices();
 
         // Transform all vertices to camera space once (avoids duplicate transforms)
-        const cameraSpaceVertices = worldVertices.map(v => this._worldToCameraSpace(v));
+        const cameraSpaceVertices = worldVertices.map(v => this.#worldToCameraSpace(v));
 
         const projectedFaces = [];
 
@@ -109,7 +109,7 @@ export class Camera {
             const faceCameraVertices = face.map(idx => cameraSpaceVertices[idx]);
 
             // Back-face culling: skip faces pointing away from the camera
-            if (this._isBackFaceCulling && faceCameraVertices.length >= 3 && this._isBackFacing(faceCameraVertices))
+            if (this.#isBackFaceCulling && faceCameraVertices.length >= 3 && this.#isBackFacing(faceCameraVertices))
                 continue;
 
             // Project vertices and calculate average depth
@@ -120,14 +120,14 @@ export class Camera {
             for (const cameraSpacePos of faceCameraVertices) {
                 depthSum += cameraSpacePos.z;
 
-                const normScreenPos = this._getNormalizedScreenPosition(cameraSpacePos);
+                const normScreenPos = this.#getNormalizedScreenPosition(cameraSpacePos);
                 if (normScreenPos === null) {
                     isValid = false;
                     break;
                 }
 
                 screenPositions.push(
-                    this._getScaledScreenPosition(normScreenPos)
+                    this.#getScaledScreenPosition(normScreenPos)
                 );
             }
 
@@ -158,7 +158,7 @@ export class Camera {
      * @returns {boolean} True if the face is back-facing and should be culled.
      * @private
      */
-    _isBackFacing(cameraSpaceVertices) {
+    #isBackFacing(cameraSpaceVertices) {
         const v0 = cameraSpaceVertices[0];
         const v1 = cameraSpaceVertices[1];
         const v2 = cameraSpaceVertices[2];
@@ -175,7 +175,7 @@ export class Camera {
     }
 
     /** @private */
-    _getScaledScreenPosition(normScreenPos) {
+    #getScaledScreenPosition(normScreenPos) {
         /* Currently (0, 0) is the top left corner of the canvas
 
         * Convert from normalized coordinates to respective screen coordinates based on the canvas size:
@@ -186,14 +186,14 @@ export class Camera {
         */
 
         return new Vector2(
-            (normScreenPos.x + 1) / 2 * this._screenSize.x,
-            (1 - (normScreenPos.y + 1) / 2) * this._screenSize.y);
+            (normScreenPos.x + 1) / 2 * this.#screenSize.x,
+            (1 - (normScreenPos.y + 1) / 2) * this.#screenSize.y);
     }
 
     /** @private */
-    _getNormalizedScreenPosition(scenePos) {
-        /* 
-        * If > 0 the point is in front of the camera, if <= 0 the point is not visible, because the divisor 
+    #getNormalizedScreenPosition(scenePos) {
+        /*
+        * If > 0 the point is in front of the camera, if <= 0 the point is not visible, because the divisor
         * would be zero. Thus, it is in the same 3D position as the camera. As z increases the 3D point moves
         * further away from the camera. */
         const near = 1e-4;
@@ -201,13 +201,13 @@ export class Camera {
             return null;
 
         return new Vector2(
-            (scenePos.x / scenePos.z) * this._focalLength / this._aspectRatio,
-            (scenePos.y / scenePos.z) * this._focalLength
+            (scenePos.x / scenePos.z) * this.#focalLength / this.#aspectRatio,
+            (scenePos.y / scenePos.z) * this.#focalLength
         );
     }
 
     /** @private */
-    _worldToCameraSpace(worldPos) {
+    #worldToCameraSpace(worldPos) {
         // First translate by negative camera position
         const translated = worldPos.getTranslated(
             this.#transform.position.getScaled(-1)

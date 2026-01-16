@@ -7,9 +7,9 @@ export class Material {
     #originalEdgeColor;
     #originalEdgeGradientColor;
     #originalFaceColor;
-    _edgeColor;
-    _edgeGradientColor;
-    _faceColor;
+    #edgeColor;
+    #edgeGradientColor;
+    #faceColor;
 
     // endregion
 
@@ -29,9 +29,9 @@ export class Material {
         this.#originalFaceColor = faceColor;
 
         // Mutable color properties
-        this._edgeColor = edgeColor;
-        this._edgeGradientColor = edgeGradientColor;
-        this._faceColor = faceColor;
+        this.#edgeColor = edgeColor;
+        this.#edgeGradientColor = edgeGradientColor;
+        this.#faceColor = faceColor;
     }
 
     // endregion
@@ -43,7 +43,7 @@ export class Material {
      * @returns {boolean} True if the material has an edge color.
      */
     get isEdgeGradient() {
-        return this._edgeGradientColor !== null;
+        return this.#edgeGradientColor !== null;
     }
 
     /**
@@ -51,7 +51,7 @@ export class Material {
      * @returns {boolean} True if the material has a face color.
      */
     get isFaceColor() {
-        return this._faceColor !== null;
+        return this.#faceColor !== null;
     }
 
     /**
@@ -83,7 +83,7 @@ export class Material {
      * @returns {string|null} The edge color (hex string) or null.
      */
     get edgeColor() {
-        return this._edgeColor;
+        return this.#edgeColor;
     }
 
     /**
@@ -91,7 +91,7 @@ export class Material {
      * @returns {string|null} The gradient end color (hex string) or null.
      */
     get edgeGradientColor() {
-        return this._edgeGradientColor;
+        return this.#edgeGradientColor;
     }
 
     /**
@@ -99,7 +99,7 @@ export class Material {
      * @returns {string|null} The face fill color (hex string) or null.
      */
     get faceColor() {
-        return this._faceColor;
+        return this.#faceColor;
     }
 
     // endregion
@@ -111,7 +111,7 @@ export class Material {
      * @param {string|null} value - The edge color (hex string) or null.
      */
     set edgeColor(value) {
-        this._edgeColor = value;
+        this.#edgeColor = value;
     }
 
     /**
@@ -119,7 +119,7 @@ export class Material {
      * @param {string|null} value - The gradient end color (hex string) or null.
      */
     set edgeGradientColor(value) {
-        this._edgeGradientColor = value;
+        this.#edgeGradientColor = value;
     }
 
     /**
@@ -127,7 +127,7 @@ export class Material {
      * @param {string|null} value - The face fill color (hex string) or null.
      */
     set faceColor(value) {
-        this._faceColor = value;
+        this.#faceColor = value;
     }
 
     // endregion
@@ -138,21 +138,21 @@ export class Material {
      * Resets the primary edge color to its original value from construction.
      */
     resetEdgeColor() {
-        this._edgeColor = this.#originalEdgeColor;
+        this.#edgeColor = this.#originalEdgeColor;
     }
 
     /**
      * Resets the gradient color to its original value from construction.
      */
     resetEdgeGradientColor() {
-        this._edgeGradientColor = this.#originalEdgeGradientColor;
+        this.#edgeGradientColor = this.#originalEdgeGradientColor;
     }
 
     /**
      * Resets the face color to its original value from construction.
      */
     resetFaceColor() {
-        this._faceColor = this.#originalFaceColor;
+        this.#faceColor = this.#originalFaceColor;
     }
 
     // endregion

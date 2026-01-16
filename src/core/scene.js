@@ -3,7 +3,7 @@
  */
 export class Scene {
     #sceneObjects = [];
-    _nextId = 1;
+    #nextId = 1;
     #idToObject = new Map();
     #objectToId = new Map();
 
@@ -33,7 +33,7 @@ export class Scene {
             throw new Error('Scene object is already in the scene');
         }
 
-        const id = this._nextId++;
+        const id = this.#nextId++;
         this.#sceneObjects.push(sceneObject);
         this.#idToObject.set(id, sceneObject);
         this.#objectToId.set(sceneObject, id);

@@ -14,14 +14,14 @@ export class Engine {
     #renderer;
     #camera;
     scene = new Scene();
-    _isDepthSorting = false;
-    _isRunning = false;
-    _lastFrameTime = 0;
-    _fps = 0;
-    _isFrameRateCounter = false;
-    _onFrameUpdate = null;
-    _defaultEdgeColor = '#008000';
-    _depthFog = {
+    #isDepthSorting = false;
+    #isRunning = false;
+    #lastFrameTime = 0;
+    #fps = 0;
+    #isFrameRateCounter = false;
+    #onFrameUpdate = null;
+    #defaultEdgeColor = '#008000';
+    #depthFog = {
         enabled: false,
         color: '#000000',
         near: 5,
@@ -58,7 +58,7 @@ export class Engine {
      * @returns {{enabled: boolean, color: string, near: number, far: number}} The fog settings.
      */
     get depthFog() {
-        return {...this._depthFog};
+        return {...this.#depthFog};
     }
 
     /**
@@ -90,7 +90,7 @@ export class Engine {
      * @returns {string} The default edge color.
      */
     get defaultEdgeColor() {
-        return this._defaultEdgeColor;
+        return this.#defaultEdgeColor;
     }
 
     /**
@@ -110,7 +110,7 @@ export class Engine {
     // region Setter Properties
 
     set onFrameUpdate(callback) {
-        this._onFrameUpdate = callback;
+        this.#onFrameUpdate = callback;
     }
 
     /**
@@ -120,7 +120,7 @@ export class Engine {
      * @param {boolean} [enabled] - Sets the state directly.
      */
     set isDepthSorting(enabled) {
-        this._isDepthSorting = enabled;
+        this.#isDepthSorting = enabled;
     }
 
     /**
@@ -129,7 +129,7 @@ export class Engine {
      * @param {{enabled?: boolean, color?: string, near?: number, far?: number}} options - Fog configuration.
      */
     set depthFog(options) {
-        this._depthFog = {...this._depthFog, ...options};
+        this.#depthFog = {...this.#depthFog, ...options};
     }
 
     /**
@@ -161,7 +161,7 @@ export class Engine {
      * @param {string} color - The default edge color.
      */
     set defaultEdgeColor(color) {
-        this._defaultEdgeColor = color;
+        this.#defaultEdgeColor = color;
     }
 
     /**
@@ -169,7 +169,7 @@ export class Engine {
      * @param {boolean} enabled - Whether to show the FPS counter.
      */
     set isFrameRateCounter(enabled) {
-        this._isFrameRateCounter = enabled;
+        this.#isFrameRateCounter = enabled;
     }
 
     /**
@@ -201,15 +201,15 @@ export class Engine {
      * Starts the render loop.
      */
     start() {
-        this._isRunning = true;
-        this._frameUpdate();
+        this.#isRunning = true;
+        this.#frameUpdate();
     }
 
     /**
      * Stops the render loop.
      */
     stop() {
-        this._isRunning = false;
+        this.#isRunning = false;
     }
 
     // endregion
@@ -217,29 +217,29 @@ export class Engine {
     // region Frame Update Methods
 
     /** @private */
-    _frameUpdate() {
-        if (!this._isRunning)
+    #frameUpdate() {
+        if (!this.#isRunning)
             return;
 
         const now = performance.now();
-        const deltaTime = this._lastFrameTime ? (now - this._lastFrameTime) / 1000 : 0;
-        this._lastFrameTime = now;
-        this._fps = deltaTime > 0 ? 1 / deltaTime : 0;
+        const deltaTime = this.#lastFrameTime ? (now - this.#lastFrameTime) / 1000 : 0;
+        this.#lastFrameTime = now;
+        this.#fps = deltaTime > 0 ? 1 / deltaTime : 0;
 
-        if (this._onFrameUpdate)
-            this._onFrameUpdate(deltaTime);
+        if (this.#onFrameUpdate)
+            this.#onFrameUpdate(deltaTime);
 
         this.#renderer.clear();
-        this._renderAllObjects();
+        this.#renderAllObjects();
 
-        if (this._isFrameRateCounter)
-            this.#renderer.renderFPS(this._fps);
+        if (this.#isFrameRateCounter)
+            this.#renderer.renderFPS(this.#fps);
 
-        requestAnimationFrame(() => this._frameUpdate());
+        requestAnimationFrame(() => this.#frameUpdate());
     }
 
     /** @private */
-    _renderAllObjects() {
+    #renderAllObjects() {
         // Collect all projected faces from all objects
         const allFaces = [];
 
@@ -249,7 +249,7 @@ export class Engine {
         }
 
         // Sort if depth sorting is enabled (back-to-front)
-        if (this._isDepthSorting)
+        if (this.#isDepthSorting)
             allFaces.sort(ProjectedFace.compareByDepth);
 
         // Clear bloom canvas at start of frame
@@ -262,29 +262,29 @@ export class Engine {
             const positions = face.screenPositions;
 
             // Determine edge color(s)
-            let edgeColor = face.color || this._defaultEdgeColor;
+            let edgeColor = face.color || this.#defaultEdgeColor;
             let gradientEndColor = face.gradientColor;
             let fillColor = face.faceColor;
 
             // Apply depth fog if enabled
-            if (this._depthFog.enabled) {
+            if (this.#depthFog.enabled) {
                 const fogAmount = ColorUtils.calculateFogAmount(
                     face.depth,
-                    this._depthFog.near,
-                    this._depthFog.far
+                    this.#depthFog.near,
+                    this.#depthFog.far
                 );
 
-                edgeColor = ColorUtils.applyFog(edgeColor, this._depthFog.color, fogAmount);
+                edgeColor = ColorUtils.applyFog(edgeColor, this.#depthFog.color, fogAmount);
 
                 if (gradientEndColor)
-                    gradientEndColor = ColorUtils.applyFog(gradientEndColor, this._depthFog.color, fogAmount);
+                    gradientEndColor = ColorUtils.applyFog(gradientEndColor, this.#depthFog.color, fogAmount);
 
                 if (fillColor)
-                    fillColor = ColorUtils.applyFog(fillColor, this._depthFog.color, fogAmount);
+                    fillColor = ColorUtils.applyFog(fillColor, this.#depthFog.color, fogAmount);
             }
 
             // Fill face to occlude faces behind (depth sorting) or render face color
-            if (this._isDepthSorting) {
+            if (this.#isDepthSorting) {
                 let occlusionColor = fillColor;
 
                 if (!occlusionColor) {
@@ -309,6 +309,10 @@ export class Engine {
                 }
 
                 this.#renderer.fillFace(positions, occlusionColor);
+
+                // Also fill on bloom canvas if bloom is enabled
+                if (bloomEnabled)
+                    this.#renderer.fillFaceOnBloom(positions, occlusionColor);
             }
 
             // Draw edges to main-canvas

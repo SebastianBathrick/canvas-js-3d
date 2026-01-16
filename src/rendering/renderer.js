@@ -6,13 +6,13 @@ export class Renderer {
 
     #canvas;
     #ctx;
-    _backgroundColor = '#000000';
-    _backgroundGradientColor = null;
-    _debugTextColor = '#ffffff';
-    _pointSize = 20;
-    _bloom = {enabled: false, blur: 15, color: null};
-    _bloomCanvas;
-    _bloomCtx;
+    #backgroundColor = '#000000';
+    #backgroundGradientColor = null;
+    #debugTextColor = '#ffffff';
+    #pointSize = 20;
+    #bloom = {enabled: false, blur: 15, color: null};
+    #bloomCanvas;
+    #bloomCtx;
 
     // endregion
 
@@ -37,11 +37,11 @@ export class Renderer {
      * @returns {string} The background color.
      */
     get backgroundColor() {
-        return this._backgroundColor;
+        return this.#backgroundColor;
     }
 
     get isBackgroundGradient() {
-        return this._backgroundGradientColor !== null;
+        return this.#backgroundGradientColor !== null;
     }
 
     /**
@@ -57,7 +57,7 @@ export class Renderer {
      * @returns {string|null} The gradient end color, or null if no gradient.
      */
     get backgroundGradientColor() {
-        return this._backgroundGradientColor;
+        return this.#backgroundGradientColor;
     }
 
     /**
@@ -65,7 +65,7 @@ export class Renderer {
      * @returns {string} The debug text color.
      */
     get debugTextColor() {
-        return this._debugTextColor;
+        return this.#debugTextColor;
     }
 
     /**
@@ -73,7 +73,7 @@ export class Renderer {
      * @returns {number} The point size in pixels.
      */
     get pointSize() {
-        return this._pointSize;
+        return this.#pointSize;
     }
 
     /**
@@ -81,7 +81,7 @@ export class Renderer {
      * @returns {{enabled: boolean, blur: number, color: string|null}} Bloom settings.
      */
     get bloom() {
-        return {...this._bloom};
+        return {...this.#bloom};
     }
 
     // endregion
@@ -93,7 +93,7 @@ export class Renderer {
      * @param {string} color - The new background color (hex string or CSS color).
      */
     set backgroundColor(color) {
-        this._backgroundColor = color;
+        this.#backgroundColor = color;
     }
 
     /**
@@ -101,7 +101,7 @@ export class Renderer {
      * @param {string|null} color - The gradient end color, or null to disable.
      */
     set backgroundGradientColor(color) {
-        this._backgroundGradientColor = color;
+        this.#backgroundGradientColor = color;
     }
 
     /**
@@ -109,7 +109,7 @@ export class Renderer {
      * @param {string} color - The new debug text color.
      */
     set debugTextColor(color) {
-        this._debugTextColor = color;
+        this.#debugTextColor = color;
     }
 
     /**
@@ -117,7 +117,7 @@ export class Renderer {
      * @param {number} size - The new point size in pixels.
      */
     set pointSize(size) {
-        this._pointSize = size;
+        this.#pointSize = size;
     }
 
     /**
@@ -125,7 +125,7 @@ export class Renderer {
      * @param {{enabled?: boolean, blur?: number, color?: string|null}} options - Bloom settings.
      */
     set bloom(options) {
-        this._bloom = {...options};
+        this.#bloom = {...this.#bloom, ...options};
     }
 
     // endregion
@@ -137,7 +137,7 @@ export class Renderer {
      * @returns {boolean} True if bloom is enabled.
      */
     isBloomEnabled() {
-        return this._bloom.enabled;
+        return this.#bloom.enabled;
     }
 
     /**
@@ -147,8 +147,8 @@ export class Renderer {
      * @param {string} color - The stroke color.
      */
     renderEdgeToBloom(startVector2, endVector2, color) {
-        const ctx = this._bloomCtx;
-        ctx.strokeStyle = this._bloom.color || color;
+        const ctx = this.#bloomCtx;
+        ctx.strokeStyle = this.#bloom.color || color;
         ctx.beginPath();
         ctx.moveTo(startVector2.x, startVector2.y);
         ctx.lineTo(endVector2.x, endVector2.y);
@@ -163,9 +163,9 @@ export class Renderer {
      * @param {string} endColor - The color at the end.
      */
     renderEdgeGradientToBloom(startVector2, endVector2, startColor, endColor) {
-        const ctx = this._bloomCtx;
-        if (this._bloom.color) {
-            ctx.strokeStyle = this._bloom.color;
+        const ctx = this.#bloomCtx;
+        if (this.#bloom.color) {
+            ctx.strokeStyle = this.#bloom.color;
         } else {
             const gradient = ctx.createLinearGradient(
                 startVector2.x, startVector2.y,
@@ -185,11 +185,32 @@ export class Renderer {
      * Clears the bloom canvas for a new frame.
      */
     clearBloomCanvas() {
-        if (!this._bloom.enabled)
+        if (!this.#bloom.enabled)
             return;
 
-        this._initBloomCanvas();
-        this._bloomCtx.clearRect(0, 0, this._bloomCanvas.width, this._bloomCanvas.height);
+        this.#initBloomCanvas();
+        this.#bloomCtx.clearRect(0, 0, this.#bloomCanvas.width, this.#bloomCanvas.height);
+    }
+
+    /**
+     * Fills a face on the bloom canvas (for depth sorting occlusion).
+     * @param {Vector2[]} positions - Array of screen positions forming the face.
+     * @param {string} color - Fill color.
+     */
+    fillFaceOnBloom(positions, color) {
+        if (!this.#bloom.enabled || !this.#bloomCanvas)
+            return;
+
+        const ctx = this.#bloomCtx;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(positions[0].x, positions[0].y);
+
+        for (let i = 1; i < positions.length; i++)
+            ctx.lineTo(positions[i].x, positions[i].y);
+
+        ctx.closePath();
+        ctx.fill();
     }
 
 
@@ -197,27 +218,27 @@ export class Renderer {
      * Applies blur to bloom canvas and composites onto main canvas.
      */
     compositeBloom() {
-        if (!this._bloom.enabled || !this._bloomCanvas)
+        if (!this.#bloom.enabled || !this.#bloomCanvas)
             return;
 
         // Apply blur filter and draw to main canvas with additive blending
         this.#ctx.save();
-        this.#ctx.filter = `blur(${this._bloom.blur}px)`;
+        this.#ctx.filter = `blur(${this.#bloom.blur}px)`;
         this.#ctx.globalCompositeOperation = 'lighter';
-        this.#ctx.drawImage(this._bloomCanvas, 0, 0);
+        this.#ctx.drawImage(this.#bloomCanvas, 0, 0);
         this.#ctx.restore();
     }
 
     /** @private */
-    _initBloomCanvas() {
-        if (!this._bloomCanvas) {
-            this._bloomCanvas = document.createElement('canvas');
-            this._bloomCtx = this._bloomCanvas.getContext('2d');
+    #initBloomCanvas() {
+        if (!this.#bloomCanvas) {
+            this.#bloomCanvas = document.createElement('canvas');
+            this.#bloomCtx = this.#bloomCanvas.getContext('2d');
         }
-        if (this._bloomCanvas.width !== this.#canvas.width ||
-            this._bloomCanvas.height !== this.#canvas.height) {
-            this._bloomCanvas.width = this.#canvas.width;
-            this._bloomCanvas.height = this.#canvas.height;
+        if (this.#bloomCanvas.width !== this.#canvas.width ||
+            this.#bloomCanvas.height !== this.#canvas.height) {
+            this.#bloomCanvas.width = this.#canvas.width;
+            this.#bloomCanvas.height = this.#canvas.height;
         }
     }
 
@@ -298,7 +319,7 @@ export class Renderer {
         this.#ctx.font = font;
         this.#ctx.textAlign = horizontalAlign;
         this.#ctx.textBaseline = verticalAlign;
-        this.#ctx.fillStyle = this._debugTextColor;
+        this.#ctx.fillStyle = this.#debugTextColor;
         this.#ctx.fillText(text, this.#canvas.width - padding, padding);
         this.#ctx.restore();
     }
@@ -310,12 +331,12 @@ export class Renderer {
      * @param {Vector2} vector2 - The position in screen coordinates.
      */
     renderPoint(vector2) {
-        this.#ctx.fillStyle = this._debugTextColor;
+        this.#ctx.fillStyle = this.#debugTextColor;
         this.#ctx.fillRect(
-            vector2.x - this._pointSize / 2,
-            vector2.y - this._pointSize / 2,
-            this._pointSize,
-            this._pointSize
+            vector2.x - this.#pointSize / 2,
+            vector2.y - this.#pointSize / 2,
+            this.#pointSize,
+            this.#pointSize
         );
     }
 
@@ -337,16 +358,16 @@ export class Renderer {
      * Clears the canvas with the background color or gradient.
      */
     clear() {
-        if (this._backgroundGradientColor) {
+        if (this.#backgroundGradientColor) {
             const gradient = this.#ctx.createLinearGradient(
                 0, 0,
                 0, this.#canvas.height
             );
-            gradient.addColorStop(0, this._backgroundColor);
-            gradient.addColorStop(1, this._backgroundGradientColor);
+            gradient.addColorStop(0, this.#backgroundColor);
+            gradient.addColorStop(1, this.#backgroundGradientColor);
             this.#ctx.fillStyle = gradient;
         } else {
-            this.#ctx.fillStyle = this._backgroundColor;
+            this.#ctx.fillStyle = this.#backgroundColor;
         }
         this.#ctx.fillRect(0, 0, this.#canvas.width, this.#canvas.height);
     }
