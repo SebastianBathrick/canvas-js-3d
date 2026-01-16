@@ -138,12 +138,12 @@ function updateMeshStats() {
 
     for (const model of models) {
         const mesh = model.mesh;
-        totalVerts += mesh.getVertices().length;
-        totalFaces += mesh.getFaceIndices().length;
+        totalVerts += mesh.vertices.length;
+        totalFaces += mesh.faceIndices.length;
 
         // Count unique edges per mesh
         const edgeSet = new Set();
-        for (const face of mesh.getFaceIndices()) {
+        for (const face of mesh.faceIndices) {
             for (let i = 0; i < face.length; i++) {
                 const a = face[i];
                 const b = face[(i + 1) % face.length];
@@ -213,7 +213,7 @@ let frameCount = 0;
 let fpsTime = 0;
 
 // Animation: rotate all models each frame
-engine.onUpdate = (deltaTime) => {
+engine._onFrameUpdate = (deltaTime) => {
     // Update FPS counter
     frameCount++;
     fpsTime += deltaTime;

@@ -38,6 +38,10 @@ export class Material {
 
     // region Getter Properties
 
+    get isGradient() {
+        return this._edgeGradientColor !== null;
+    }
+
     /**
      * Gets the original color from construction.
      * @returns {string|null} The original color (hex string) or null.

@@ -65,7 +65,7 @@ Then open `http://localhost:8080` in your browser.
 Create `app.js`:
 
 ```javascript
-import { Engine, Mesh, SceneObject, Transform, Vector3 } from 'canvas-js-3d';
+import {Engine, Mesh, SceneObject, Transform, Vector3} from 'canvas-js-3d';
 
 const canvas = document.getElementById('canvas');
 const engine = new Engine(canvas, 'cyan', 'black');
@@ -73,13 +73,13 @@ const engine = new Engine(canvas, 'cyan', 'black');
 // Define vertices for a cube
 const vertices = [
     new Vector3(-1, -1, -1),  // 0: back-bottom-left
-    new Vector3( 1, -1, -1),  // 1: back-bottom-right
-    new Vector3( 1,  1, -1),  // 2: back-top-right
-    new Vector3(-1,  1, -1),  // 3: back-top-left
-    new Vector3(-1, -1,  1),  // 4: front-bottom-left
-    new Vector3( 1, -1,  1),  // 5: front-bottom-right
-    new Vector3( 1,  1,  1),  // 6: front-top-right
-    new Vector3(-1,  1,  1),  // 7: front-top-left
+    new Vector3(1, -1, -1),  // 1: back-bottom-right
+    new Vector3(1, 1, -1),  // 2: back-top-right
+    new Vector3(-1, 1, -1),  // 3: back-top-left
+    new Vector3(-1, -1, 1),  // 4: front-bottom-left
+    new Vector3(1, -1, 1),  // 5: front-bottom-right
+    new Vector3(1, 1, 1),  // 6: front-top-right
+    new Vector3(-1, 1, 1),  // 7: front-top-left
 ];
 
 // Define faces as arrays of vertex indices
@@ -96,7 +96,9 @@ const mesh = new Mesh(vertices, faceIndices);
 const cube = new SceneObject(mesh, new Transform(new Vector3(0, 0, 5), Vector3.zero, 1));
 
 engine.addSceneObject(cube);
-engine.onUpdate = (dt) => { cube.transform.rotation = cube.transform.rotation.getTranslated(new Vector3(0, dt, 0)); };
+engine._onFrameUpdate = (dt) => {
+    cube.transform.rotation = cube.transform.rotation.getTranslated(new Vector3(0, dt, 0));
+};
 engine.start();
 ```
 
@@ -106,7 +108,7 @@ Here's an example that loads a 3D model from an OBJ file:
 
 ```javascript
 // app.js
-import { Engine, SceneObject, Transform, Vector3, WavefrontMeshConverter } from 'canvas-js-3d';
+import {Engine, SceneObject, Transform, Vector3, WavefrontMeshConverter} from 'canvas-js-3d';
 
 // Get canvas and create engine with foreground/background colors
 const canvas = document.getElementById('canvas');
@@ -125,7 +127,7 @@ const obj = new SceneObject(
 engine.addSceneObject(obj);
 
 // Animate: rotate the object each frame
-engine.onUpdate = (deltaTime) => {
+engine._onFrameUpdate = (deltaTime) => {
     obj.transform.rotation = obj.transform.rotation.getTranslated(new Vector3(0, Math.PI * 0.5 * deltaTime, 0));
 };
 
@@ -171,7 +173,7 @@ const engine = new Engine(canvas, 'white', 'black');  // canvas, fgColor, bgColo
 engine.addSceneObject(obj);      // Add object to scene
 engine.removeSceneObject(obj);   // Remove object from scene
 
-engine.onUpdate = (deltaTime) => {
+engine._onFrameUpdate = (deltaTime) => {
     // Called every frame with time since last frame (in seconds)
 };
 

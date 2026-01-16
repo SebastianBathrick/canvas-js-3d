@@ -20,7 +20,7 @@ export class Engine {
     _fps = 0;
     _isFrameRateCounter = false;
     _onFrameUpdate = null;
-    _defaultEdgeColor = '#ffffff';
+    _defaultEdgeColor = '#008000';
     _depthFog = {
         enabled: false,
         color: '#000000',
@@ -35,12 +35,10 @@ export class Engine {
     /**
      * Creates a new Engine instance.
      * @param {HTMLCanvasElement} canvas - The canvas element to render to.
-     * @param {string} defaultEdgeColor - The default edge color.
      */
-    constructor(canvas, defaultEdgeColor) {
+    constructor(canvas) {
         this.#renderer = new Renderer(canvas);
         this.#camera = new Camera(new Vector2(canvas.width, canvas.height));
-        this._defaultEdgeColor = defaultEdgeColor;
     }
 
     // endregion
