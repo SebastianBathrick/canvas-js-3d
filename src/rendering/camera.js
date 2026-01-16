@@ -26,13 +26,9 @@ export class Camera {
      * @param {number} fov - The vertical field of view in degrees (default 60).
      */
     constructor(screenSize, fov = 60) {
-        /** @type {Vector2} */
         this.#screenSize = screenSize;
-        /** @type {number} */
         this.#aspectRatio = screenSize.x / screenSize.y;
-        /** @type {Transform} */
         this.#transform = new Transform(Vector3.zero(), Vector3.zero(), Vector3.one());
-        /** @type {boolean} */
         this.#isBackFaceCulling = true;
         this.setFov(fov);
     }
