@@ -72,8 +72,6 @@ const MIN_BLOOM_BLUR = 1;
 const MAX_BLOOM_BLUR = 50;
 const BLOOM_BLUR_STEP = 1;
 
-const CUBE_MESH_PATH_INDEX = 1;
-const TORUS_MESH_PATH_INDEX = 4; // (Without monkey)
 //const MONKEY_MESH_PATH_INDEX = 0; // Monkey
 /* Version including the monkey model.
 const MESH_PATHS = {

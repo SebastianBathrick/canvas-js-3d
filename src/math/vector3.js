@@ -202,18 +202,6 @@ export class Vector3 {
 
     // endregion
 
-    // region Utility Methods
-
-    /**
-     * Checks if all components are zero.
-     * @returns {boolean} True if the vector is zero.
-     */
-    isZero() {
-        return this.#x === 0 && this.#y === 0 && this.#z === 0;
-    }
-
-    // endregion
-
     // region Static Directional Vectors
 
     /**
