@@ -1,7 +1,7 @@
 /**
  * Demo scene for the `canvas-js-3d` library.
  *
- * This file is intentionally set up as a simple, interactive showcase of the engine + inspector UI,
+ * This file is intentionally set up as a simple, interactive showcase of the library + inspector UI,
  * not as production app code.
  *
  * Hosted demo:
