@@ -47,6 +47,7 @@ Great for learning, 3D webpage GUIs, small browser games (especially with synthw
 # Quick Start
 
 ### Installation
+Install using tthe npm package manager. The canvas-js-3d npm package page can be found here: [https://www.npmjs.com/package/canvas-js-3d](https://www.npmjs.com/package/canvas-js-3d)
 ```powershell
 npm install canvas-js-3d
 ```
