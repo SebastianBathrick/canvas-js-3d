@@ -47,7 +47,8 @@ Great for learning, 3D webpage GUIs, small browser games (especially with synthw
 # Quick Start
 
 ### Installation
-Install using tthe npm package manager. The canvas-js-3d npm package page can be found here: [https://www.npmjs.com/package/canvas-js-3d](https://www.npmjs.com/package/canvas-js-3d)
+Install the canvas-js-3d package using the npm package manager. The npm package page is at this link: [https://www.npmjs.com/package/canvas-js-3d](https://www.npmjs.com/package/canvas-js-3d).
+
 ```powershell
 npm install canvas-js-3d
 ```
@@ -128,8 +129,8 @@ Run a dev server:
 ```powershell
 npx http-server -c-1
 ```
-> [!NOTE]
-> This library uses native ES modules. You must run it from a local server (not file://).
+
+### This library uses native ES modules. You must run it from a local server (not file://).
 
 # Feature Usage
 
