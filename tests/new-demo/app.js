@@ -69,6 +69,12 @@ const MIN_FOG_DISTANCE = 0;
 const MAX_FOG_DISTANCE = 100;
 const FOG_DISTANCE_STEP = 1;
 
+const DEFAULT_BLOOM_COLOR = "#ffffff";
+const DEFAULT_BLOOM_BLUR = 15;
+const MIN_BLOOM_BLUR = 1;
+const MAX_BLOOM_BLUR = 50;
+const BLOOM_BLUR_STEP = 1;
+
 const CUBE_MESH_PATH_INDEX = 1;
 const MONKEY_MESH_PATH_INDEX = 0; // Monkey
 const MESH_PATHS = {
@@ -81,6 +87,294 @@ const MESH_PATHS = {
 };
 
 const DEFAULT_SELECTED_SCENE_OBJ_COLOR = "green";
+
+// endregion
+
+// region Demo Scene Setup Helpers
+
+/**
+ * Creates a scene object with specified mesh, position, rotation, and material settings.
+ * @param {Engine} engine - The engine instance
+ * @param {string} meshName - Name of the mesh (e.g., "Monkey", "Cube", "Sphere")
+ * @param {Object} options - Configuration options
+ * @param {Vector3} [options.position] - Position in 3D space (default: Vector3(0, 0, 10))
+ * @param {Vector3} [options.rotation] - Rotation in radians (default: Vector3(0, 0, 0))
+ * @param {Vector3} [options.scale] - Scale factors (default: Vector3(1, 1, 1))
+ * @param {string} [options.edgeColor] - Edge color in hex format (default: SCENE_OBJ_DEFAULT_EDGE_COLOR)
+ * @param {string} [options.edgeGradientColor] - Edge gradient color in hex format (default: null)
+ * @param {string} [options.faceColor] - Face color in hex format (default: null)
+ * @returns {Promise<SceneObject>} The created scene object
+ */
+async function createDemoSceneObject(engine, meshName, options = {}) {
+    const {
+        position = new Vector3(0, 0, 10),
+        rotation = new Vector3(0, 0, 0),
+        scale = Vector3.one(),
+        edgeColor = SCENE_OBJ_DEFAULT_EDGE_COLOR,
+        edgeGradientColor = null,
+        faceColor = null
+    } = options;
+
+    // Find the mesh index by name
+    const meshIndex = Object.keys(MESH_PATHS).indexOf(meshName);
+    if (meshIndex === -1) {
+        console.error(`Mesh "${meshName}" not found. Available meshes:`, Object.keys(MESH_PATHS));
+        return null;
+    }
+
+    // Create the scene object
+    await createSceneObject(engine, position, rotation, meshIndex);
+
+    // Get the newly created object
+    const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
+    const lastIndex = sceneObjsSelectElement.options.length - 1;
+    const id = parseInt(sceneObjsSelectElement.options[lastIndex].value, 10);
+    const sceneObject = engine.scene.getSceneObjectById(id);
+
+    if (sceneObject) {
+        // Apply scale
+        sceneObject.transform.setScale(scale);
+
+        // Apply material
+        sceneObject.material = new Material(edgeColor, edgeGradientColor, faceColor);
+    }
+
+    return sceneObject;
+}
+
+/**
+ * Creates multiple scene objects in a grid pattern.
+ * @param {Engine} engine - The engine instance
+ * @param {string} meshName - Name of the mesh to use for all objects
+ * @param {Object} options - Configuration options
+ * @param {number} [options.rows] - Number of rows (default: 3)
+ * @param {number} [options.cols] - Number of columns (default: 3)
+ * @param {number} [options.spacing] - Distance between objects (default: 5)
+ * @param {Vector3} [options.centerPosition] - Center position of the grid (default: Vector3(0, 0, 15))
+ * @param {string} [options.edgeColor] - Edge color for all objects
+ * @param {string} [options.edgeGradientColor] - Edge gradient color for all objects
+ * @param {string} [options.faceColor] - Face color for all objects
+ * @returns {Promise<Array<SceneObject>>} Array of created scene objects
+ */
+async function createDemoGrid(engine, meshName, options = {}) {
+    const {
+        rows = 3,
+        cols = 3,
+        spacing = 5,
+        centerPosition = new Vector3(0, 0, 15),
+        edgeColor,
+        edgeGradientColor,
+        faceColor
+    } = options;
+
+    const objects = [];
+    const startX = -(cols - 1) * spacing / 2;
+    const startY = -(rows - 1) * spacing / 2;
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const position = new Vector3(
+                centerPosition.x + startX + col * spacing,
+                centerPosition.y + startY + row * spacing,
+                centerPosition.z
+            );
+
+            const obj = await createDemoSceneObject(engine, meshName, {
+                position,
+                edgeColor,
+                edgeGradientColor,
+                faceColor
+            });
+
+            if (obj) objects.push(obj);
+        }
+    }
+
+    return objects;
+}
+
+/**
+ * Creates multiple scene objects in a circular pattern.
+ * @param {Engine} engine - The engine instance
+ * @param {string} meshName - Name of the mesh to use for all objects
+ * @param {Object} options - Configuration options
+ * @param {number} [options.count] - Number of objects in the circle (default: 6)
+ * @param {number} [options.radius] - Radius of the circle (default: 8)
+ * @param {Vector3} [options.centerPosition] - Center position of the circle (default: Vector3(0, 0, 15))
+ * @param {boolean} [options.faceCenter] - Whether objects should rotate to face the center (default: true)
+ * @param {string} [options.edgeColor] - Edge color for all objects
+ * @param {string} [options.edgeGradientColor] - Edge gradient color for all objects
+ * @param {string} [options.faceColor] - Face color for all objects
+ * @returns {Promise<Array<SceneObject>>} Array of created scene objects
+ */
+async function createDemoCircle(engine, meshName, options = {}) {
+    const {
+        count = 6,
+        radius = 8,
+        centerPosition = new Vector3(0, 0, 15),
+        faceCenter = true,
+        edgeColor,
+        edgeGradientColor,
+        faceColor
+    } = options;
+
+    const objects = [];
+    const angleStep = (Math.PI * 2) / count;
+
+    for (let i = 0; i < count; i++) {
+        const angle = i * angleStep;
+        const position = new Vector3(
+            centerPosition.x + Math.cos(angle) * radius,
+            centerPosition.y + Math.sin(angle) * radius,
+            centerPosition.z
+        );
+
+        const rotation = faceCenter
+            ? new Vector3(0, angle + Math.PI / 2, 0)
+            : new Vector3(0, 0, 0);
+
+        const obj = await createDemoSceneObject(engine, meshName, {
+            position,
+            rotation,
+            edgeColor,
+            edgeGradientColor,
+            faceColor
+        });
+
+        if (obj) objects.push(obj);
+    }
+
+    return objects;
+}
+
+/**
+ * Applies random positions within specified bounds to a scene object.
+ * @param {SceneObject} sceneObject - The scene object to randomize
+ * @param {Object} bounds - Position bounds
+ * @param {Object} [bounds.x] - X axis bounds (default: {min: -10, max: 10})
+ * @param {Object} [bounds.y] - Y axis bounds (default: {min: -10, max: 10})
+ * @param {Object} [bounds.z] - Z axis bounds (default: {min: 10, max: 30})
+ */
+function applyRandomPosition(sceneObject, bounds = {}) {
+    const {
+        x = { min: -10, max: 10 },
+        y = { min: -10, max: 10 },
+        z = { min: 10, max: 30 }
+    } = bounds;
+
+    const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+    const position = new Vector3(
+        randomInRange(x.min, x.max),
+        randomInRange(y.min, y.max),
+        randomInRange(z.min, z.max)
+    );
+
+    sceneObject.transform.setPosition(position);
+}
+
+/**
+ * Applies random rotation to a scene object.
+ * @param {SceneObject} sceneObject - The scene object to randomize
+ * @param {Object} bounds - Rotation bounds in radians
+ * @param {Object} [bounds.x] - X axis rotation bounds (default: {min: 0, max: Math.PI * 2})
+ * @param {Object} [bounds.y] - Y axis rotation bounds (default: {min: 0, max: Math.PI * 2})
+ * @param {Object} [bounds.z] - Z axis rotation bounds (default: {min: 0, max: Math.PI * 2})
+ */
+function applyRandomRotation(sceneObject, bounds = {}) {
+    const {
+        x = { min: 0, max: Math.PI * 2 },
+        y = { min: 0, max: Math.PI * 2 },
+        z = { min: 0, max: Math.PI * 2 }
+    } = bounds;
+
+    const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+    const rotation = new Vector3(
+        randomInRange(x.min, x.max),
+        randomInRange(y.min, y.max),
+        randomInRange(z.min, z.max)
+    );
+
+    sceneObject.transform.setRotation(rotation);
+}
+
+/**
+ * Creates a preset demo scene with multiple objects.
+ * @param {Engine} engine - The engine instance
+ * @param {string} presetName - Name of the preset ("grid", "circle", "showcase", "random")
+ * @returns {Promise<Array<SceneObject>>} Array of created scene objects
+ */
+async function loadDemoPreset(engine, presetName) {
+    // Clear existing objects first
+    clearSceneObjects(engine);
+
+    const objects = [];
+
+    switch (presetName) {
+        case "grid":
+            return await createDemoGrid(engine, "Cube", {
+                rows: 3,
+                cols: 3,
+                spacing: 6,
+                centerPosition: new Vector3(0, 0, 20),
+                edgeColor: "#00ffff",
+                faceColor: SCENE_OBJ_DEFAULT_FACE_COLOR
+            });
+
+        case "circle":
+            return await createDemoCircle(engine, "Monkey", {
+                count: 8,
+                radius: 10,
+                centerPosition: new Vector3(0, 0, 20),
+                faceCenter: true,
+                edgeColor: "#ff00ff",
+                edgeGradientColor: "#00ffff"
+            });
+
+        case "showcase":
+            // Create one of each mesh type in a line
+            const meshNames = Object.keys(MESH_PATHS);
+            const spacing = 8;
+            const startX = -(meshNames.length - 1) * spacing / 2;
+
+            for (let i = 0; i < meshNames.length; i++) {
+                const obj = await createDemoSceneObject(engine, meshNames[i], {
+                    position: new Vector3(startX + i * spacing, 0, 20),
+                    rotation: new Vector3(0, Math.PI / 4, 0),
+                    edgeColor: "#ffffff"
+                });
+                if (obj) objects.push(obj);
+            }
+            return objects;
+
+        case "random":
+            // Create random objects at random positions
+            const meshNames2 = Object.keys(MESH_PATHS);
+            for (let i = 0; i < 10; i++) {
+                const randomMesh = meshNames2[Math.floor(Math.random() * meshNames2.length)];
+                const obj = await createDemoSceneObject(engine, randomMesh, {
+                    position: new Vector3(
+                        Math.random() * 20 - 10,
+                        Math.random() * 20 - 10,
+                        Math.random() * 20 + 10
+                    ),
+                    rotation: new Vector3(
+                        Math.random() * Math.PI * 2,
+                        Math.random() * Math.PI * 2,
+                        Math.random() * Math.PI * 2
+                    ),
+                    edgeColor: `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`
+                });
+                if (obj) objects.push(obj);
+            }
+            return objects;
+
+        default:
+            console.error(`Unknown preset: ${presetName}`);
+            return objects;
+    }
+}
 
 // endregion
 
@@ -566,14 +860,14 @@ function updateSelectedObjectControls(engine) {
     const displayName = sceneObjsSelectElement.options[selectedIndex].text;
 
     // Add transform controls for the selected object
-    // Insert after the camera controls (index 1)
+    // Insert after the scene objects panel (index 1)
     const controlSubpanel = addTransformInput(
         displayName,
         sceneObject.transform,
         true,  // isPos
         !doesRotateSelSceneObj,  // isRot
         true,  // isScale
-        1,     // childIndex - insert after camera
+        1,     // childIndex - insert after scene objects panel
         SELECTED_OBJ_TRANSFORM_PANEL_ID  // panelId
     );
 
@@ -852,22 +1146,12 @@ function initInspector(engine) {
     updateInspectorClearButtonState(engine);
     updateInspectorRemoveButtonState();
 
-    // Add camera transform controls at the top of the inspector panel
-    addTransformInput(
-        "Camera",
-        engine.camera.transform,
-        true, // isPos
-        true, // isRot
-        false, // isScale - disable scale for camera
-        0 // childIndex - insert at the top
-    );
-
-    // Add rendering options checkboxes
-    const renderingOptionsPanel = document.getElementById("rendering-options-panel");
+    // ========== Rendering Panel ==========
+    const renderingPanel = document.getElementById("rendering-panel");
 
     createSettingsCheckbox(
         "Depth Sorting",
-        renderingOptionsPanel,
+        renderingPanel,
         (checked) => {
             engine.isDepthSorting = checked;
         },
@@ -876,7 +1160,7 @@ function initInspector(engine) {
 
     createSettingsCheckbox(
         "Back Face Culling",
-        renderingOptionsPanel,
+        renderingPanel,
         (checked) => {
             engine.camera.isBackFaceCulling = checked;
         },
@@ -884,20 +1168,8 @@ function initInspector(engine) {
     );
 
     createSettingsSlider(
-        "Field of View",
-        renderingOptionsPanel,
-        (value) => {
-            engine.camera.setFov(value);
-        },
-        MIN_FOV,
-        MAX_FOV,
-        FOV_STEP,
-        DEFAULT_FOV
-    );
-
-    createSettingsSlider(
         "Resolution Scale",
-        renderingOptionsPanel,
+        renderingPanel,
         (value) => {
             resolutionScale = value;
             updateToBrowserSize(engine);
@@ -908,9 +1180,12 @@ function initInspector(engine) {
         DEFAULT_RESOLUTION_SCALE
     );
 
+    // ========== Animation Panel ==========
+    const animationPanel = document.getElementById("animation-panel");
+
     createSettingsCheckbox(
         "Rotate Selected Scene Object",
-        renderingOptionsPanel,
+        animationPanel,
         (checked) => {
             doesRotateSelSceneObj = checked;
             updateSelectedObjectControls(engine);
@@ -920,21 +1195,23 @@ function initInspector(engine) {
 
     createSettingsSlider(
         "Rotation Speed",
-        renderingOptionsPanel,
+        animationPanel,
         (value) => {
             selSceneObjectRotationSpeed = value;
         },
         SELECTED_OBJ_MIN_ROTATE_SPEED,
         SELECTED_OBJ_MAX_ROTATE_SPEED,
-        SELECTED_OBJ_ROTATE_SPEED_SLIDER_INC
+        SELECTED_OBJ_ROTATE_SPEED_SLIDER_INC,
+        DEFAULT_SELECTED_OBJ_ROTATE_SPEED
     );
 
-    // Background color/gradient controls (create pickers first to get references, then reorder DOM)
+    // ========== Background Panel ==========
+    const backgroundPanel = document.getElementById("background-panel");
     const isBackgroundGradient = engine.isBackgroundGradient;
 
     const bgColorSettings = addSettingsColor(
         "Background Color",
-        renderingOptionsPanel,
+        backgroundPanel,
         (color) => {
             engine.backgroundColor = color;
         },
@@ -943,7 +1220,7 @@ function initInspector(engine) {
 
     const bgGradientSettings = addSettingsGradient(
         "Background Gradient",
-        renderingOptionsPanel,
+        backgroundPanel,
         (gradient) => {
             engine.backgroundColor = gradient.startColor;
             engine.backgroundGradientColor = gradient.endColor;
@@ -954,7 +1231,7 @@ function initInspector(engine) {
 
     createSettingsCheckbox(
         "Use Background Gradient",
-        renderingOptionsPanel,
+        backgroundPanel,
         (useGradient) => {
             if (useGradient) {
                 const startColor = bgGradientSettings.querySelector('.gradient-start-input').value;
@@ -976,15 +1253,16 @@ function initInspector(engine) {
     );
 
     // Reorder DOM: move checkbox before color pickers
-    const bgGradientCheckbox = renderingOptionsPanel.lastElementChild;
-    renderingOptionsPanel.insertBefore(bgGradientCheckbox, bgColorSettings);
+    const bgGradientCheckbox = backgroundPanel.lastElementChild;
+    backgroundPanel.insertBefore(bgGradientCheckbox, bgColorSettings);
 
-    // Depth fog controls
+    // ========== Fog Panel ==========
+    const fogPanel = document.getElementById("fog-panel");
     const fogSettings = engine.depthFog;
 
     const fogColorSettings = addSettingsColor(
         "Fog Color",
-        renderingOptionsPanel,
+        fogPanel,
         (color) => {
             engine.depthFog = { color };
         },
@@ -993,7 +1271,7 @@ function initInspector(engine) {
 
     const fogNearSlider = createSettingsSlider(
         "Fog Near",
-        renderingOptionsPanel,
+        fogPanel,
         (value) => {
             engine.depthFog = { near: value };
         },
@@ -1005,7 +1283,7 @@ function initInspector(engine) {
 
     const fogFarSlider = createSettingsSlider(
         "Fog Far",
-        renderingOptionsPanel,
+        fogPanel,
         (value) => {
             engine.depthFog = { far: value };
         },
@@ -1017,7 +1295,7 @@ function initInspector(engine) {
 
     createSettingsCheckbox(
         "Enable Fog",
-        renderingOptionsPanel,
+        fogPanel,
         (enabled) => {
             engine.depthFog = { enabled };
             if (enabled) {
@@ -1034,8 +1312,99 @@ function initInspector(engine) {
     );
 
     // Reorder DOM: move checkbox before fog settings
-    const fogCheckbox = renderingOptionsPanel.lastElementChild;
-    renderingOptionsPanel.insertBefore(fogCheckbox, fogColorSettings);
+    const fogCheckbox = fogPanel.lastElementChild;
+    fogPanel.insertBefore(fogCheckbox, fogColorSettings);
+
+    // ========== Bloom Panel ==========
+    const bloomPanel = document.getElementById("bloom-panel");
+    const bloomSettings = engine.bloom;
+
+    const bloomColorSettings = addSettingsColor(
+        "Bloom Color",
+        bloomPanel,
+        (color) => {
+            engine.bloom = { color };
+        },
+        bloomSettings.color || DEFAULT_BLOOM_COLOR
+    );
+
+    const bloomBlurSlider = createSettingsSlider(
+        "Bloom Blur",
+        bloomPanel,
+        (value) => {
+            engine.bloom = { blur: value };
+        },
+        MIN_BLOOM_BLUR,
+        MAX_BLOOM_BLUR,
+        BLOOM_BLUR_STEP,
+        bloomSettings.blur || DEFAULT_BLOOM_BLUR
+    );
+
+    const bloomUseEdgeColorCheckbox = createSettingsCheckbox(
+        "Use Edge Color for Bloom",
+        bloomPanel,
+        (useEdgeColor) => {
+            if (useEdgeColor) {
+                engine.bloom = { color: null };
+                bloomColorSettings.style.display = 'none';
+            } else {
+                const color = bloomColorSettings.querySelector('.color-input').value;
+                engine.bloom = { color };
+                bloomColorSettings.style.display = 'flex';
+            }
+        },
+        bloomSettings.color === null
+    );
+
+    // Reorder DOM: move checkbox before bloom color picker
+    const bloomUseEdgeColorContainer = bloomUseEdgeColorCheckbox.parentElement;
+    bloomPanel.insertBefore(bloomUseEdgeColorContainer, bloomColorSettings);
+
+    const bloomEnableCheckbox = createSettingsCheckbox(
+        "Enable Bloom",
+        bloomPanel,
+        (enabled) => {
+            engine.bloom = { enabled };
+            if (enabled) {
+                bloomColorSettings.style.display = bloomSettings.color === null ? 'none' : 'flex';
+                bloomUseEdgeColorContainer.style.display = 'flex';
+                bloomBlurSlider.parentElement.style.display = 'flex';
+            } else {
+                bloomColorSettings.style.display = 'none';
+                bloomUseEdgeColorContainer.style.display = 'none';
+                bloomBlurSlider.parentElement.style.display = 'none';
+            }
+        },
+        bloomSettings.enabled
+    );
+
+    // Reorder DOM: move enable checkbox before all bloom settings
+    const bloomEnableContainer = bloomEnableCheckbox.parentElement;
+    bloomPanel.insertBefore(bloomEnableContainer, bloomUseEdgeColorContainer);
+
+    // ========== Camera Panel (at the bottom) ==========
+    // Add camera transform controls at the bottom of the inspector panel
+    const cameraPanel = addTransformInput(
+        "Camera",
+        engine.camera.transform,
+        true, // isPos
+        true, // isRot
+        false, // isScale - disable scale for camera
+        null // childIndex - append to the end
+    );
+
+    // Add FOV slider to the camera panel
+    createSettingsSlider(
+        "Field of View",
+        cameraPanel,
+        (value) => {
+            engine.camera.setFov(value);
+        },
+        MIN_FOV,
+        MAX_FOV,
+        FOV_STEP,
+        DEFAULT_FOV
+    );
 }
 
 function addOptionsToMeshSelect() {
