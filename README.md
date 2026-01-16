@@ -5,13 +5,13 @@ A lightweight, dependency‑free 3D wireframe + flat‑shaded renderer built on 
 Great for learning, 3D webpage GUIs, small browser games (especially with synthwave/arcade visuals), and experimentation.
 
 ### Live Demo: [https://sebastianbathrick.github.io/canvas-js-3d/](https://sebastianbathrick.github.io/canvas-js-3d/)
+</br>
 
-## What This Library Is (and Isn’t)
+# What This Library Is (and Isn’t)
 
 ### canvas-js-3d is a small 3D library that:
 * Projects real 3D geometry to a 2D canvas
 * Renders edges, filled faces, or both
-* Supports depth sorting, back‑face culling, fog, and bloom
 * Loads Wavefront OBJ meshes
 
 ### It intentionally:
@@ -19,12 +19,12 @@ Great for learning, 3D webpage GUIs, small browser games (especially with synthw
 * Is not for rendering highly detailed visuals
 * Has no dependencies
 
-## Features
+# Features
 
 ### Rendering
 * Wireframe rendering (edges only)
-* Depth sorting (for solid meshes using painter’s algorithm)
-* Flat-shaded face colors
+* Depth sorting (using painter’s algorithm)
+* Flat-shaded face colors (solid objects/non-wireframe)
 * Back-face culling
 * Edge color gradients
 * Bloom
@@ -36,7 +36,7 @@ Great for learning, 3D webpage GUIs, small browser games (especially with synthw
 
 * Vector3 + Vector2 Math
 * Transform with position/rotation/scale
-* Scene containing SceneObjects to easily track geometry state
+* Scene containing SceneObjects, each with their own mesh, material, & transform
 * Camera with adjustable FOV and transform
 
 ### Assets
@@ -44,7 +44,7 @@ Great for learning, 3D webpage GUIs, small browser games (especially with synthw
 * Wavefront OBJ loading (vertices + faces)
 * Load from URL, File, file dialog, or raw text
 
-## Quick Start
+# Quick Start
 
 ### Installation
 ```powershell
@@ -55,15 +55,15 @@ npm install canvas-js-3d
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-    <script type="importmap">
+    <head>
+        <script type="importmap">
         {
-        "imports": {
-          "canvas-js-3d": "./node_modules/canvas-js-3d/src/index.js"
+            "imports": {
+              "canvas-js-3d": "./node_modules/canvas-js-3d/src/index.js"
+            }
         }
-    }
-    </script>
-</head>
+        </script>
+    </head>
     <body>
       <canvas id="canvas" width="800" height="600"></canvas>
       <script type="module" src="app.js"></script>
@@ -130,32 +130,32 @@ npx http-server -c-1
 > [!NOTE]
 > This library uses native ES modules. You must run it from a local server (not file://).
 
-## Feature Usage
+# Feature Usage
 
-These snippets assume you already have an Engine, a SceneObject called obj, and a running render loop. They’re meant to be drop-in additions to the minimal setup above.
+These snippets assume you already have an Engine, a SceneObject called cubeSceneObj, and a running render loop. They’re meant to be drop-in additions to the minimal setup above.
 
-#### Depth Sorting (Solid Meshes)
+### Depth Sorting (Solid Meshes)
 ```javascript
 engine.isDepthSorting = true; // Already enabled by default
 ```
 
-#### Back-Face Culling
+### Back-Face Culling
 ```javascript
 engine.camera.isBackFaceCulling = true; // Already enabled by default
 ```
 
-#### Camera Transform
+### Camera Transform
 ```javascript
 engine.camera.transform.setPosition(0, 0, -3);
 engine.camera.transform.setRotation(0, 0, 0); // in radians
 ```
 
-#### Camera Field of View (FOV)
+### Camera Field of View (FOV)
 ```javascript
 engine.camera.setFov(90); // 90 degrees (60 degrees by default)
 ```
 
-#### Background Color Versus Gradient
+### Background Color Versus Gradient
 ```javascript
 // Solid color
 engine.backgroundColor = '#add8e6';
@@ -166,12 +166,12 @@ engine.backgroundColor = '#000000';
 engine.backgroundGradientColor = '#1a1a2e';
 ```
 
-#### Default Edge Color (Fallback)
+### Default Edge Color (Fallback)
 ```javascript
 engine.defaultEdgeColor = '#00ff00';
 ```
 
-#### Materials: Edges, Gradients, Faces
+### Materials: Edges, Gradients, Faces
 ```javascript
 // Edges only
 cubeSceneObj.material = new Material('#ffffff');
@@ -186,7 +186,7 @@ engine.isDepthSorting = true;
 cubeSceneObj.material = new Material('#ff00ff', '#00ffff', '#222222');
 ```
 
-#### Fog
+### Fog
 ```javascript
 engine.depthFog = {
     enabled: true,
@@ -196,7 +196,7 @@ engine.depthFog = {
 };
 ```
 
-#### Bloom
+### Bloom
 ```javascript
 engine.bloom = {
     enabled: true,
@@ -205,13 +205,13 @@ engine.bloom = {
 };
 ```
 
-#### FPS Counter
+### FPS Counter
 ```javascript
 engine.isFrameRateCounter = true;
 engine.debugTextColor = '#ffffff';
 ```
 
-#### Screen Resize Handling (Pixels)
+### Screen Resize Handling (Pixels)
 ```javascript
 import { Vector2 } from 'canvas-js-3d';
 
@@ -221,7 +221,7 @@ engine.screenSize = new Vector2(
 );
 ```
 
-#### Loading an OBJ Mesh
+### Loading an OBJ Mesh
 ```javascript
 import { WavefrontMeshConverter } from 'canvas-js-3d';
 
@@ -236,7 +236,7 @@ const obj = new SceneObject(
 engine.scene.addSceneObject(obj);
 ```
 
-Supported:
+#### Supported File Sources:
 * WavefrontMeshConverter.fromUrl(url)
 * WavefrontMeshConverter.fromFile(file)
 * WavefrontMeshConverter.fromFileDialog()
@@ -244,7 +244,7 @@ Supported:
 
 Only vertex positions and face indices are parsed. Normals and UVs are ignored.
 
-## Directory Structure
+# Directory Structure
 ```
 src/
 ├─ math/              # Vectors & transform math
@@ -253,6 +253,6 @@ src/
 └─ wavefront-loading/ # OBJ loader pipeline
 ```
 
-## License
+# License
 
 MIT © 2026 Sebastian Bathrick
