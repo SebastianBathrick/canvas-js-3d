@@ -4,7 +4,7 @@ const SCENE_OBJ_DEFAULT_FACE_COLOR = "#2E2E2E";
 const DEFAULT_BACKGROUND_COLOR = "#000000";
 const DEFAULT_BACKGROUND_GRADIENT_COLOR = "#1a1a2e";
 const SELECTED_OBJ_TRANSFORM_PANEL_ID = "selected-obj-transform-panel";
-const DEFAULT_SELECTED_OBJ_ROTATE_SPEED = 0.1;
+const DEFAULT_SELECTED_OBJ_ROTATE_SPEED = 0.4;
 const SELECTED_OBJ_MIN_ROTATE_SPEED = 0.05;
 const SELECTED_OBJ_MAX_ROTATE_SPEED = 1.0;
 const SELECTED_OBJ_ROTATE_SPEED_SLIDER_INC = 0.01;
@@ -20,17 +20,16 @@ const CREATE_SCENE_OBJ_BTN_ID = "create-scene-obj-btn";
 const REMOVE_SCENE_OBJ_BTN_ID = "remove-scene-obj-btn";
 const CLEAR_SCENE_OBJS_BTN_ID = "clear-scene-objs-btn";
 
-const TRANSFORM_INPUTS_TEMPLATE_ID = "settings-input-transform-template";
+const TRANSFORM_SETTINGS_TEMPLATE_ID = "settings-input-transform-template";
 const VECTOR_INPUT_TEMPLATE_ID = "settings-input-vector-template";
 const SETTINGS_INPUT_CHECKBOX_TEMPLATE_ID = "settings-input-checkbox-template";
 const SETTINGS_INPUT_SLIDER_TEMPLATE_ID = "settings-input-slider-template";
 const SETTINGS_INPUT_COLOR_TEMPLATE_ID = "settings-input-color-template";
 const SETTINGS_INPUT_GRADIENT_TEMPLATE_ID = "settings-input-gradient-template";
-const SETTINGS_INPUT_COLOR_OR_GRADIENT_TEMPLATE_ID = "settings-input-color-or-gradient-template";
 
 const MOBILE_WIDTH_THRESHOLD = 768;
 const MOBILE_INSPECTOR_HEIGHT = 300;
-const DESKTOP_INSPECTOR_WIDTH = 275;
+const DESKTOP_INSPECTOR_WIDTH = 300;
 
 const POS_INC = 0.5;
 const ROT_INC = .01;
@@ -47,36 +46,36 @@ const CREATE_MAX_X = 7;
 const CREATE_MAX_Y = 7;
 const CREATE_MIN_Z = 7;
 const CREATE_MAX_Z = 30;
-const DEFAULT_CREATE_Y_ROT = Math.PI + .35;
-const DEFAULT_CREATE_Z_ROT = .15;
 const CREATE_MIN_ROT = 0;
 const CREATE_MAX_ROT = Math.PI * 2 - .1;
+const DEFAULT_CREATE_ROT = new Vector3(1.36, 6.75, 1.3)
+const DEFAULT_CREATE_POS = new Vector3(0, 0, 3.5);
 
 const DEFAULT_FOV = 60;
 const MAX_FOV = 120;
 const MIN_FOV = 30;
 const FOV_STEP = 1;
 
-const DEFAULT_RESOLUTION_SCALE = 1.0;
+const DEFAULT_RESOLUTION_SCALE = 0.8;
 const MIN_RESOLUTION_SCALE = 0.25;
 const MAX_RESOLUTION_SCALE = 1.0;
 const RESOLUTION_SCALE_STEP = 0.05;
 
 const DEFAULT_FOG_COLOR = "#000000";
-const DEFAULT_FOG_NEAR = 5;
-const DEFAULT_FOG_FAR = 50;
 const MIN_FOG_DISTANCE = 0;
 const MAX_FOG_DISTANCE = 100;
 const FOG_DISTANCE_STEP = 1;
 
 const DEFAULT_BLOOM_COLOR = "#ffffff";
-const DEFAULT_BLOOM_BLUR = 15;
+const DEFAULT_BLOOM_BLUR = 5;
 const MIN_BLOOM_BLUR = 1;
 const MAX_BLOOM_BLUR = 50;
 const BLOOM_BLUR_STEP = 1;
 
 const CUBE_MESH_PATH_INDEX = 1;
-const MONKEY_MESH_PATH_INDEX = 0; // Monkey
+const TORUS_MESH_PATH_INDEX = 4; // (Without monkey)
+//const MONKEY_MESH_PATH_INDEX = 0; // Monkey
+/* Version including the monkey model.
 const MESH_PATHS = {
     Monkey: "../../meshes/monkey.obj",
     Cube: "../../meshes/cube.obj",
@@ -85,8 +84,15 @@ const MESH_PATHS = {
     "Ico Sphere": "../../meshes/ico-sphere.obj",
     Torus: "../../meshes/torus.obj",
 };
+ */
 
-const DEFAULT_SELECTED_SCENE_OBJ_COLOR = "green";
+const MESH_PATHS = {
+    Cube: "../../meshes/cube.obj",
+    Cone: "../../meshes/cone.obj",
+    Sphere: "../../meshes/sphere.obj",
+    "Ico Sphere": "../../meshes/ico-sphere.obj",
+    Torus: "../../meshes/torus.obj",
+};
 
 // endregion
 
@@ -95,7 +101,7 @@ const DEFAULT_SELECTED_SCENE_OBJ_COLOR = "green";
 /**
  * Creates a scene object with specified mesh, position, rotation, and material settings.
  * @param {Engine} engine - The engine instance
- * @param {string} meshName - Name of the mesh (e.g., "Monkey", "Cube", "Sphere")
+ * @param {string} meshName - Name of the mesh (e.g. "Cube", "Sphere")
  * @param {Object} options - Configuration options
  * @param {Vector3} [options.position] - Position in 3D space (default: Vector3(0, 0, 10))
  * @param {Vector3} [options.rotation] - Rotation in radians (default: Vector3(0, 0, 0))
@@ -303,11 +309,13 @@ function applyRandomRotation(sceneObject, bounds = {}) {
  * Creates a preset demo scene with multiple objects.
  * @param {Engine} engine - The engine instance
  * @param {string} presetName - Name of the preset ("grid", "circle", "showcase", "random")
+ * @param {boolean} [isClear=false] - Whether to clear existing objects before creating new ones (default: false)
  * @returns {Promise<Array<SceneObject>>} Array of created scene objects
  */
-async function loadDemoPreset(engine, presetName) {
+async function loadDemoPreset(engine, presetName, isClear = false) {
     // Clear existing objects first
-    clearSceneObjects(engine);
+    if (isClear)
+        clearSceneObjects(engine);
 
     const objects = [];
 
@@ -317,13 +325,13 @@ async function loadDemoPreset(engine, presetName) {
                 rows: 3,
                 cols: 3,
                 spacing: 6,
-                centerPosition: new Vector3(0, 0, 20),
-                edgeColor: "#00ffff",
-                faceColor: SCENE_OBJ_DEFAULT_FACE_COLOR
+                centerPosition: new Vector3(0, 0, 30),
+                edgeColor: "#03b370",
+                faceColor: "#818181"
             });
 
         case "circle":
-            return await createDemoCircle(engine, "Monkey", {
+            return await createDemoCircle(engine, "Cone", {
                 count: 8,
                 radius: 10,
                 centerPosition: new Vector3(0, 0, 20),
@@ -439,7 +447,7 @@ async function createSceneObject(engine, posOverride = null, rotOverride = null,
             randomInt(CREATE_MIN_Z, CREATE_MAX_Z)
         );
     } else {
-        spawnPos = new Vector3(0, 0, CREATE_MIN_Z);
+        spawnPos = DEFAULT_CREATE_POS;
     }
 
     // Use rotOverride if provided, otherwise use default logic
@@ -452,7 +460,7 @@ async function createSceneObject(engine, posOverride = null, rotOverride = null,
             randomInt(CREATE_MIN_ROT, CREATE_MAX_ROT)
         );
     } else {
-        spawnRot = new Vector3(0, DEFAULT_CREATE_Y_ROT, DEFAULT_CREATE_Z_ROT);
+        spawnRot = DEFAULT_CREATE_ROT;
     }
 
     const sceneObject = new SceneObject(mesh, new Transform(spawnPos, spawnRot, Vector3.one()), new Material(SCENE_OBJ_DEFAULT_EDGE_COLOR));
@@ -619,7 +627,7 @@ function createSettingsSlider(title, parentElement, onChange, min = 0, max = 100
  * @param {null} uniqueId - Optional unique ID for the color picker (auto-generated if not provided)
  * @returns {HTMLInputElement} The created color input element
  */
-function addSettingsColor(title, parentElement, onChange, initialColor = "#000000", uniqueId = null) {
+function createSettingsColor(title, parentElement, onChange, initialColor = "#000000", uniqueId = null) {
     const template = document.getElementById(SETTINGS_INPUT_COLOR_TEMPLATE_ID);
     const clone = template.content.cloneNode(true);
     const container = clone.firstElementChild;
@@ -665,7 +673,7 @@ function addSettingsColor(title, parentElement, onChange, initialColor = "#00000
  * @param {null} uniqueId - Optional unique ID prefix for the gradient picker inputs (auto-generated if not provided)
  * @returns {Object} Object containing {startInput, endInput} - the created color input elements
  */
-function addSettingsGradient(title, parentElement, onChange, initialStartColor = "#000000", initialEndColor = "#ffffff", uniqueId = null) {
+function createSettingsGradient(title, parentElement, onChange, initialStartColor = "#000000", initialEndColor = "#ffffff", uniqueId = null) {
     const template = document.getElementById(SETTINGS_INPUT_GRADIENT_TEMPLATE_ID);
     const clone = template.content.cloneNode(true);
     const container = clone.firstElementChild;
@@ -713,119 +721,6 @@ function addSettingsGradient(title, parentElement, onChange, initialStartColor =
     return container;
 }
 
-/**
- * Creates a color OR gradient picker input with a toggle checkbox.
- * When the checkbox is unchecked (default), displays a single color picker.
- * When checked, displays gradient start/end color pickers.
- * @param {string} title - The label text to display for the picker
- * @param {HTMLElement} parentElement - The element to append the picker to
- * @param {function} onChange - Callback function that receives an object: {isGradient: boolean, color?: string,
- *     startColor?: string, endColor?: string}
- * @param {boolean} initialIsGradient - Whether gradient mode is initially enabled (default: false)
- * @param {string} initialColor - Initial single color value in hex format (default: "#ffffff")
- * @param {string} initialStartColor - Initial gradient start color in hex format (default: "#000000")
- * @param {string} initialEndColor - Initial gradient end color in hex format (default: "#ffffff")
- * @param {null} uniqueId - Optional unique ID prefix for the inputs (auto-generated if not provided)
- * @returns {Object} Object containing {checkbox, singleColorInput, startColorInput, endColorInput,
- *     singleColorContainer, gradientColorsContainer}
- */
-function addOptionColorOrGradient(
-    title,
-    parentElement,
-    onChange,
-    initialIsGradient = false,
-    initialColor = "#ffffff",
-    initialStartColor = "#000000",
-    initialEndColor = "#ffffff",
-    uniqueId = null
-) {
-    const template = document.getElementById(SETTINGS_INPUT_COLOR_OR_GRADIENT_TEMPLATE_ID);
-    const clone = template.content.cloneNode(true);
-
-    const label = clone.querySelector('.color-or-gradient-label');
-    const checkbox = clone.querySelector('.gradient-toggle-checkbox');
-    const singleColorContainer = clone.querySelector('.single-color-container');
-    const singleColorInput = clone.querySelector('.single-color-input');
-    const gradientColorsContainer = clone.querySelector('.gradient-colors-container');
-    const startColorInput = clone.querySelector('.gradient-start-color-input');
-    const endColorInput = clone.querySelector('.gradient-end-color-input');
-
-    // Set the label text
-    label.textContent = title;
-
-    // Set unique IDs (generate from title if not provided)
-    const idPrefix = uniqueId || `${makeDomSafeKey(title)}-color-or-gradient`;
-    checkbox.id = `${idPrefix}-checkbox`;
-    singleColorInput.id = `${idPrefix}-single`;
-    startColorInput.id = `${idPrefix}-start`;
-    endColorInput.id = `${idPrefix}-end`;
-
-    // Set initial colors
-    singleColorInput.value = initialColor;
-    startColorInput.value = initialStartColor;
-    endColorInput.value = initialEndColor;
-
-    // Set initial checkbox state and visibility
-    checkbox.checked = initialIsGradient;
-    if (initialIsGradient) {
-        singleColorContainer.style.display = 'none';
-        gradientColorsContainer.style.display = 'flex';
-    } else {
-        singleColorContainer.style.display = 'flex';
-        gradientColorsContainer.style.display = 'none';
-    }
-
-    // Helper to emit the current state
-    const emitChange = () => {
-        if (typeof onChange === "function") {
-            if (checkbox.checked) {
-                onChange({
-                    isGradient: true,
-                    startColor: startColorInput.value,
-                    endColor: endColorInput.value
-                });
-            } else {
-                onChange({
-                    isGradient: false,
-                    color: singleColorInput.value
-                });
-            }
-        }
-    };
-
-    // Handle checkbox toggle
-    checkbox.addEventListener("change", () => {
-        if (checkbox.checked) {
-            singleColorContainer.style.display = 'none';
-            gradientColorsContainer.style.display = 'flex';
-        } else {
-            singleColorContainer.style.display = 'flex';
-            gradientColorsContainer.style.display = 'none';
-        }
-        emitChange();
-    });
-
-    // Handle color input changes
-    singleColorInput.addEventListener("input", emitChange);
-    startColorInput.addEventListener("input", emitChange);
-    endColorInput.addEventListener("input", emitChange);
-
-    // Append to parent
-    parentElement.appendChild(clone);
-
-    // Call the onChange callback with initial values after setup is complete
-    emitChange();
-
-    return {
-        checkbox,
-        singleColorInput,
-        startColorInput,
-        endColorInput,
-        singleColorContainer,
-        gradientColorsContainer
-    };
-}
-
 // endregion
 
 // region SceneObject Selection Functions
@@ -844,25 +739,23 @@ function updateSelectedObjectControls(engine) {
     const selectedIndex = sceneObjsSelectElement.selectedIndex;
 
     // If nothing is selected or no objects exist, return
-    if (selectedIndex === -1 || sceneObjsSelectElement.options.length === 0) {
+    if (selectedIndex === -1 || sceneObjsSelectElement.options.length === 0)
         return;
-    }
 
     // Get the selected scene object by ID
     selSceneObjectId = parseInt(sceneObjsSelectElement.value, 10);
     const sceneObject = engine.scene.getSceneObjectById(selSceneObjectId);
 
-    if (!sceneObject) {
+    if (!sceneObject)
         return;
-    }
 
     // Get the display name from the select option
     const displayName = sceneObjsSelectElement.options[selectedIndex].text;
 
     // Add transform controls for the selected object
     // Insert after the scene objects panel (index 1)
-    const controlSubpanel = addTransformInput(
-        displayName,
+    const controlSubpanel = createTransformSettings(
+        `Selected "${displayName}"`,
         sceneObject.transform,
         true,  // isPos
         !doesRotateSelSceneObj,  // isRot
@@ -874,16 +767,7 @@ function updateSelectedObjectControls(engine) {
     // Edge color/gradient controls (create pickers first to get references, then reorder DOM)
     const isGradient = sceneObject.material.isEdgeGradient;
 
-    const colorSettings = addSettingsColor(
-        "Edge Color",
-        controlSubpanel,
-        (color) => {
-            sceneObject.material = new Material(color, null, sceneObject.material.faceColor);
-        },
-        sceneObject.material.originalEdgeColor || SCENE_OBJ_DEFAULT_EDGE_COLOR
-    );
-
-    const gradientSettings = addSettingsGradient(
+    const gradientSettings = createSettingsGradient(
         "Edge Gradient",
         controlSubpanel,
         (gradient) => {
@@ -893,6 +777,17 @@ function updateSelectedObjectControls(engine) {
         sceneObject.material.originalEdgeGradientColor || SCENE_OBJ_DEFAULT_EDGE_COLOR
     );
 
+    const colorSettings = createSettingsColor(
+        "Edge Color",
+        controlSubpanel,
+        (color) => {
+            sceneObject.material = new Material(color, null, sceneObject.material.faceColor);
+        },
+        sceneObject.material.originalEdgeColor || SCENE_OBJ_DEFAULT_EDGE_COLOR
+    );
+
+
+
     createSettingsCheckbox(
         "Use Edge Gradient",
         controlSubpanel,
@@ -900,6 +795,7 @@ function updateSelectedObjectControls(engine) {
             if (useGradient) {
                 const startColor = gradientSettings.querySelector('.gradient-start-input').value;
                 const endColor = gradientSettings.querySelector('.gradient-end-input').value;
+
                 sceneObject.material = new Material(startColor, endColor, sceneObject.material.faceColor);
                 colorSettings.style.display = 'none';
                 gradientSettings.style.display = 'flex';
@@ -921,7 +817,7 @@ function updateSelectedObjectControls(engine) {
     // Face color controls
     const isFaceColor = sceneObject.material.isFaceColor;
 
-    const faceColorSettings = addSettingsColor(
+    const faceColorSettings = createSettingsColor(
         "Face Color",
         controlSubpanel,
         (color) => {
@@ -974,9 +870,9 @@ function updateInspectorRemoveButtonState() {
 
 // endregion
 
-// region Transform Input Functions
+// region Transform Settings Functions
 
-function addTransformInput(
+function createTransformSettings(
     transformName,
     transform,
     isPos = true,
@@ -986,7 +882,7 @@ function addTransformInput(
     panelId = null
 ) {
     // The template contains a single div element with a header element child
-    const template = document.getElementById(TRANSFORM_INPUTS_TEMPLATE_ID);
+    const template = document.getElementById(TRANSFORM_SETTINGS_TEMPLATE_ID);
     const subpanel = template.content.cloneNode(true).firstElementChild;
     subpanel.firstElementChild.textContent = transformName;
 
@@ -1207,9 +1103,8 @@ function initInspector(engine) {
 
     // ========== Background Panel ==========
     const backgroundPanel = document.getElementById("background-panel");
-    const isBackgroundGradient = engine.isBackgroundGradient;
 
-    const bgColorSettings = addSettingsColor(
+    const bgColorSettings = createSettingsColor(
         "Background Color",
         backgroundPanel,
         (color) => {
@@ -1218,7 +1113,7 @@ function initInspector(engine) {
         engine.backgroundColor || DEFAULT_BACKGROUND_COLOR
     );
 
-    const bgGradientSettings = addSettingsGradient(
+    const bgGradientSettings = createSettingsGradient(
         "Background Gradient",
         backgroundPanel,
         (gradient) => {
@@ -1242,17 +1137,15 @@ function initInspector(engine) {
                 bgGradientSettings.style.display = 'flex';
             }
             else {
-                const color = bgColorSettings.querySelector('.color-input').value;
-                engine.backgroundColor = color;
+                engine.backgroundColor = bgColorSettings.querySelector('.color-input').value;
                 engine.backgroundGradientColor = null;
                 bgColorSettings.style.display = 'flex';
                 bgGradientSettings.style.display = 'none';
             }
         },
-        isBackgroundGradient
+        true
     );
 
-    // Reorder DOM: move checkbox before color pickers
     const bgGradientCheckbox = backgroundPanel.lastElementChild;
     backgroundPanel.insertBefore(bgGradientCheckbox, bgColorSettings);
 
@@ -1260,7 +1153,7 @@ function initInspector(engine) {
     const fogPanel = document.getElementById("fog-panel");
     const fogSettings = engine.depthFog;
 
-    const fogColorSettings = addSettingsColor(
+    const fogColorSettings = createSettingsColor(
         "Fog Color",
         fogPanel,
         (color) => {
@@ -1311,7 +1204,6 @@ function initInspector(engine) {
         fogSettings.enabled
     );
 
-    // Reorder DOM: move checkbox before fog settings
     const fogCheckbox = fogPanel.lastElementChild;
     fogPanel.insertBefore(fogCheckbox, fogColorSettings);
 
@@ -1319,7 +1211,7 @@ function initInspector(engine) {
     const bloomPanel = document.getElementById("bloom-panel");
     const bloomSettings = engine.bloom;
 
-    const bloomColorSettings = addSettingsColor(
+    const bloomColorSettings = createSettingsColor(
         "Bloom Color",
         bloomPanel,
         (color) => {
@@ -1337,7 +1229,7 @@ function initInspector(engine) {
         MIN_BLOOM_BLUR,
         MAX_BLOOM_BLUR,
         BLOOM_BLUR_STEP,
-        bloomSettings.blur || DEFAULT_BLOOM_BLUR
+        DEFAULT_BLOOM_BLUR
     );
 
     const bloomUseEdgeColorCheckbox = createSettingsCheckbox(
@@ -1378,13 +1270,12 @@ function initInspector(engine) {
         bloomSettings.enabled
     );
 
-    // Reorder DOM: move enable checkbox before all bloom settings
     const bloomEnableContainer = bloomEnableCheckbox.parentElement;
     bloomPanel.insertBefore(bloomEnableContainer, bloomUseEdgeColorContainer);
 
     // ========== Camera Panel (at the bottom) ==========
     // Add camera transform controls at the bottom of the inspector panel
-    const cameraPanel = addTransformInput(
+    const cameraPanel = createTransformSettings(
         "Camera",
         engine.camera.transform,
         true, // isPos
@@ -1412,9 +1303,6 @@ function addOptionsToMeshSelect() {
     for (const [key, value] of Object.entries(MESH_PATHS)) {
         meshSelectElement.appendChild(new Option(key, value));
     }
-    // Set the default selected mesh to a cube because it has the least vertices
-    // This is in-case the user spams the create button as soon as the page loads
-    meshSelectElement.selectedIndex = CUBE_MESH_PATH_INDEX;
 }
 
 // endregion
@@ -1456,6 +1344,100 @@ function updateToBrowserSize(engine) {
 
 }
 
+
+async function createDemoSceneObjects(engine) {
+    // Spawn a grid of cubes surrounded by cones in a circular formation.
+    //await loadDemoPreset(engine, "grid");
+    //await loadDemoPreset(engine, "circle")
+
+    const demoObj = {
+        position: new Vector3(4, -12, 24.5),
+        rotation: new Vector3(-.26, 2.21, -2.27),
+        scale: new Vector3(3.2, 1.4, 1),
+        edgeColor: "#b6b6b6",
+        edgeGradientColor: null,
+        faceColor: null
+    }
+
+    await createDemoSceneObject(
+        engine,
+        "Cube",
+        demoObj
+    );
+
+    demoObj.scale = Vector3.one();
+    demoObj.position = new Vector3(-10, 13, 30);
+    demoObj.rotation = new Vector3(-1.1, 5.761, -.25);
+    demoObj.edgeColor = "#404040";
+
+    await createDemoSceneObject(
+        engine,
+        "Cube",
+        demoObj
+    );
+
+
+
+    demoObj.position = new Vector3(0, 13, 26);
+    demoObj.rotation = new Vector3(-0.25, 2.36, -1.45);
+    demoObj.scale = new Vector3(1.8, 1.8, 1.8);
+    demoObj.edgeColor = "#4b7064";
+    demoObj.edgeGradientColor = null;
+    demoObj.faceColor = "#0f2f2c";
+    await createDemoSceneObject(engine, "Cube", demoObj);
+
+    demoObj.position = new Vector3(-11.5, -11, 29.5);
+    demoObj.rotation = new Vector3(.8, -1.38, 0.32);
+    demoObj.scale = new Vector3(1.7, 1.7, 1.7);
+    demoObj.edgeColor = "#4f476e";
+    demoObj.edgeGradientColor = null;
+    demoObj.faceColor = "#1b1633";
+    await createDemoSceneObject(engine, "Cube", demoObj);
+
+    demoObj.position = new Vector3(-13.0, -2.5, 28);
+    demoObj.rotation = new Vector3(-1.0, 0.55, 1.55);
+    demoObj.scale = new Vector3(1.35, 1.35, 1.35);
+    demoObj.edgeColor = "#37513b";
+    demoObj.edgeGradientColor = "#20715a";
+    demoObj.faceColor = null;
+    await createDemoSceneObject(engine, "Cone", demoObj);
+
+    demoObj.position = new Vector3(-15.5, 5.5, 34);
+    demoObj.rotation = new Vector3(-.27, -25.12, -.51);
+    demoObj.scale = new Vector3(4, 4, 4);
+    demoObj.edgeColor = "#5d4885";
+    demoObj.edgeGradientColor = null;
+    demoObj.faceColor = null;
+    await createDemoSceneObject(engine, "Sphere", demoObj);
+
+    demoObj.position = new Vector3(7.5, -4.5, 18);
+    demoObj.rotation = new Vector3(-0.25, 0.55, -0.45);
+    demoObj.scale = new Vector3(1.4, 1.4, 1.4);
+    demoObj.edgeColor = "#6c5c4d";
+    demoObj.edgeGradientColor = null;
+    demoObj.faceColor = "#2a1a10";
+    await createDemoSceneObject(engine, "Ico Sphere", demoObj);
+
+    demoObj.position = new Vector3(14, 8, 33.5);
+    demoObj.rotation = new Vector3(2, 29.38, -.85);
+    demoObj.scale = new Vector3(3, 3, 3);
+    demoObj.edgeColor = "#2b876f";
+    demoObj.edgeGradientColor = null;
+    demoObj.faceColor = "#1a381c";
+    await createDemoSceneObject(engine, "Cone", demoObj);
+
+    demoObj.position = DEFAULT_CREATE_POS;
+    demoObj.rotation = DEFAULT_CREATE_ROT;
+    demoObj.scale = Vector3.one();
+    demoObj.edgeColor = "#ffffff";
+    demoObj.faceColor = "#000000"
+    demoObj.edgeGradientColor = null;
+    await createDemoSceneObject(engine, "Torus", demoObj);
+
+    // Create a scene object in the center of the screen (created last so it's selected and rotates)
+    //await createSceneObject(engine, DEFAULT_CREATE_POS, DEFAULT_CREATE_ROT, TORUS_MESH_PATH_INDEX);
+}
+
 async function init() {
 
     const engine = new Engine(document.getElementById("canvas"));
@@ -1464,10 +1446,6 @@ async function init() {
     updateToBrowserSize(engine);
 
     initInspector(engine);
-
-    // Create a scene object in the center of the screen
-    await createSceneObject(engine, null, null, MONKEY_MESH_PATH_INDEX);
-
 
     updateInspectorRemoveButtonState();
     updateSelectedObjectControls(engine);
@@ -1483,7 +1461,7 @@ async function init() {
 
         selSceneObject.transform.rotate(new Vector3(0, selSceneObjectRotationSpeed * deltaTime, 0));
     }
-
+    createDemoSceneObjects(engine);
     engine.start();
 }
 

@@ -2,8 +2,6 @@
  * Handles loading OBJ file content from various sources (URL, File, file dialog).
  */
 export class WavefrontFileLoader {
-    // region Static Loading Methods
-
     /**
      * Loads OBJ file content from an HTTP URL.
      * @param {string} url - The URL to fetch the OBJ file from.
@@ -63,6 +61,4 @@ export class WavefrontFileLoader {
             input.click();
         });
     }
-
-    // endregion
 }
