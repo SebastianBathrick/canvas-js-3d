@@ -1,9 +1,14 @@
 # canvas-js-3d
 
+[![npm version](https://img.shields.io/npm/v/canvas-js-3d?logo=npm)](https://www.npmjs.com/package/canvas-js-3d)
+[![npm downloads](https://img.shields.io/npm/dm/canvas-js-3d?logo=npm)](https://www.npmjs.com/package/canvas-js-3d)
+[![license](https://img.shields.io/npm/l/canvas-js-3d)](./LICENSE)
+[![demo](https://img.shields.io/badge/demo-live-brightgreen)](https://sebastianbathrick.github.io/canvas-js-3d/)
+[![github](https://img.shields.io/badge/github-repo-blue?logo=github)](https://github.com/SebastianBathrick/canvas-js-3d)
+
 **canvas-js-3d** is a lightweight, dependency-free 3D graphics JavaScript library built on the HTML Canvas API and designed to run in web browsers. It makes it easy to load Wavefront OBJ files and render external 3D models directly to the canvas, without using WebGL, Three.js, or any other third-party libraries. The entire codebase is written in pure, vanilla JavaScript.
 
 Great for learning, 3D web page visuals, small browser games (especially with synthwave/arcade visuals), and experimentation.
-<br />
 
 # Demo
 ### Demo Link: [https://sebastianbathrick.github.io/canvas-js-3d/](https://sebastianbathrick.github.io/canvas-js-3d/)
@@ -14,8 +19,8 @@ Great for learning, 3D web page visuals, small browser games (especially with sy
 
 ### Rendering
 * Wireframe rendering (edges only)
-* Depth sorting (using painter’s algorithm)
-* Flat-shaded face colors (solid objects/non-wireframe)
+* Flat-shaded face colors (solid objects / non-wireframe)
+* Depth sorting (using painter's algorithm)
 * Back-face culling
 * Edge color gradients
 * Bloom
@@ -25,7 +30,7 @@ Great for learning, 3D web page visuals, small browser games (especially with sy
 
 ### Scene & Math
 
-* Vector3 + Vector2 Math
+* Vector3 + Vector2 math
 * Transform with position/rotation/scale
 * Scene containing SceneObjects, each with their own mesh, material, & transform
 * Camera with adjustable FOV and transform
@@ -103,7 +108,7 @@ const cubeSceneObj = new SceneObject(
     ),
     new Material(
         '#ffffff', // Edge color
-        null, // Optional gradient color (ex. '#0000ff' for blue)
+        null, // Optional gradient color (e.g. '#0000ff' for blue)
         '#333333' // Optional face color (null for wireframe)
     )
 );
@@ -115,7 +120,7 @@ engine.onFrameUpdate = (deltaTime) => {
 };
 
 engine.scene.addSceneObject(cubeSceneObj);
-engine.start(); 
+engine.start();
 ```
 Run a dev server:
 ```powershell
@@ -149,7 +154,7 @@ engine.camera.transform.setRotation(0, 0, 0); // in radians
 engine.camera.setFov(90); // 90 degrees (60 degrees by default)
 ```
 
-### Background Color Versus Gradient
+### Background Color vs. Gradient
 ```javascript
 // Solid color
 engine.backgroundColor = '#add8e6';
