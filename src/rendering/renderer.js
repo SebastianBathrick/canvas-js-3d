@@ -45,6 +45,14 @@ export class Renderer {
     }
 
     /**
+     * Gets the canvas height.
+     * @returns {number} The canvas height in pixels.
+     */
+    get screenHeight() {
+        return this.#canvas.height;
+    }
+
+    /**
      * Gets the background gradient end color.
      * @returns {string|null} The gradient end color, or null if no gradient.
      */

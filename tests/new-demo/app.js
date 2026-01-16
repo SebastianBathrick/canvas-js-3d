@@ -62,6 +62,13 @@ const MIN_RESOLUTION_SCALE = 0.25;
 const MAX_RESOLUTION_SCALE = 1.0;
 const RESOLUTION_SCALE_STEP = 0.05;
 
+const DEFAULT_FOG_COLOR = "#000000";
+const DEFAULT_FOG_NEAR = 5;
+const DEFAULT_FOG_FAR = 50;
+const MIN_FOG_DISTANCE = 0;
+const MAX_FOG_DISTANCE = 100;
+const FOG_DISTANCE_STEP = 1;
+
 const CUBE_MESH_PATH_INDEX = 1;
 const MONKEY_MESH_PATH_INDEX = 0; // Monkey
 const MESH_PATHS = {
@@ -971,6 +978,64 @@ function initInspector(engine) {
     // Reorder DOM: move checkbox before color pickers
     const bgGradientCheckbox = renderingOptionsPanel.lastElementChild;
     renderingOptionsPanel.insertBefore(bgGradientCheckbox, bgColorSettings);
+
+    // Depth fog controls
+    const fogSettings = engine.depthFog;
+
+    const fogColorSettings = addSettingsColor(
+        "Fog Color",
+        renderingOptionsPanel,
+        (color) => {
+            engine.depthFog = { color };
+        },
+        fogSettings.color || DEFAULT_FOG_COLOR
+    );
+
+    const fogNearSlider = createSettingsSlider(
+        "Fog Near",
+        renderingOptionsPanel,
+        (value) => {
+            engine.depthFog = { near: value };
+        },
+        MIN_FOG_DISTANCE,
+        MAX_FOG_DISTANCE,
+        FOG_DISTANCE_STEP,
+        fogSettings.near
+    );
+
+    const fogFarSlider = createSettingsSlider(
+        "Fog Far",
+        renderingOptionsPanel,
+        (value) => {
+            engine.depthFog = { far: value };
+        },
+        MIN_FOG_DISTANCE,
+        MAX_FOG_DISTANCE,
+        FOG_DISTANCE_STEP,
+        fogSettings.far
+    );
+
+    createSettingsCheckbox(
+        "Enable Fog",
+        renderingOptionsPanel,
+        (enabled) => {
+            engine.depthFog = { enabled };
+            if (enabled) {
+                fogColorSettings.style.display = 'flex';
+                fogNearSlider.parentElement.style.display = 'flex';
+                fogFarSlider.parentElement.style.display = 'flex';
+            } else {
+                fogColorSettings.style.display = 'none';
+                fogNearSlider.parentElement.style.display = 'none';
+                fogFarSlider.parentElement.style.display = 'none';
+            }
+        },
+        fogSettings.enabled
+    );
+
+    // Reorder DOM: move checkbox before fog settings
+    const fogCheckbox = renderingOptionsPanel.lastElementChild;
+    renderingOptionsPanel.insertBefore(fogCheckbox, fogColorSettings);
 }
 
 function addOptionsToMeshSelect() {

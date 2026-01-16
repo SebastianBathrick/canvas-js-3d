@@ -284,8 +284,32 @@ export class Engine {
             }
 
             // Fill face to occlude faces behind (depth sorting) or render face color
-            if (this._isDepthSorting)
-                this.#renderer.fillFace(positions, fillColor || this.#renderer.backgroundColor);
+            if (this._isDepthSorting) {
+                let occlusionColor = fillColor;
+
+                if (!occlusionColor) {
+                    // Sample background color (or gradient) at face position
+                    if (this.#renderer.isBackgroundGradient) {
+                        // Calculate average Y position of face
+                        let avgY = 0;
+                        for (const pos of positions)
+                            avgY += pos.y;
+                        avgY /= positions.length;
+
+                        // Interpolate gradient based on Y position (0 = top, 1 = bottom)
+                        const t = avgY / this.#renderer.screenHeight;
+                        occlusionColor = ColorUtils.interpolate(
+                            this.#renderer.backgroundColor,
+                            this.#renderer.backgroundGradientColor,
+                            t
+                        );
+                    } else {
+                        occlusionColor = this.#renderer.backgroundColor;
+                    }
+                }
+
+                this.#renderer.fillFace(positions, occlusionColor);
+            }
 
             // Draw edges to main-canvas
             for (let i = 0; i < positions.length; i++) {
