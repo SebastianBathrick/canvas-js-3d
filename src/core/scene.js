@@ -7,13 +7,6 @@ export class Scene {
     #idToObject = new Map();
     #objectToId = new Map();
 
-    /**`
-     * Creates a new Scene.
-     */
-    constructor() {
-
-    }
-
     /**
      * Gets all scene objects in the scene.
      * @returns {SceneObject[]} Array of scene objects.
