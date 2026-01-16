@@ -4,82 +4,135 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>canvas-js-3d Demo</title>
-    <link rel="stylesheet" href="./style.css">
+    <script type="importmap">
+        {
+          "imports": {
+            "canvas-js-3d": "../../src/index.js"
+          }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="canvas-container">
+
+
+<!-- Reusable templates -->
+<template id="settings-input-vector-template">
+    <div class="sub-panel-item">
+        <div class="vector-input">
+
+            <h4 class="vector-label"></h4>
+
+            <div class="vector-axes">
+                <div class="vector-axis">
+                    <h5>X</h5>
+                    <input type="number" class="x" value="0">
+                </div>
+                <div class="vector-axis">
+                    <h5>Y</h5>
+                    <input type="number" class="y" value="0">
+                </div>
+                <div class="vector-axis">
+                    <h5>Z</h5>
+                    <input type="number" class="z" value="0">
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="settings-input-transform-template">
+    <div class="sub-panel" id="selected-scene-obj-controls">
+        <h3 class="transform-controls-title">Transform Controls</h3>
+    </div>
+</template>
+
+<template id="settings-input-checkbox-template">
+    <div class="sub-panel-item">
+        <input type="checkbox" id="option-input-checkbox">
+        <h4>Option Input Checkbox</h4>
+    </div>
+</template>
+
+<template id="settings-input-slider-template">
+    <div class="sub-panel-item">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <h4 class="slider-label">Slider Label</h4>
+            <h4 class="slider-value">0</h4>
+        </div>
+        <input type="range" class="slider-input" min="0" max="100" step="1" value="0">
+    </div>
+</template>
+
+<template id="settings-input-color-template">
+    <div class="sub-panel-item">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <h4 class="color-label">Color Label</h4>
+            <input type="color" class="color-input" value="#000000">
+        </div>
+    </div>
+</template>
+
+<template id="settings-input-gradient-template">
+    <div class="sub-panel-item">
+        <h4 class="gradient-label">Gradient Label</h4>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 12px;">Start</span>
+                <input type="color" class="gradient-start-input" value="#000000">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 12px;">End</span>
+                <input type="color" class="gradient-end-input" value="#ffffff">
+            </div>
+        </div>
+    </div>
+</template>
+
+<div class="panel" id="inspector-panel">
+    <div class="sub-panel">
+        <h3>Scene Objects</h3>
+
+        <div class="sub-panel-item" id="create-scene-obj-control">
+            <select id="create-scene-obj-mesh-select"></select>
+            <button id="create-scene-obj-btn">Create</button>
+        </div>
+
+        <div class="sub-panel-item">
+            <select id="scene-objs-select" size="5">
+            </select>
+        </div>
+
+        <div class="sub-panel-item" id="remove-clear-scene-objs-control">
+            <button id="remove-scene-obj-btn">Remove</button>
+            <button id="clear-scene-objs-btn">Clear</button>
+        </div>
+    </div>
+
+    <div class="sub-panel" id="rendering-panel">
+        <h3>Rendering</h3>
+    </div>
+
+    <div class="sub-panel" id="animation-panel">
+        <h3>Animation</h3>
+    </div>
+
+    <div class="sub-panel" id="background-panel">
+        <h3>Background</h3>
+    </div>
+
+    <div class="sub-panel" id="fog-panel">
+        <h3>Fog</h3>
+    </div>
+
+    <div class="sub-panel" id="bloom-panel">
+        <h3>Bloom</h3>
+    </div>
+</div>
+
+<div class="panel" id="viewport-panel">
     <canvas id="canvas"></canvas>
-    <div class="stats-overlay">
-        <div id="fpsCounter">0 FPS</div>
-        <div id="meshStats">Verts: 0 | Edges: 0 | Faces: 0</div>
-    </div>
 </div>
-
-<div class="controls">
-    <h2>canvas-js-3d Controls</h2>
-
-    <div class="control-group">
-        <label>Add Model</label>
-        <select id="modelSelect">
-            <option value="./meshes/monkey.obj">Monkey</option>
-            <option value="./meshes/cube.obj">Cube</option>
-            <option value="./meshes/cone.obj">Cone</option>
-            <option value="./meshes/sphere.obj">Sphere</option>
-            <option value="./meshes/ico-sphere.obj">Ico Sphere</option>
-            <option value="./meshes/torus.obj">Torus</option>
-        </select>
-        <button id="addModelBtn">Add Model</button>
-        <p class="model-count">Models: <span id="modelCount">0</span> / 9</p>
-    </div>
-
-    <div class="control-group">
-        <label>Rotation Speed</label>
-        <div class="control-row">
-            <input type="range" id="rotationSpeed" min="0" max="5" step="0.1" value="0.5">
-            <span class="value" id="rotationSpeedValue">0.5</span>
-        </div>
-    </div>
-
-    <div class="control-group">
-        <label>Scale</label>
-        <div class="control-row">
-            <input type="range" id="scale" min="0.1" max="3" step="0.1" value="1">
-            <span class="value" id="scaleValue">1.0</span>
-        </div>
-    </div>
-
-    <div class="control-group">
-        <label>Position Offset</label>
-        <div class="xyz-controls">
-            <div class="axis-row">
-                <span class="axis-label x">X</span>
-                <input type="range" id="posX" min="-5" max="5" step="0.1" value="0">
-                <span class="value" id="posXValue">0.0</span>
-            </div>
-            <div class="axis-row">
-                <span class="axis-label y">Y</span>
-                <input type="range" id="posY" min="-5" max="5" step="0.1" value="0">
-                <span class="value" id="posYValue">0.0</span>
-            </div>
-            <div class="axis-row">
-                <span class="axis-label z">Z</span>
-                <input type="range" id="posZ" min="2" max="20" step="0.1" value="5">
-                <span class="value" id="posZValue">5.0</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="control-group">
-        <label>Rendering</label>
-        <div class="checkbox-row">
-            <input type="checkbox" id="depthSorting">
-            <label for="depthSorting">Depth Sorting (Occlusion)</label>
-        </div>
-    </div>
-
-    <button id="clearSceneBtn" class="danger">Clear Scene</button>
-</div>
-
-<script type="module" src="./demo.js"></script>
+<script type="module" src="app.js"></script>
 </body>
 </html>

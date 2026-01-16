@@ -1,3 +1,20 @@
+/**
+ * Demo scene for the `canvas-js-3d` library.
+ *
+ * This file is intentionally set up as a simple, interactive showcase of the engine + inspector UI,
+ * not as production app code.
+ *
+ * Hosted demo:
+ * https://sebastianbathrick.github.io/canvas-js-3d/
+ *
+ * Source repo:
+ * https://github.com/SebastianBathrick/canvas-js-3d
+ *
+ * License: MIT
+ * Copyright (c) Sebastian Bathrick
+ */
+
+
 // region Constants
 const SCENE_OBJ_DEFAULT_EDGE_COLOR = "#ffffff";
 const SCENE_OBJ_DEFAULT_FACE_COLOR = "#2E2E2E";
@@ -1459,7 +1476,7 @@ async function init() {
 
         selSceneObject.transform.rotate(new Vector3(0, selSceneObjectRotationSpeed * deltaTime, 0));
     }
-    createDemoSceneObjects(engine);
+    await createDemoSceneObjects(engine);
     engine.start();
 }
 
