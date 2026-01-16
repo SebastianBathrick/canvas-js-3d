@@ -1,7 +1,10 @@
 // region Constants
-// ID for the selected object's transform controls
 const SCENE_OBJ_DEFAULT_EDGE_COLOR = "#ffffff";
 const SELECTED_OBJ_TRANSFORM_PANEL_ID = "selected-obj-transform-panel";
+const DEFAULT_SELECTED_OBJ_ROTATE_SPEED = 0.1;
+const SELECTED_OBJ_MIN_ROTATE_SPEED = 0.05;
+const SELECTED_OBJ_MAX_ROTATE_SPEED = 1.0;
+const SELECTED_OBJ_ROTATE_SPEED_SLIDER_INC = 0.01;
 
 // The select element where the user picks from a limited list of predefined meshes
 const CREATE_SCENE_OBJ_MESH_SELECT_ID = "create-scene-obj-mesh-select";
@@ -160,7 +163,6 @@ async function createSceneObject(engine, posOverride = null, rotOverride = null,
 
     updateInspectorClearButtonState(engine);
     updateInspectorRemoveButtonState();
-    updateSceneObjectSelectionColors(engine);
     updateSelectedObjectControls(engine);
 }
 
@@ -186,7 +188,6 @@ function removeSceneObject(engine) {
 
     updateInspectorClearButtonState(engine);
     updateInspectorRemoveButtonState();
-    updateSceneObjectSelectionColors(engine);
     updateSelectedObjectControls(engine);
 }
 
@@ -198,7 +199,7 @@ function clearSceneObjects(engine) {
     const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
     sceneObjsSelectElement.innerHTML = '';
 
-    currentlySelectedSceneObjectId = null;
+    selSceneObjectId = null;
     updateInspectorClearButtonState(engine);
     updateInspectorRemoveButtonState();
     updateSelectedObjectControls(engine);
@@ -526,6 +527,8 @@ function addOptionColorOrGradient(
 // region SceneObject Selection Functions
 
 function updateSelectedObjectControls(engine) {
+    updateInspectorRemoveButtonState();
+
     // Remove existing controls if they exist
     const existingPanel = document.getElementById(SELECTED_OBJ_TRANSFORM_PANEL_ID);
     if (existingPanel) {
@@ -542,8 +545,8 @@ function updateSelectedObjectControls(engine) {
     }
 
     // Get the selected scene object by ID
-    const selectedId = parseInt(sceneObjsSelectElement.value, 10);
-    const sceneObject = engine.scene.getSceneObjectById(selectedId);
+    selSceneObjectId = parseInt(sceneObjsSelectElement.value, 10);
+    const sceneObject = engine.scene.getSceneObjectById(selSceneObjectId);
 
     if (!sceneObject) {
         return;
@@ -558,13 +561,14 @@ function updateSelectedObjectControls(engine) {
         displayName,
         sceneObject.transform,
         true,  // isPos
-        true,  // isRot
+        !doesRotateSelSceneObj,  // isRot
         true,  // isScale
         1,     // childIndex - insert after camera
         SELECTED_OBJ_TRANSFORM_PANEL_ID  // panelId
     );
 
     const isGradient = sceneObject.material.isGradient;
+
 
     const colorSettings = addSettingsColor(
         "Edge Color",
@@ -578,7 +582,7 @@ function updateSelectedObjectControls(engine) {
         "Edge Gradient",
         controlSubpanel,
         (gradient) => {
-            sceneObject.material = new Material(gradient.startColor, gradient.endColor, sceneObject.material.faceColor);;
+            sceneObject.material = new Material(gradient.startColor, gradient.endColor, sceneObject.material.faceColor);
         },
         sceneObject.material.originalEdgeColor || "#ffffff",
         sceneObject.material.originalEdgeGradientColor || "#ffffff"
@@ -588,12 +592,17 @@ function updateSelectedObjectControls(engine) {
         "Use Edge Gradient",
         controlSubpanel,
         (isGradient) => {
-            sceneObject.material.edgeGradientColor = isGradient ? selectedSceneObjectColor : null;
             if (isGradient) {
+                sceneObject.material = new Material(sceneObject.material.edgeColor, SCENE_OBJ_DEFAULT_EDGE_COLOR, sceneObject.material.faceColor);
                 colorSettings.style.display = 'none';
                 gradientSettings.style.display = 'flex';
+
+                // Set the color picker for gradient settings to the edge color
+                gradientSettings.querySelector('.gradient-start-input').value = sceneObject.material.originalEdgeColor;
+                gradientSettings.querySelector('.gradient-end-input').value = sceneObject.material.originalEdgeGradientColor;
             }
             else {
+                sceneObject.material = new Material(sceneObject.material.edgeColor, null, sceneObject.material.faceColor);
                 colorSettings.style.display = 'flex';
                 gradientSettings.style.display = 'none';
             }
@@ -602,31 +611,6 @@ function updateSelectedObjectControls(engine) {
         );
 
 
-}
-
-function updateSceneObjectSelectionColors(engine) {
-    const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
-    const selectedIndex = sceneObjsSelectElement.selectedIndex;
-
-    // Unselect the previous object
-    if (currentlySelectedSceneObjectId !== null) {
-        const previousSceneObject = engine.scene.getSceneObjectById(currentlySelectedSceneObjectId);
-        if (previousSceneObject) {
-            previousSceneObject.material.resetEdgeColor();
-        }
-    }
-
-    // Select the new object
-    if (selectedIndex !== -1 && sceneObjsSelectElement.options.length > 0) {
-        const selectedId = parseInt(sceneObjsSelectElement.value, 10);
-        const sceneObject = engine.scene.getSceneObjectById(selectedId);
-        if (sceneObject) {
-            sceneObject.material.edgeColor = selectedSceneObjectColor;
-            currentlySelectedSceneObjectId = selectedId;
-        }
-    } else {
-        currentlySelectedSceneObjectId = null;
-    }
 }
 
 function updateInspectorClearButtonState(engine) {
@@ -806,9 +790,7 @@ function initInspectorListeners(engine) {
     document.getElementById(REMOVE_SCENE_OBJ_BTN_ID).addEventListener("click", () => removeSceneObject(engine));
     document.getElementById(CLEAR_SCENE_OBJS_BTN_ID).addEventListener("click", () => clearSceneObjects(engine));
     document.getElementById(SCENE_OBJS_SELECT_ID).addEventListener("change", () => {
-        updateInspectorRemoveButtonState();
         updateSelectedObjectControls(engine);
-        updateSceneObjectSelectionColors(engine);
     });
     window.addEventListener("resize", () => updateToBrowserSize(engine));
 }
@@ -875,21 +857,26 @@ function initInspector(engine) {
         DEFAULT_RESOLUTION_SCALE
     );
 
-    addSettingsColor(
-        "Selected Object Color",
+    createSettingsCheckbox(
+        "Rotate Selected Scene Object",
         renderingOptionsPanel,
-        (color) => {
-            selectedSceneObjectColor = color;
-            // Update the selected object immediately if there is one
-            if (currentlySelectedSceneObjectId !== null) {
-                const selectedObject = engine.scene.getSceneObjectById(currentlySelectedSceneObjectId);
-                if (selectedObject) {
-                    selectedObject.material.edgeColor = color;
-                }
-            }
+        (checked) => {
+            doesRotateSelSceneObj = checked;
+            updateSelectedObjectControls(engine);
         },
-        selectedSceneObjectColor
+        true
     );
+
+    createSettingsSlider(
+        "Rotation Speed",
+        renderingOptionsPanel,
+        (value) => {
+            selSceneObjectRotationSpeed = value;
+        },
+        SELECTED_OBJ_MIN_ROTATE_SPEED,
+        SELECTED_OBJ_MAX_ROTATE_SPEED,
+        SELECTED_OBJ_ROTATE_SPEED_SLIDER_INC
+    )
 }
 
 function addOptionsToMeshSelect() {
@@ -953,13 +940,21 @@ async function init() {
     // Create a scene object in the center of the screen
     await createSceneObject(engine, null, null, MONKEY_MESH_PATH_INDEX);
 
-    // Note: createSceneObject already selects the object and updates UI
-    // The following lines are technically redundant but kept for clarity
-    const sceneObjsSelectElement = document.getElementById(SCENE_OBJS_SELECT_ID);
-    sceneObjsSelectElement.selectedIndex = 0;
+
     updateInspectorRemoveButtonState();
-    updateSceneObjectSelectionColors(engine);
     updateSelectedObjectControls(engine);
+
+    engine.onFrameUpdate = (deltaTime) => {
+        if (!doesRotateSelSceneObj || selSceneObjectId === null)
+            return;
+
+        const selSceneObject = engine.scene.getSceneObjectById(selSceneObjectId);
+
+        if (selSceneObject === undefined)
+            return;
+
+        selSceneObject.transform.rotate(new Vector3(0, selSceneObjectRotationSpeed * deltaTime, 0));
+    }
 
     engine.start();
 }
@@ -968,9 +963,9 @@ import {Engine, Material, SceneObject, Transform, Vector2, Vector3, WavefrontMes
 
 let isMobile = false;
 let resolutionScale = DEFAULT_RESOLUTION_SCALE;
-let selectedSceneObjectColor = DEFAULT_SELECTED_SCENE_OBJ_COLOR;
 let selectedObjectOriginalColor = null;
 const meshCache = new Map();
-let currentlySelectedSceneObjectId = null;
-
+let doesRotateSelSceneObj = true;
+let selSceneObjectId = null;
+let selSceneObjectRotationSpeed = DEFAULT_SELECTED_OBJ_ROTATE_SPEED;
 init();

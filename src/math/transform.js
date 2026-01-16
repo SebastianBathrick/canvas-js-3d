@@ -140,11 +140,11 @@ export class Transform {
     }
 
     /**
-     * Rotates the position around all axes (XYZ rotation).
-     * @param {Vector3} rotation - The rotation angles in radians (x, y, z).
+     * Rotates by adding the given rotation angles to the current rotation.
+     * @param {Vector3} rotation - The rotation angles in radians (x, y, z) to add.
      */
     rotate(rotation) {
-        this._rotation = this._rotation.getRotated(rotation);
+        this._rotation = this._rotation.getTranslated(rotation);
     }
 
     /**
