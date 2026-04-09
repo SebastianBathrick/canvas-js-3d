@@ -6,7 +6,7 @@
 [![demo](https://img.shields.io/badge/demo-live-brightgreen)](https://sebastianbathrick.github.io/canvas-js-3d/)
 [![github](https://img.shields.io/badge/github-repo-blue?logo=github)](https://github.com/SebastianBathrick/canvas-js-3d)
 
-**canvas-js-3d** is a lightweight, dependency-free 3D graphics JavaScript library built on the HTML Canvas API and designed to run in web browsers. It makes it easy to load Wavefront OBJ files and render external 3D models directly to the canvas, without using WebGL, Three.js, or any other third-party libraries. The entire codebase is written in pure, vanilla JavaScript.
+**canvas-js-3d** is a lightweight, dependency-free 3D rendering JavaScript library built on the HTML Canvas API and designed to run in web browsers. It makes it easy to load Wavefront OBJ files and render external 3D models directly to the canvas, without using WebGL, Three.js, or any other third-party libraries. The entire codebase is written in pure, vanilla JavaScript.
 
 Great for learning, 3D web page visuals, small browser games (especially with synthwave/arcade visuals), and experimentation.
 
